@@ -4,300 +4,764 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chinese AI Pronunciation Test Station</title>
+    <title>AI Pronunciation Test Station</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        /* [UI ต้นแบบคงไว้ 100%] */
         :root {
-            --bg1: #040816; --bg2: #0a1025; --panel: rgba(12, 18, 40, 0.72);
-            --line: rgba(255, 255, 255, 0.10); --cyan: #35d8ff; --blue: #6d7cff;
-            --violet: #b56cff; --green: #1dff95; --red: #ff4d6d;
-            --text: #edf5ff; --muted: #9db2d9;
+            --bg1: #040816;
+            --bg2: #0a1025;
+            --panel: rgba(12, 18, 40, 0.72);
+            --line: rgba(255, 255, 255, 0.10);
+            --cyan: #35d8ff;
+            --blue: #6d7cff;
+            --violet: #b56cff;
+            --green: #1dff95;
+            --red: #ff4d6d;
+            --text: #edf5ff;
+            --muted: #9db2d9;
         }
-        * { box-sizing: border-box; }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            margin: 0; padding: 20px; font-family: 'Prompt', sans-serif; color: var(--text);
-            background: radial-gradient(circle at 10% 20%, rgba(53, 216, 255, 0.18), transparent 25%),
-                        radial-gradient(circle at 90% 10%, rgba(181, 108, 255, 0.15), transparent 25%),
-                        linear-gradient(to bottom, var(--bg1), var(--bg2));
-            overflow-x: hidden; min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Prompt', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 10% 20%, rgba(53, 216, 255, 0.18), transparent 25%),
+                radial-gradient(circle at 90% 10%, rgba(181, 108, 255, 0.15), transparent 25%),
+                linear-gradient(to bottom, var(--bg1), var(--bg2));
+            overflow-x: hidden;
+            min-height: 100vh;
         }
+
         body::before {
-            content: ""; position: fixed; inset: 0; pointer-events: none;
-            background: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px; opacity: 0.25;
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.25;
         }
-        .container { max-width: 1150px; margin: auto; position: relative; z-index: 1; }
-        .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); backdrop-filter: blur(18px); box-shadow: 0 15px 40px rgba(0,0,0,0.35); }
-        .header { padding: 30px; border-radius: 30px; margin-bottom: 22px; position: relative; overflow: hidden; }
-        .logo-area { display: flex; align-items: center; gap: 18px; }
-        .logo { width: 70px; height: 70px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color: #07101f; }
-        h1 { margin: 0; font-size: 32px; font-family: 'Orbitron', sans-serif; }
-        .login-box { margin-bottom: 20px; }
-        .login-box input { width: 100%; padding: 18px; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(7, 12, 30, 0.75); color: white; font-size: 20px; outline: none; }
-        .top-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .stat { padding: 18px; border-radius: 22px; text-align: center; }
-        .stat-value { font-size: 34px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
-        .main-grid { display: grid; grid-template-columns: 1.3fr 0.8fr; gap: 20px; }
-        .sentence-box { padding: 35px; border-radius: 30px; text-align: center; }
-        .chinese-text { margin-top: 25px; font-size: 48px; font-weight: 900; font-family: 'Prompt', sans-serif; color: var(--cyan); }
-        .thai-text { margin-top: 14px; font-size: 22px; color: #b6c6e8; }
-        .countdown-wrapper { margin: 30px auto; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); }
-        .countdown { font-size: 42px; font-family: 'Orbitron', sans-serif; color: white; }
-        button { border: none; padding: 18px 35px; border-radius: 18px; cursor: pointer; font-size: 20px; font-weight: bold; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color: #07101f; width: 100%; }
-        .result-box { padding: 35px; border-radius: 30px; text-align: center; }
-        .score { font-size: 70px; font-weight: 900; font-family: 'Orbitron', sans-serif; color: white; }
-        .status { font-size: 30px; font-weight: bold; margin-top: 10px; }
-        .pass { color: var(--green); } .fail { color: var(--red); }
-        .heard-text { margin-top: 15px; padding: 15px; border-radius: 15px; background: rgba(255,255,255,0.05); font-size: 16px; }
-        @media(max-width:900px){ .main-grid { grid-template-columns: 1fr; } .chinese-text { font-size: 36px; } }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(45px);
+            opacity: 0.25;
+            pointer-events: none;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb1 { width: 240px; height: 240px; background: var(--cyan); top: 60px; left: -60px; }
+        .orb2 { width: 300px; height: 300px; background: var(--violet); top: 100px; right: -100px; animation-delay: -3s; }
+        .orb3 { width: 180px; height: 180px; background: var(--blue); bottom: -50px; left: 45%; animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-25px); }
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(53, 216, 255, 0.05);
+        }
+
+        .header {
+            padding: 30px;
+            border-radius: 30px;
+            margin-bottom: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(53, 216, 255, 0.07), transparent);
+            transform: translateX(-100%);
+            animation: scan 7s linear infinite;
+        }
+
+        @keyframes scan {
+            100% { transform: translateX(100%); }
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 30px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet));
+            color: #07101f;
+            box-shadow: 0 0 30px rgba(53, 216, 255, 0.35);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 52px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            margin-top: 12px;
+            font-size: 20px;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .live {
+            padding: 12px 20px;
+            border-radius: 999px;
+            background: rgba(29, 255, 149, 0.08);
+            border: 1px solid rgba(29, 255, 149, 0.25);
+            color: #87ffca;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .live::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 15px var(--green);
+        }
+
+        .login-box {
+            margin-bottom: 20px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(7, 12, 30, 0.75);
+            color: white;
+            font-size: 20px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .login-box input::placeholder {
+            color: #8ea5cf;
+        }
+
+        .login-box input:focus {
+            border-color: rgba(53, 216, 255, 0.45);
+            box-shadow: 0 0 20px rgba(53, 216, 255, 0.15);
+        }
+
+        .top-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            padding: 18px;
+            border-radius: 22px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .stat::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue));
+        }
+
+        .stat-title {
+            font-size: 15px;
+            color: var(--muted);
+        }
+
+        .stat-value {
+            margin-top: 10px;
+            font-size: 34px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 0.8fr;
+            gap: 20px;
+        }
+
+        .sentence-box {
+            padding: 35px;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .question-number {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #c6d6f4;
+        }
+
+        .english-text {
+            margin-top: 25px;
+            font-size: 46px;
+            font-weight: 900;
+            line-height: 1.2;
+            text-shadow: 0 0 20px rgba(53, 216, 255, 0.15);
+            color: var(--cyan);
+        }
+
+        .thai-text {
+            margin-top: 14px;
+            font-size: 24px;
+            color: #b6c6e8;
+            line-height: 1.7;
+        }
+
+        .countdown-wrapper {
+            margin: 35px auto 10px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan));
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 35px rgba(53, 216, 255, 0.2);
+        }
+
+        .countdown-wrapper::before {
+            content: "";
+            position: absolute;
+            width: 145px;
+            height: 145px;
+            border-radius: 50%;
+            background: #07101f;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .countdown {
+            position: relative;
+            font-size: 72px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            z-index: 1;
+            text-shadow: 0 0 18px rgba(53, 216, 255, 0.3);
+        }
+
+        @keyframes pulse {
+            50% { transform: scale(1.04); }
+        }
+
+        .controls {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        button {
+            border: none;
+            padding: 18px 35px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet));
+            color: #07101f;
+            box-shadow: 0 10px 35px rgba(53, 216, 255, 0.2);
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 45px rgba(53, 216, 255, 0.3);
+        }
+
+        .result-box {
+            padding: 35px;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .score {
+            font-size: 90px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--cyan), white, var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(53, 216, 255, 0.2);
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .pass { color: var(--green); text-shadow: 0 0 18px rgba(29, 255, 149, 0.25); }
+        .fail { color: var(--red); text-shadow: 0 0 18px rgba(255, 77, 109, 0.25); }
+
+        .heard-text {
+            margin-top: 18px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #c0d0ed;
+            font-size: 18px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .teacher-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            line-height: 1.9;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .teacher-title {
+            font-weight: bold;
+            color: #90dfff;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            color: #92a4c9;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        @media(max-width:900px) {
+            .main-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 38px; }
+            .english-text { font-size: 38px; }
+        }
+
+        @media(max-width:600px) {
+            body { padding: 8px; }
+            .header { padding: 15px; margin-bottom: 12px; border-radius: 20px; }
+            .top-header { gap: 10px; }
+            .logo-area { gap: 12px; }
+            .logo { width: 45px; height: 45px; font-size: 18px; border-radius: 12px; }
+            h1 { font-size: 20px; letter-spacing: 0px; }
+            .subtitle { font-size: 12px; margin-top: 5px; line-height: 1.4; }
+            .live { padding: 6px 12px; font-size: 10px; }
+            .login-box { margin-bottom: 12px; }
+            .login-box input { padding: 12px; font-size: 16px; border-radius: 12px; }
+            .top-bar { gap: 8px; margin-bottom: 12px; grid-template-columns: repeat(3, 1fr); }
+            .stat { padding: 10px; border-radius: 15px; }
+            .stat-title { font-size: 10px; }
+            .stat-value { margin-top: 5px; font-size: 18px; }
+            .sentence-box { padding: 20px; border-radius: 20px; }
+            .question-number { font-size: 12px; padding: 6px 12px; }
+            .english-text { font-size: 26px; margin-top: 15px; }
+            .thai-text { font-size: 16px; margin-top: 8px; }
+            .countdown-wrapper { margin: 20px auto 10px; width: 100px; height: 100px; }
+            .countdown-wrapper::before { width: 80px; height: 80px; }
+            .countdown { font-size: 36px; }
+            .controls { margin-top: 15px; }
+            button { width: 100%; padding: 14px; font-size: 18px; border-radius: 14px; }
+            .result-box { padding: 20px; border-radius: 20px; margin-top: 12px; }
+            .score { font-size: 50px; }
+            .status { font-size: 24px; margin-top: 5px; }
+            .heard-text { font-size: 14px; padding: 12px; margin-top: 12px; min-height: auto; }
+            .teacher-box { margin-top: 15px; padding: 15px; border-radius: 15px; font-size: 14px; }
+            .teacher-title { font-size: 16px; margin-bottom: 5px; }
+            .footer { margin-top: 15px; margin-bottom: 15px; font-size: 12px; }
+        }
     </style>
 </head>
 
 <body>
+
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+
     <div class="container">
+
         <div class="header glass">
-            <div class="logo-area">
-                <div class="logo">CN</div>
-                <div>
-                    <h1>Chinese AI Test Station</h1>
-                    <div style="color:var(--muted)">ระบบวัดการออกเสียงภาษาจีนอัตโนมัติ 20 ข้อ</div>
+            <div class="top-header">
+                <div class="logo-area">
+                    <div class="logo">CN</div>
+                    <div>
+                        <h1>AI Pronunciation Test Station</h1>
+                        <div class="subtitle">ระบบวัดการออกเสียงภาษาจีนอัตโนมัติด้วย AI แบบ Real-Time</div>
+                    </div>
                 </div>
+                <div class="live">SYSTEM ONLINE</div>
             </div>
         </div>
 
         <div class="login-box">
-            <input type="text" id="studentName" placeholder="กรอกชื่อ-นามสกุล ผู้เข้าทดสอบ" />
+            <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
         </div>
 
         <div class="top-bar">
             <div class="stat glass">
-                <div style="color:var(--muted);font-size:12px;">SCORE</div>
-                <div class="stat-value" id="totalScore">0</div>
+                <div class="stat-title">TOTAL SCORE</div>
+                <div class="stat-value"><span id="totalScore">0</span></div>
             </div>
             <div class="stat glass">
-                <div style="color:var(--muted);font-size:12px;">PASS</div>
-                <div class="stat-value" id="passCount" style="color:var(--green)">0</div>
+                <div class="stat-title">PASS</div>
+                <div class="stat-value"><span id="passCount">0</span></div>
             </div>
             <div class="stat glass">
-                <div style="color:var(--muted);font-size:12px;">FAIL</div>
-                <div class="stat-value" id="failCount" style="color:var(--red)">0</div>
+                <div class="stat-title">FAIL</div>
+                <div class="stat-value"><span id="failCount">0</span></div>
             </div>
         </div>
 
         <div class="main-grid">
             <div class="sentence-box glass">
-                <div id="questionNumber" style="background:rgba(255,255,255,0.1); padding:5px 15px; border-radius:20px; display:inline-block;">ข้อที่ 1 / 20</div>
-                <div class="chinese-text" id="chineseText">我的爱好是看书。</div>
+                <div class="question-number" id="questionNumber">ข้อที่ 1 / 20</div>
+                <div class="english-text" id="englishText">我的爱好是看书。</div>
                 <div class="thai-text" id="thaiText">งานอดิเรกของฉันคือการอ่านหนังสือ</div>
                 <div class="countdown-wrapper">
                     <div class="countdown" id="countdown">10</div>
                 </div>
-                <button onclick="startRecognition()">🎤 เริ่มพูด (Speak Now)</button>
+                <div class="controls">
+                    <button class="start-btn" onclick="startRecognition()">🎤 เริ่มพูด</button>
+                </div>
             </div>
 
             <div class="result-box glass">
                 <div class="score" id="score">0%</div>
-                <div class="status" id="status">Ready</div>
-                <div class="heard-text" id="heardText">AI กำลังรอฟังเสียงภาษาจีน...</div>
+                <div class="status" id="status">รอเริ่มทดสอบ</div>
+                <div class="heard-text" id="heardText">AI พร้อมรับเสียง...</div>
             </div>
         </div>
 
-        <div style="margin-top:20px; text-align:center; opacity:0.6; font-size:12px;">
-            AI Reward Learning Machine © 2026 | พัฒนาโดย ครูวิทยากร วรรณา
+        <div class="teacher-box glass">
+            <div class="teacher-title">ผู้พัฒนาโครงการ</div>
+            ครูวิทยากร วรรณา<br>
+            แผนกอิเล็กทรอนิกส์<br>
+            วิทยาลัยสารพัดช่างศรีสะเกษ
         </div>
+
+        <div class="footer">AI Reward Learning Machine © 2026</div>
+
     </div>
 
     <script>
-        // ใส่ลิงก์ Google Apps Script ของคุณที่นี่
+        // ======================================
+        // SETTINGS (วาง URL ของ Google Apps Script ที่นี่)
+        // ======================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgiS39s8LLv39UFDNtAob3WZ2P-HZDrRUItOe6ZrMmuone7apWNIlqL33zpPLIXJKX/exec";
 
+        // ======================================
+        // QUESTIONS (อ้างอิงตรงตามไฟล์ Ex1.png 100%)
+        // ======================================
         const questions = [
-            { cn: "我的爱好是看书。", th: "งานอดิเรกของฉันคือการอ่านหนังสือ" },
-            { cn: "我爸爸在医院工作，他是医生。", th: "พ่อของฉันทำงานที่โรงพยาบาล เขาเป็นหมอ" },
-            { cn: "白天睡觉，夜间工作。", th: "นอนตอนกลางวัน ทำงานตอนกลางคืน" },
-            { cn: "我们班有2位老师。", th: "ห้องเรียนพวกเรามีครู 2 ท่าน" },
-            { cn: "它明年上半年可以出版。", th: "มันจะถูกตีพิมพ์ในช่วงครึ่งปีแรกของปีหน้า" },
-            { cn: "老公找你半年了，你去哪儿了？", th: "สามีตามหาคุณมาครึ่งปีแล้ว คุณไปอยู่ที่ไหนมา?" },
-            { cn: "你吃包子吗？", th: "คุณกินซาลาเปาไหม?" },
-            { cn: "桌上有三个杯子。", th: "บนโต๊ะมีแก้วน้ำ 3 ใบ" },
-            { cn: "指南针的指标是指向北的。", th: "เข็มของเข็มทิศชี้ไปทางทิศเหนือ" },
-            { cn: "超市在宿舍南边还是北边？", th: "ซุปเปอร์มาร์เก็ตอยู่ทางทิศใต้หรือทิศเหนือของหอพัก?" },
-            { cn: "我们在北京。", th: "พวกเราอยู่ที่ปักกิ่ง" },
-            { cn: "他拿着本子做笔记。", th: "เขากำลังถือสมุดจดบันทึก" },
-            { cn: "我想找别的工作。", th: "ฉันอยากหางานอื่นทำ" },
-            { cn: "我爱上别人了。", th: "ฉันรักคนอื่นไปแล้ว" },
-            { cn: "护士正在给病人打针。", th: "พยาบาลกำลังฉีดยาให้คนไข้" },
-            { cn: "我去超市买点儿菜。", th: "ฉันไปซุปเปอร์มาร์เก็ตซื้อผักนิดหน่อย" },
-            { cn: "请喝杯茶吧。", th: "ดื่มชาสักถ้วยเถอะครับ" },
-            { cn: "我不会开。", th: "ฉันขับไม่เป็น / ฉันเปิดไม่เป็น" },
-            { cn: "你有零钱买车票吗？", th: "คุณมีเศษเหรียญซื้อตั๋วรถไหม?" },
-            { cn: "车上有很多人。", th: "บนรถมีคนเยอะมาก" }
+            { chinese: "我的爱好是看书。", thai: "งานอดิเรกของฉันคือการอ่านหนังสือ" },
+            { chinese: "我爸爸在医院工作，他是医生。", thai: "พ่อของฉันทำงานที่โรงพยาบาล เขาเป็นหมอ" },
+            { chinese: "他白天睡觉，夜间工作。", thai: "เขานอนตอนกลางวัน ทำงานตอนกลางคืน" },
+            { chinese: "我们班有2位老师。", thai: "ห้องเรียนพวกเรามีครู 2 ท่าน" },
+            { chinese: "它明年上半年可以出版。", th: "มันจะถูกตีพิมพ์ในช่วงครึ่งปีแรกของปีหน้า" },
+            { chinese: "老公找你半天了，你去哪儿了？", thai: "สามีตามหาคุณตั้งนานแล้ว คุณไปอยู่ที่ไหนมา?" },
+            { chinese: "你吃包子吗？", thai: "คุณกินซาลาเปาไหม?" },
+            { chinese: "桌上有三个杯子。", thai: "บนโต๊ะมีแก้วน้ำ 3 ใบ" },
+            { chinese: "指南针的指标是指向北的。", thai: "เข็มของเข็มทิศชี้ไปทางทิศเหนือ" },
+            { chinese: "超市在宿舍南边还是北边？", thai: "ซุปเปอร์มาร์เก็ตอยู่ทางทิศใต้หรือทิศเหนือของหอพัก?" },
+            { chinese: "我住在北京。", thai: "ฉันอาศัยอยู่ที่ปักกิ่ง" },
+            { chinese: "他拿着本子做笔记。", thai: "เขากำลังถือสมุดจดบันทึก" },
+            { chinese: "我想找别的工作。", thai: "ฉันอยากหางานอื่นทำ" },
+            { chinese: "我爱上别人了。", thai: "ฉันรักคนอื่นไปแล้ว" },
+            { chinese: "护士正在给病人打针。", thai: "พยาบาลกำลังฉีดยาให้คนไข้" },
+            { chinese: "我去超市买点儿菜。", thai: "ฉันไปซุปเปอร์มาร์เก็ตซื้อผักนิดหน่อย" },
+            { chinese: "请喝杯茶吧。", thai: "ดื่มชาสักถ้วยเถอะครับ" },
+            { chinese: "我不会开。", thai: "ฉันขับรถไม่เป็น" },
+            { chinese: "你有零钱买车票吗？", thai: "คุณมีเศษเหรียญซื้อตั๋วรถไหม?" },
+            { chinese: "车上有很多人。", thai: "บนรถมีคนเยอะมาก" }
         ];
 
         let currentQuestion = 0;
         let totalScore = 0;
         let passCount = 0;
         let failCount = 0;
-        let isRunning = false;
+
         let recognition;
-        let timer;
+        let countdownInterval;
+        let timeLeft = 10;
+        let isRunning = false;
 
         window.onload = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
             if (!SpeechRecognition) {
-                alert("เบราว์เซอร์ไม่รองรับ Speech Recognition");
+                alert("เบราว์เซอร์ของคุณไม่รองรับระบบแยกแยะเสียง กรุณาเปิดด้วย Google Chrome หรือ Safari");
                 return;
             }
+
             recognition = new SpeechRecognition();
-            recognition.lang = 'zh-CN'; // ตั้งค่าเป็นภาษาจีนกลาง
+            recognition.lang = 'zh-CN'; // เปลี่ยนเป็นภาษาจีนกลางตามเป้าหมายโครงการ
             recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
 
-            recognition.onresult = (event) => {
-                clearInterval(timer);
-                const result = event.results[0][0].transcript;
-                const target = questions[currentQuestion].cn;
-                const score = calculateSimilarity(target, result);
+            recognition.onresult = function(event) {
+                if (!isRunning) return;
+                isRunning = false;
+                clearInterval(countdownInterval);
 
-                document.getElementById("heardText").innerText = "AI ได้ยิน: " + result;
-                document.getElementById("score").innerText = score + "%";
-                
-                if(score >= 80) {
+                const speechResult = event.results[0][0].transcript;
+                const target = questions[currentQuestion].chinese;
+                const score = similarity(target, speechResult);
+
+                document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
+                document.getElementById("score").innerHTML = score + "%";
+                totalScore += score;
+                document.getElementById("totalScore").innerHTML = totalScore;
+
+                if (score >= 80) {
                     passCount++;
-                    document.getElementById("status").innerText = "PASS ✅";
+                    document.getElementById("passCount").innerHTML = passCount;
+                    document.getElementById("status").innerHTML = "PASS ✅";
                     document.getElementById("status").className = "status pass";
+                    playPassSound();
                 } else {
                     failCount++;
-                    document.getElementById("status").innerText = "FAIL ❌";
+                    document.getElementById("failCount").innerHTML = failCount;
+                    document.getElementById("status").innerHTML = "FAIL ❌";
                     document.getElementById("status").className = "status fail";
+                    playFailSound();
                 }
 
-                totalScore += score;
-                updateStats();
-                setTimeout(nextQuestion, 2000);
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1500);
             };
 
-            recognition.onerror = () => { 
-                isRunning = false; 
-                document.getElementById("status").innerText = "Error! Try Again";
+            recognition.onerror = function(event) {
+                console.log("Recognition Error:", event.error);
+                isRunning = false;
+                clearInterval(countdownInterval);
+                document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
+                document.getElementById("status").className = "status fail";
+                document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
             };
+
+            loadQuestion(currentQuestion);
         };
 
+        function loadQuestion(index) {
+            document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / 20";
+            document.getElementById("englishText").innerHTML = questions[index].chinese;
+            document.getElementById("thaiText").innerHTML = questions[index].thai;
+            document.getElementById("score").innerHTML = "0%";
+            document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
+            document.getElementById("status").className = "status";
+            document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
+            document.getElementById("countdown").innerHTML = "10";
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+
+            if (currentQuestion >= questions.length) {
+                saveScoreToGoogleSheet();
+                alert("จบทดสอบแล้ว\nคะแนนรวม: " + totalScore);
+
+                totalScore = 0;
+                passCount = 0;
+                failCount = 0;
+
+                document.getElementById("totalScore").innerHTML = 0;
+                document.getElementById("passCount").innerHTML = 0;
+                document.getElementById("failCount").innerHTML = 0;
+
+                currentQuestion = 0;
+            }
+            loadQuestion(currentQuestion);
+        }
+
+        function similarity(a, b) {
+            a = a.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, "");
+            b = b.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, "");
+            if (a.length === 0) return 0;
+
+            let longer = a.length > b.length ? a : b;
+            let shorter = a.length > b.length ? b : a;
+            let same = 0;
+
+            for (let i = 0; i < shorter.length; i++) {
+                if (shorter[i] === longer[i]) {
+                    same++;
+                }
+            }
+            return Math.floor((same / longer.length) * 100);
+        }
+
         function startRecognition() {
-            if(document.getElementById("studentName").value.trim() === "") {
-                alert("กรุณากรอกชื่อก่อนเริ่มทดสอบ");
+            const studentName = document.getElementById("studentName").value;
+
+            if (studentName.trim() === "") {
+                alert("กรุณากรอกชื่อ");
                 return;
             }
-            if(isRunning) return;
-            isRunning = true;
-            let timeLeft = 10;
-            document.getElementById("countdown").innerText = timeLeft;
-            document.getElementById("status").innerText = "Listening...";
-            
-            recognition.start();
 
-            timer = setInterval(() => {
+            if (isRunning) {
+                try { recognition.stop(); } catch (e) {}
+            }
+
+            isRunning = true;
+            clearInterval(countdownInterval);
+            timeLeft = 10;
+
+            document.getElementById("countdown").innerHTML = timeLeft;
+            document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
+            document.getElementById("status").className = "status";
+            document.getElementById("heardText").innerHTML = "Listening...";
+
+            try {
+                recognition.start();
+            } catch (err) {
+                console.log("Start Error:", err);
+                isRunning = false;
+                clearInterval(countdownInterval);
+                document.getElementById("status").innerHTML = "เปิดไมค์ไม่ได้ ❌";
+                document.getElementById("status").className = "status fail";
+                document.getElementById("heardText").innerHTML = "กรุณารีเฟรชหน้าเว็บและอนุญาตให้ใช้ไมค์";
+                return;
+            }
+
+            countdownInterval = setInterval(() => {
                 timeLeft--;
-                document.getElementById("countdown").innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    recognition.stop();
-                    handleTimeout();
+                document.getElementById("countdown").innerHTML = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    if (isRunning) {
+                        isRunning = false;
+                        try { recognition.stop(); } catch (e) {}
+
+                        failCount++;
+                        document.getElementById("failCount").innerHTML = failCount;
+                        document.getElementById("status").innerHTML = "หมดเวลา ⏰";
+                        document.getElementById("status").className = "status fail";
+                        document.getElementById("heardText").innerHTML = "ไม่มีการพูด";
+
+                        playFailSound();
+
+                        setTimeout(() => {
+                            nextQuestion();
+                        }, 1500);
+                    }
                 }
             }, 1000);
         }
 
-        function handleTimeout() {
-            failCount++;
-            updateStats();
-            document.getElementById("status").innerText = "TIMEOUT ⏰";
-            document.getElementById("status").className = "status fail";
-            setTimeout(nextQuestion, 2000);
-        }
+        function saveScoreToGoogleSheet() {
+            const studentName = document.getElementById("studentName").value;
 
-        function nextQuestion() {
-            isRunning = false;
-            currentQuestion++;
-            if(currentQuestion < questions.length) {
-                loadQuestion();
-            } else {
-                saveToSheet();
-                alert("การทดสอบเสร็จสิ้น! คะแนนรวมของคุณคือ: " + totalScore);
-                resetQuiz();
-            }
-        }
-
-        function loadQuestion() {
-            document.getElementById("questionNumber").innerText = `ข้อที่ ${currentQuestion + 1} / 20`;
-            document.getElementById("chineseText").innerText = questions[currentQuestion].cn;
-            document.getElementById("thaiText").innerText = questions[currentQuestion].th;
-            document.getElementById("score").innerText = "0%";
-            document.getElementById("status").innerText = "Ready";
-            document.getElementById("status").className = "status";
-            document.getElementById("countdown").innerText = "10";
-        }
-
-        function updateStats() {
-            document.getElementById("totalScore").innerText = totalScore;
-            document.getElementById("passCount").innerText = passCount;
-            document.getElementById("failCount").innerText = failCount;
-        }
-
-        function calculateSimilarity(str1, str2) {
-            // การคำนวณเบื้องต้นสำหรับภาษาจีน (นับตัวอักษรที่ตรงกัน)
-            let s1 = str1.replace(/[^\u4e00-\u9fa5]/g, "");
-            let s2 = str2.replace(/[^\u4e00-\u9fa5]/g, "");
-            let matches = 0;
-            for(let char of s2) { if(s1.includes(char)) matches++; }
-            let res = Math.floor((matches / s1.length) * 100);
-            return res > 100 ? 100 : res;
-        }
-
-        function saveToSheet() {
-            const data = {
-                name: document.getElementById("studentName").value,
-                score: totalScore,
-                pass: passCount,
-                fail: failCount
-            };
             fetch(SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
-                cache: "no-cache",
-                body: JSON.stringify(data)
-            }).then(() => console.log("Data Sent"));
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: studentName,
+                    score: totalScore,
+                    pass: passCount,
+                    fail: failCount
+                })
+            })
+            .then(() => {
+                console.log("Saved To Google Sheet");
+            })
+            .catch(error => {
+                console.log("Google Sheet Error:", error);
+            });
         }
 
-        function resetQuiz() {
-            currentQuestion = 0; totalScore = 0; passCount = 0; failCount = 0;
-            updateStats(); loadQuestion();
+        function playPassSound() {
+            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+            audio.play().catch(e => console.log("Audio Play Blocked:", e));
+        }
+
+        function playFailSound() {
+            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+            audio.play().catch(e => console.log("Audio Play Blocked:", e));
         }
     </script>
 </body>
 </html>
-
-### การตั้งค่า Google Apps Script (ฝั่งรับข้อมูล)
-ก๊อปปี้สคริปต์นี้ไปวางใน Apps Script ของคุณ:
-
-```javascript
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  
-  // บันทึกตามลำดับ: Time, Name, Score, Pass, Fail
-  sheet.appendRow([
-    new Date(), 
-    data.name, 
-    data.score, 
-    data.pass, 
-    data.fail
-  ]);
-  
-  return ContentService.createTextOutput("Success");
-}
-
