@@ -526,7 +526,7 @@
         // ======================================
         // SETTINGS (วาง URL ของ Google Apps Script ที่นี่)
         // ======================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgiS39s8LLv39UFDNtAob3WZ2P-HZDrRUItOe6ZrMmuone7apWNIlqL33zpPLIXJKX/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
 
         // ======================================
         // QUESTIONS (อ้างอิงตรงตามไฟล์ Ex1.png 100%)
@@ -729,27 +729,31 @@
             }, 1000);
         }
 
-        function saveScoreToGoogleSheet() {
+    function saveScoreToGoogleSheet() {
             const studentName = document.getElementById("studentName").value;
+
+            // จัดเตรียมข้อมูลในรูปแบบ Form Data (รองรับ no-cors ได้ดีกว่า JSON)
+            const formData = new URLSearchParams();
+            formData.append("name", studentName);
+            formData.append("score", totalScore);
+            formData.append("pass", passCount);
+            formData.append("fail", failCount);
 
             fetch(SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors",
+                mode: "no-cors", // จำเป็นต้องใช้เพื่อเลี่ยงปัญหา CORS ข้ามโดเมน
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/x-www-form-urlencoded"
                 },
-                body: JSON.stringify({
-                    name: studentName,
-                    score: totalScore,
-                    pass: passCount,
-                    fail: failCount
-                })
+                body: formData.toString() // แปลงเป็นสตริงเพื่อส่งข้อมูล
             })
             .then(() => {
-                console.log("Saved To Google Sheet");
+                console.log("ส่งข้อมูลไปยัง Google Sheet เรียบร้อยแล้ว");
+                // หมายเหตุ: ในโหมด no-cors เราจะไม่สามารถอ่าน response กลับมาได้ 
+                // แต่ข้อมูลจะถูกส่งไปที่ฝั่งเซิร์ฟเวอร์สำเร็จ
             })
             .catch(error => {
-                console.log("Google Sheet Error:", error);
+                console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
             });
         }
 
