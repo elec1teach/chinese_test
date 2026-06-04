@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chinese AI Pronunciation Test Station</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* [UI ต้นแบบคงไว้ 100%] */
+        :root {
+            --bg1: #040816; --bg2: #0a1025; --panel: rgba(12, 18, 40, 0.72);
+            --line: rgba(255, 255, 255, 0.10); --cyan: #35d8ff; --blue: #6d7cff;
+            --violet: #b56cff; --green: #1dff95; --red: #ff4d6d;
+            --text: #edf5ff; --muted: #9db2d9;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 20px; font-family: 'Prompt', sans-serif; color: var(--text);
+            background: radial-gradient(circle at 10% 20%, rgba(53, 216, 255, 0.18), transparent 25%),
+                        radial-gradient(circle at 90% 10%, rgba(181, 108, 255, 0.15), transparent 25%),
+                        linear-gradient(to bottom, var(--bg1), var(--bg2));
+            overflow-x: hidden; min-height: 100vh;
+        }
+        body::before {
+            content: ""; position: fixed; inset: 0; pointer-events: none;
+            background: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px; opacity: 0.25;
+        }
+        .container { max-width: 1150px; margin: auto; position: relative; z-index: 1; }
+        .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); backdrop-filter: blur(18px); box-shadow: 0 15px 40px rgba(0,0,0,0.35); }
+        .header { padding: 30px; border-radius: 30px; margin-bottom: 22px; position: relative; overflow: hidden; }
+        .logo-area { display: flex; align-items: center; gap: 18px; }
+        .logo { width: 70px; height: 70px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color: #07101f; }
+        h1 { margin: 0; font-size: 32px; font-family: 'Orbitron', sans-serif; }
+        .login-box { margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 18px; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(7, 12, 30, 0.75); color: white; font-size: 20px; outline: none; }
+        .top-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat { padding: 18px; border-radius: 22px; text-align: center; }
+        .stat-value { font-size: 34px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
+        .main-grid { display: grid; grid-template-columns: 1.3fr 0.8fr; gap: 20px; }
+        .sentence-box { padding: 35px; border-radius: 30px; text-align: center; }
+        .chinese-text { margin-top: 25px; font-size: 48px; font-weight: 900; font-family: 'Prompt', sans-serif; color: var(--cyan); }
+        .thai-text { margin-top: 14px; font-size: 22px; color: #b6c6e8; }
+        .countdown-wrapper { margin: 30px auto; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); }
+        .countdown { font-size: 42px; font-family: 'Orbitron', sans-serif; color: white; }
+        button { border: none; padding: 18px 35px; border-radius: 18px; cursor: pointer; font-size: 20px; font-weight: bold; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color: #07101f; width: 100%; }
+        .result-box { padding: 35px; border-radius: 30px; text-align: center; }
+        .score { font-size: 70px; font-weight: 900; font-family: 'Orbitron', sans-serif; color: white; }
+        .status { font-size: 30px; font-weight: bold; margin-top: 10px; }
+        .pass { color: var(--green); } .fail { color: var(--red); }
+        .heard-text { margin-top: 15px; padding: 15px; border-radius: 15px; background: rgba(255,255,255,0.05); font-size: 16px; }
+        @media(max-width:900px){ .main-grid { grid-template-columns: 1fr; } .chinese-text { font-size: 36px; } }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header glass">
+            <div class="logo-area">
+                <div class="logo">CN</div>
+                <div>
+                    <h1>Chinese AI Test Station</h1>
+                    <div style="color:var(--muted)">ระบบวัดการออกเสียงภาษาจีนอัตโนมัติ 20 ข้อ</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-box">
+            <input type="text" id="studentName" placeholder="กรอกชื่อ-นามสกุล ผู้เข้าทดสอบ" />
+        </div>
+
+        <div class="top-bar">
+            <div class="stat glass">
+                <div style="color:var(--muted);font-size:12px;">SCORE</div>
+                <div class="stat-value" id="totalScore">0</div>
+            </div>
+            <div class="stat glass">
+                <div style="color:var(--muted);font-size:12px;">PASS</div>
+                <div class="stat-value" id="passCount" style="color:var(--green)">0</div>
+            </div>
+            <div class="stat glass">
+                <div style="color:var(--muted);font-size:12px;">FAIL</div>
+                <div class="stat-value" id="failCount" style="color:var(--red)">0</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="sentence-box glass">
+                <div id="questionNumber" style="background:rgba(255,255,255,0.1); padding:5px 15px; border-radius:20px; display:inline-block;">ข้อที่ 1 / 20</div>
+                <div class="chinese-text" id="chineseText">我的爱好是看书。</div>
+                <div class="thai-text" id="thaiText">งานอดิเรกของฉันคือการอ่านหนังสือ</div>
+                <div class="countdown-wrapper">
+                    <div class="countdown" id="countdown">10</div>
+                </div>
+                <button onclick="startRecognition()">🎤 เริ่มพูด (Speak Now)</button>
+            </div>
+
+            <div class="result-box glass">
+                <div class="score" id="score">0%</div>
+                <div class="status" id="status">Ready</div>
+                <div class="heard-text" id="heardText">AI กำลังรอฟังเสียงภาษาจีน...</div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px; text-align:center; opacity:0.6; font-size:12px;">
+            AI Reward Learning Machine © 2026 | พัฒนาโดย ครูวิทยากร วรรณา
+        </div>
+    </div>
+
+    <script>
+        // ใส่ลิงก์ Google Apps Script ของคุณที่นี่
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgiS39s8LLv39UFDNtAob3WZ2P-HZDrRUItOe6ZrMmuone7apWNIlqL33zpPLIXJKX/exec";
+
+        const questions = [
+            { cn: "我的爱好是看书。", th: "งานอดิเรกของฉันคือการอ่านหนังสือ" },
+            { cn: "我爸爸在医院工作，他是医生。", th: "พ่อของฉันทำงานที่โรงพยาบาล เขาเป็นหมอ" },
+            { cn: "白天睡觉，夜间工作。", th: "นอนตอนกลางวัน ทำงานตอนกลางคืน" },
+            { cn: "我们班有2位老师。", th: "ห้องเรียนพวกเรามีครู 2 ท่าน" },
+            { cn: "它明年上半年可以出版。", th: "มันจะถูกตีพิมพ์ในช่วงครึ่งปีแรกของปีหน้า" },
+            { cn: "老公找你半年了，你去哪儿了？", th: "สามีตามหาคุณมาครึ่งปีแล้ว คุณไปอยู่ที่ไหนมา?" },
+            { cn: "你吃包子吗？", th: "คุณกินซาลาเปาไหม?" },
+            { cn: "桌上有三个杯子。", th: "บนโต๊ะมีแก้วน้ำ 3 ใบ" },
+            { cn: "指南针的指标是指向北的。", th: "เข็มของเข็มทิศชี้ไปทางทิศเหนือ" },
+            { cn: "超市在宿舍南边还是北边？", th: "ซุปเปอร์มาร์เก็ตอยู่ทางทิศใต้หรือทิศเหนือของหอพัก?" },
+            { cn: "我们在北京。", th: "พวกเราอยู่ที่ปักกิ่ง" },
+            { cn: "他拿着本子做笔记。", th: "เขากำลังถือสมุดจดบันทึก" },
+            { cn: "我想找别的工作。", th: "ฉันอยากหางานอื่นทำ" },
+            { cn: "我爱上别人了。", th: "ฉันรักคนอื่นไปแล้ว" },
+            { cn: "护士正在给病人打针。", th: "พยาบาลกำลังฉีดยาให้คนไข้" },
+            { cn: "我去超市买点儿菜。", th: "ฉันไปซุปเปอร์มาร์เก็ตซื้อผักนิดหน่อย" },
+            { cn: "请喝杯茶吧。", th: "ดื่มชาสักถ้วยเถอะครับ" },
+            { cn: "我不会开。", th: "ฉันขับไม่เป็น / ฉันเปิดไม่เป็น" },
+            { cn: "你有零钱买车票吗？", th: "คุณมีเศษเหรียญซื้อตั๋วรถไหม?" },
+            { cn: "车上有很多人。", th: "บนรถมีคนเยอะมาก" }
+        ];
+
+        let currentQuestion = 0;
+        let totalScore = 0;
+        let passCount = 0;
+        let failCount = 0;
+        let isRunning = false;
+        let recognition;
+        let timer;
+
+        window.onload = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("เบราว์เซอร์ไม่รองรับ Speech Recognition");
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN'; // ตั้งค่าเป็นภาษาจีนกลาง
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                clearInterval(timer);
+                const result = event.results[0][0].transcript;
+                const target = questions[currentQuestion].cn;
+                const score = calculateSimilarity(target, result);
+
+                document.getElementById("heardText").innerText = "AI ได้ยิน: " + result;
+                document.getElementById("score").innerText = score + "%";
+                
+                if(score >= 80) {
+                    passCount++;
+                    document.getElementById("status").innerText = "PASS ✅";
+                    document.getElementById("status").className = "status pass";
+                } else {
+                    failCount++;
+                    document.getElementById("status").innerText = "FAIL ❌";
+                    document.getElementById("status").className = "status fail";
+                }
+
+                totalScore += score;
+                updateStats();
+                setTimeout(nextQuestion, 2000);
+            };
+
+            recognition.onerror = () => { 
+                isRunning = false; 
+                document.getElementById("status").innerText = "Error! Try Again";
+            };
+        };
+
+        function startRecognition() {
+            if(document.getElementById("studentName").value.trim() === "") {
+                alert("กรุณากรอกชื่อก่อนเริ่มทดสอบ");
+                return;
+            }
+            if(isRunning) return;
+            isRunning = true;
+            let timeLeft = 10;
+            document.getElementById("countdown").innerText = timeLeft;
+            document.getElementById("status").innerText = "Listening...";
+            
+            recognition.start();
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("countdown").innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    recognition.stop();
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            failCount++;
+            updateStats();
+            document.getElementById("status").innerText = "TIMEOUT ⏰";
+            document.getElementById("status").className = "status fail";
+            setTimeout(nextQuestion, 2000);
+        }
+
+        function nextQuestion() {
+            isRunning = false;
+            currentQuestion++;
+            if(currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                saveToSheet();
+                alert("การทดสอบเสร็จสิ้น! คะแนนรวมของคุณคือ: " + totalScore);
+                resetQuiz();
+            }
+        }
+
+        function loadQuestion() {
+            document.getElementById("questionNumber").innerText = `ข้อที่ ${currentQuestion + 1} / 20`;
+            document.getElementById("chineseText").innerText = questions[currentQuestion].cn;
+            document.getElementById("thaiText").innerText = questions[currentQuestion].th;
+            document.getElementById("score").innerText = "0%";
+            document.getElementById("status").innerText = "Ready";
+            document.getElementById("status").className = "status";
+            document.getElementById("countdown").innerText = "10";
+        }
+
+        function updateStats() {
+            document.getElementById("totalScore").innerText = totalScore;
+            document.getElementById("passCount").innerText = passCount;
+            document.getElementById("failCount").innerText = failCount;
+        }
+
+        function calculateSimilarity(str1, str2) {
+            // การคำนวณเบื้องต้นสำหรับภาษาจีน (นับตัวอักษรที่ตรงกัน)
+            let s1 = str1.replace(/[^\u4e00-\u9fa5]/g, "");
+            let s2 = str2.replace(/[^\u4e00-\u9fa5]/g, "");
+            let matches = 0;
+            for(let char of s2) { if(s1.includes(char)) matches++; }
+            let res = Math.floor((matches / s1.length) * 100);
+            return res > 100 ? 100 : res;
+        }
+
+        function saveToSheet() {
+            const data = {
+                name: document.getElementById("studentName").value,
+                score: totalScore,
+                pass: passCount,
+                fail: failCount
+            };
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                cache: "no-cache",
+                body: JSON.stringify(data)
+            }).then(() => console.log("Data Sent"));
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0; totalScore = 0; passCount = 0; failCount = 0;
+            updateStats(); loadQuestion();
+        }
+    </script>
+</body>
+</html>
+
+### การตั้งค่า Google Apps Script (ฝั่งรับข้อมูล)
+ก๊อปปี้สคริปต์นี้ไปวางใน Apps Script ของคุณ:
+
+```javascript
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  // บันทึกตามลำดับ: Time, Name, Score, Pass, Fail
+  sheet.appendRow([
+    new Date(), 
+    data.name, 
+    data.score, 
+    data.pass, 
+    data.fail
+  ]);
+  
+  return ContentService.createTextOutput("Success");
+}
+
