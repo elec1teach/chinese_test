@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Pronunciation Test Station</title>
+    <title>AI English Pronunciation Test - Electronics Lab</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -137,10 +137,10 @@
         <div class="header glass">
             <div class="top-header">
                 <div class="logo-area">
-                    <div class="logo">CN</div>
+                    <div class="logo">EN</div>
                     <div>
                         <h1>AI Pronunciation Test Station</h1>
-                        <div class="subtitle">ระบบวัดการออกเสียงภาษาจีนอัตโนมัติด้วย AI แบบ Real-Time</div>
+                        <div class="subtitle">ระบบฝึกออกเสียงภาษาอังกฤษอัตโนมัติ สำหรับช่างอิเล็กทรอนิกส์</div>
                     </div>
                 </div>
                 <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
@@ -148,7 +148,7 @@
         </div>
 
         <div class="login-box">
-            <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
+            <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ (หรือชื่อกลุ่ม)" />
         </div>
 
         <div class="top-bar">
@@ -160,8 +160,8 @@
         <div class="main-grid">
             <div class="sentence-box glass">
                 <div class="question-number" id="questionNumber">ข้อที่ 1 / 20</div>
-                <div class="english-text" id="englishText">我的爱好是看书。</div>
-                <div class="thai-text" id="thaiText">งานอดิเรกของฉันคือการอ่านหนังสือ</div>
+                <div class="english-text" id="englishText">Check the voltage.</div>
+                <div class="thai-text" id="thaiText">เช็คแรงดันไฟหน่อย</div>
                 <div class="countdown-wrapper">
                     <div class="countdown" id="countdown">10</div>
                 </div>
@@ -178,7 +178,7 @@
         </div>
 
         <div class="teacher-box glass">
-            <div class="teacher-title">ผู้พัฒนาโครงการ</div>
+            <div class="teacher-title">ผู้ดูแลระบบและการฝึกปฏิบัติ</div>
             ครูวิทยากร วรรณา<br>แผนกอิเล็กทรอนิกส์<br>วิทยาลัยสารพัดช่างศรีสะเกษ
         </div>
 
@@ -187,10 +187,10 @@
 
     <script>
         // ======================================
-        // 1. ตั้งค่า API และ Firebase (แก้ไข URL ให้เป็นของคุณเอง)
+        // 1. ตั้งค่า API และ Firebase (คงค่าเดิมของคุณไว้)
         // ======================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
-        const PASS_REQUIREMENT = 10; // กำหนดจำนวนข้อที่ต้องผ่านถึงจะได้รางวัล (ตัวอย่าง: ผ่าน 10 ข้อ)
+        const PASS_REQUIREMENT = 10; // กำหนดจำนวนข้อที่ต้องผ่านถึงจะได้รางวัล
 
         const firebaseConfig = {
            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
@@ -205,29 +205,29 @@
         const db = firebase.database();
 
         // ======================================
-        // 2. ข้อมูลข้อสอบภาษาจีน
+        // 2. ข้อมูลข้อสอบภาษาอังกฤษ สำหรับงานอิเล็กทรอนิกส์ ปวช.
         // ======================================
         const questions = [
-            { chinese: "我的爱好是看书。", thai: "งานอดิเรกของฉันคือการอ่านหนังสือ" },
-            { chinese: "我爸爸在医院工作，他是医生。", thai: "พ่อของฉันทำงานที่โรงพยาบาล เขาเป็นหมอ" },
-            { chinese: "他白天睡觉，夜间工作。", thai: "เขานอนตอนกลางวัน ทำงานตอนกลางคืน" },
-            { chinese: "我们班有2位老师。", thai: "ห้องเรียนพวกเรามีครู 2 ท่าน" },
-            { chinese: "它明年上半年可以出版。", thai: "มันจะถูกตีพิมพ์ในช่วงครึ่งปีแรกของปีหน้า" },
-            { chinese: "老公找你半天了，你去哪儿了？", thai: "สามีตามหาคุณตั้งนานแล้ว คุณไปอยู่ที่ไหนมา?" },
-            { chinese: "你吃包子吗？", thai: "คุณกินซาลาเปาไหม?" },
-            { chinese: "桌上有三个杯子。", thai: "บนโต๊ะมีแก้วน้ำ 3 ใบ" },
-            { chinese: "指南针的指标是指向北的。", thai: "เข็มของเข็มทิศชี้ไปทางทิศเหนือ" },
-            { chinese: "超市在宿舍南边还是北边？", thai: "ซุปเปอร์มาร์เก็ตอยู่ทางทิศใต้หรือทิศเหนือของหอพัก?" },
-            { chinese: "我住在北京。", thai: "ฉันอาศัยอยู่ที่ปักกิ่ง" },
-            { chinese: "他拿着本子做笔记。", thai: "เขากำลังถือสมุดจดบันทึก" },
-            { chinese: "我想找别的工作。", thai: "ฉันอยากหางานอื่นทำ" },
-            { chinese: "我爱上别人了。", thai: "ฉันรักคนอื่นไปแล้ว" },
-            { chinese: "护士正在给病人打针。", thai: "พยาบาลกำลังฉีดยาให้คนไข้" },
-            { chinese: "我去超市买点儿菜。", thai: "ฉันไปซุปเปอร์มาร์เก็ตซื้อผักนิดหน่อย" },
-            { chinese: "请喝杯茶吧。", thai: "ดื่มชาสักถ้วยเถอะครับ" },
-            { chinese: "我不会开。", thai: "ฉันขับรถไม่เป็น" },
-            { chinese: "你有零钱买车票吗？", thai: "คุณมีเศษเหรียญซื้อตั๋วรถไหม?" },
-            { chinese: "车上有很多人。", thai: "บนรถมีคนเยอะมาก" }
+            { english: "Check the voltage.", thai: "เช็คแรงดันไฟหน่อย" },
+            { english: "Turn off the power.", thai: "ปิดสวิตช์ไฟก่อน" },
+            { english: "Is the power on?", thai: "ไฟเข้าหรือยัง?" },
+            { english: "Pass me the multimeter.", thai: "ส่งมัลติมิเตอร์ให้ครูหน่อย" },
+            { english: "Solder this wire.", thai: "บัดกรีสายไฟเส้นนี้เลย" },
+            { english: "Watch out for short circuit.", thai: "ระวังไฟช็อตนะ" },
+            { english: "Read the diagram.", thai: "ดูวงจรซิ" },
+            { english: "Connect positive to red.", thai: "ต่อขั้วบวกเข้ากับสายสีแดง" },
+            { english: "The fuse is blown.", thai: "ฟิวส์ขาดแล้ว" },
+            { english: "Ground this pin.", thai: "ต่อพินนี้ลงกราวด์" },
+            { english: "Test the circuit now.", thai: "ทดสอบวงจรได้เลย" },
+            { english: "Do you need help?", thai: "กลุ่มนี้ต้องการให้ช่วยไหม?" },
+            { english: "Use the breadboard.", thai: "ใช้เบรดบอร์ดต่อวงจรนะ" },
+            { english: "Check the resistor value.", thai: "เช็คค่าตัวต้านทานหน่อยว่าตรงไหม" },
+            { english: "Strip the wire.", thai: "ปอกสายไฟเตรียมไว้" },
+            { english: "It is getting hot.", thai: "อุปกรณ์มันเริ่มร้อนแล้วนะ" },
+            { english: "Are you done?", thai: "พวกเธอทำเสร็จหรือยัง?" },
+            { english: "Clean up your tools.", thai: "เก็บเครื่องมือให้เรียบร้อยด้วย" },
+            { english: "Good job team.", thai: "ทำได้ดีมากทุกคน!" },
+            { english: "Any questions?", thai: "มีคำถามอะไรเพิ่มเติมไหม?" }
         ];
 
         let currentQuestion = 0;
@@ -249,7 +249,8 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.lang = 'zh-CN'; 
+            // ปรับเป็นภาษาอังกฤษ (สหรัฐอเมริกา)
+            recognition.lang = 'en-US'; 
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
@@ -259,7 +260,7 @@
                 clearInterval(countdownInterval);
 
                 const speechResult = event.results[0][0].transcript;
-                const target = questions[currentQuestion].chinese;
+                const target = questions[currentQuestion].english; // ดึงค่าจาก key "english"
                 const score = similarity(target, speechResult);
 
                 document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
@@ -267,7 +268,7 @@
                 totalScore += score;
                 document.getElementById("totalScore").innerHTML = totalScore;
 
-                if (score >= 80) { // เกณฑ์ผ่านรายข้อ (ปรับได้)
+                if (score >= 80) { // เกณฑ์ผ่านรายข้อ
                     passCount++;
                     document.getElementById("passCount").innerHTML = passCount;
                     document.getElementById("status").innerHTML = "PASS ✅";
@@ -279,10 +280,9 @@
                     document.getElementById("status").className = "status fail";
                 }
 
-                setTimeout(nextQuestion, 1500);
+                setTimeout(nextQuestion, 2000); // หน่วงเวลาให้เด็กเห็นผลลัพธ์นานขึ้นนิดนึง
             };
 
-            // เรียกใช้งานฟังก์ชันเริ่มต้น
             loadQuestion(0);
             monitorMachine(); 
         };
@@ -315,11 +315,10 @@
         // ======================================
         function loadQuestion(index) {
             document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${questions.length}`;
-            document.getElementById("englishText").innerHTML = questions[index].chinese;
+            document.getElementById("englishText").innerHTML = questions[index].english; // ใช้ key "english"
             document.getElementById("thaiText").innerHTML = questions[index].thai;
             document.getElementById("countdown").innerHTML = "10";
             
-            // เคลียร์ UI สำหรับข้อใหม่
             document.getElementById("score").innerHTML = "0%";
             document.getElementById("status").innerHTML = "พร้อมทดสอบข้อถัดไป";
             document.getElementById("status").className = "status";
@@ -373,13 +372,12 @@
             document.getElementById("englishText").innerHTML = "TEST COMPLETED";
             document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
             document.getElementById("countdown").innerHTML = "-";
-            document.getElementById("startBtn").disabled = true; // ล็อกปุ่มกันกดซ้ำ
+            document.getElementById("startBtn").disabled = true; 
 
             if (passCount >= PASS_REQUIREMENT) {
                 document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! คุณได้รับสิทธิ์รับรางวัล";
                 document.getElementById("status").className = "status pass";
                 
-                // สั่งปลดล็อกตู้ผ่าน Firebase
                 db.ref('machine').update({ 
                     status: 'unlocked',
                     currentUser: document.getElementById("studentName").value 
@@ -395,9 +393,10 @@
         // 5. ตัวช่วยคำนวณและบันทึกข้อมูล
         // ======================================
         function similarity(s1, s2) {
-            // ลบเครื่องหมายวรรคตอนและช่องว่างเพื่อการเปรียบเทียบภาษาจีนที่แม่นยำขึ้น
-            s1 = s1.replace(/[.,!?，。！？\s]/g, "");
-            s2 = s2.replace(/[.,!?，。！？\s]/g, "");
+            // แปลงเป็นตัวพิมพ์เล็กทั้งหมด และตัดเครื่องหมายวรรคตอนภาษาอังกฤษออก เพื่อให้เปรียบเทียบคำได้แม่นยำขึ้น
+            s1 = s1.toLowerCase().replace(/[.,!?\s]/g, "");
+            s2 = s2.toLowerCase().replace(/[.,!?\s]/g, "");
+            
             let same = 0;
             const len = Math.max(s1.length, s2.length);
             if (len === 0) return 0;
