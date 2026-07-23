@@ -205,7 +205,7 @@
         const db = firebase.database();
 
         // ======================================
-        // 2. คลังข้อมูลข้อสอบ (สามารถใส่เพิ่มได้ถึง 300 ข้อ)
+        // 2. คลังข้อมูลข้อสอบ
         // ======================================
         const questionBank = [
             { english: "Check the voltage.", thai: "เช็คแรงดันไฟหน่อย" },
@@ -277,7 +277,7 @@
             { english: "Assemble the robot parts.", thai: "ประกอบชิ้นส่วนหุ่นยนต์" },
             { english: "Verify the pin configuration.", thai: "ตรวจสอบการต่อขาอุปกรณ์" },
             { english: "Clear the workspace.", thai: "จัดพื้นที่ทำงานให้เรียบร้อย" },
-            { english: "Power on the system.", thai: "เปิดระบบไฟได้" }, /* <---- แก้ไขจุดที่ลืมใส่ Comma ตรงนี้ครับ */
+            { english: "Power on the system.", thai: "เปิดระบบไฟได้" },
             { english: "Check the MPPT charge controller.", thai: "เช็คตัวควบคุมการชาร์จ MPPT" },
             { english: "The lithium battery is full.", thai: "แบตเตอรี่ลิเธียมเต็มแล้ว" },
             { english: "Connect the panels in series.", thai: "ต่อแผงโซลาร์เซลล์แบบอนุกรม" },
@@ -299,7 +299,7 @@
             { english: "Debug the source code.", thai: "ตรวจสอบและแก้ไขซอร์สโค้ด" }
         ];
 
-        // ตัวแปรใหม่สำหรับตั้งค่าจำนวนข้อที่จะให้สุ่ม และเก็บข้อสอบที่สุ่มมาแล้ว
+        // ตัวแปรสำหรับตั้งค่าและเก็บสถานะ
         const NUM_QUESTIONS_TO_PLAY = 20;
         let activeQuestions = []; 
 
@@ -313,14 +313,13 @@
         let timeLeft = 10;
         let isRunning = false;
 
-        // ฟังก์ชันสำหรับสับเปลี่ยนและสุ่มข้อสอบ
+        // สุ่มข้อสอบ
         function getRandomQuestions(sourceArray, numItems) {
             let shuffled = [...sourceArray];
             for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            // ป้องกันกรณีที่คลังข้อสอบมีน้อยกว่าจำนวนที่ต้องการสุ่ม
             return shuffled.slice(0, Math.min(numItems, shuffled.length));
         }
 
@@ -343,7 +342,6 @@
                 clearInterval(countdownInterval);
 
                 const speechResult = event.results[0][0].transcript;
-                // เปลี่ยนไปดึงคำศัพท์จาก activeQuestions ที่สุ่มมาแล้ว
                 const target = activeQuestions[currentQuestion].english; 
                 const score = similarity(target, speechResult);
 
@@ -367,9 +365,8 @@
                 setTimeout(nextQuestion, 2000);
             };
 
-            // สร้างชุดข้อสอบสุ่ม 20 ข้อ ก่อนเริ่มโหลดข้อแรก
+            // เตรียมคำถาม
             activeQuestions = getRandomQuestions(questionBank, NUM_QUESTIONS_TO_PLAY);
-
             loadQuestion(0);
             monitorMachine(); 
         };
@@ -386,8 +383,12 @@
                 if(status === 'ready') {
                     ui.innerHTML = "MACHINE READY";
                     ui.style.color = "#1dff95";
-                    startBtn.disabled = false;
-                    startBtn.innerHTML = "🎤 เริ่มพูด";
+                    
+                    // เปิดปุ่มเฉพาะเวลาที่ไม่ได้กำลังจับเวลาอยู่ และสอบยังไม่เสร็จ
+                    if (!isRunning && currentQuestion < activeQuestions.length) {
+                        startBtn.disabled = false;
+                        startBtn.innerHTML = "🎤 เริ่มพูด";
+                    }
                 } else {
                     ui.innerHTML = "MACHINE BUSY";
                     ui.style.color = "#ff4d6d";
@@ -401,7 +402,6 @@
         // 4. ระบบดำเนินข้อสอบ และตัดสินผล
         // ======================================
         function loadQuestion(index) {
-            // อ้างอิงความยาวและข้อมูลจาก activeQuestions แทน
             document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${activeQuestions.length}`;
             document.getElementById("englishText").innerHTML = activeQuestions[index].english; 
             document.getElementById("thaiText").innerHTML = activeQuestions[index].thai;
@@ -411,6 +411,11 @@
             document.getElementById("status").innerHTML = "พร้อมทดสอบข้อถัดไป";
             document.getElementById("status").className = "status";
             document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
+
+            // รีเซ็ตปุ่มให้กลับมากดได้อีกครั้ง
+            const startBtn = document.getElementById("startBtn");
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 เริ่มพูด";
         }
 
         function startRecognition() {
@@ -425,6 +430,11 @@
             document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
             document.getElementById("status").className = "status";
             document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
+
+            // ปิดการใช้งานปุ่มชั่วคราวขณะอัดเสียง
+            const startBtn = document.getElementById("startBtn");
+            startBtn.disabled = true;
+            startBtn.innerHTML = "🎙️ กำลังฟัง...";
 
             recognition.start();
 
@@ -448,7 +458,6 @@
 
         function nextQuestion() {
             currentQuestion++;
-            // เช็คว่าหมดข้อสอบที่สุ่มมา 20 ข้อหรือยัง
             if (currentQuestion >= activeQuestions.length) {
                 evaluateFinalResult();
             } else {
@@ -461,7 +470,11 @@
             document.getElementById("englishText").innerHTML = "TEST COMPLETED";
             document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
             document.getElementById("countdown").innerHTML = "-";
-            document.getElementById("startBtn").disabled = true; 
+            
+            // ปิดปุ่มถาวรเมื่อสอบเสร็จ
+            const startBtn = document.getElementById("startBtn");
+            startBtn.disabled = true; 
+            startBtn.innerHTML = "✅ จบการทดสอบ";
 
             if (passCount >= PASS_REQUIREMENT) {
                 document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! คุณได้รับสิทธิ์รับรางวัล";
