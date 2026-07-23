@@ -187,10 +187,10 @@
 
     <script>
         // ======================================
-        // 1. ตั้งค่า API และ Firebase (คงค่าเดิมของคุณไว้)
+        // 1. ตั้งค่า API และ Firebase
         // ======================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
-        const PASS_REQUIREMENT = 10; // กำหนดจำนวนข้อที่ต้องผ่านถึงจะได้รางวัล
+        const PASS_REQUIREMENT = 10; 
 
         const firebaseConfig = {
            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
@@ -205,9 +205,9 @@
         const db = firebase.database();
 
         // ======================================
-        // 2. ข้อมูลข้อสอบภาษาอังกฤษ สำหรับงานอิเล็กทรอนิกส์ ปวช.
+        // 2. คลังข้อมูลข้อสอบ (สามารถใส่เพิ่มได้ถึง 300 ข้อ)
         // ======================================
-        const questions = [
+        const questionBank = [
             { english: "Check the voltage.", thai: "เช็คแรงดันไฟหน่อย" },
             { english: "Turn off the power.", thai: "ปิดสวิตช์ไฟก่อน" },
             { english: "Is the power on?", thai: "ไฟเข้าหรือยัง?" },
@@ -228,7 +228,362 @@
             { english: "Clean up your tools.", thai: "เก็บเครื่องมือให้เรียบร้อยด้วย" },
             { english: "Good job team.", thai: "ทำได้ดีมากทุกคน!" },
             { english: "Any questions?", thai: "มีคำถามอะไรเพิ่มเติมไหม?" }
+           { english: "Measure the current.", thai: "วัดกระแสไฟดู" },
+    { english: "Check the resistance.", thai: "เช็คค่าความต้านทานหน่อย" },
+    { english: "Is the battery fully charged?", thai: "แบตเตอรี่ชาร์จเต็มหรือยัง?" },
+    { english: "Connect the solar panel.", thai: "ต่อแผงโซลาร์เซลล์เลย" },
+    { english: "Set the multimeter to DC.", thai: "ตั้งค่ามัลติมิเตอร์เป็นไฟกระแสตรง" },
+    { english: "Be careful with the hot soldering iron.", thai: "ระวังหัวแร้งร้อนนะ" },
+    { english: "Unplug it before working.", thai: "ถอดปลั๊กก่อนเริ่มทำงาน" },
+    { english: "The circuit is incomplete.", thai: "วงจรยังไม่สมบูรณ์" },
+    { english: "Change the blown fuse.", thai: "เปลี่ยนฟิวส์ที่ขาดด้วย" },
+    { english: "Do not touch the bare wire.", thai: "อย่าแตะสายไฟเปลือย" },
+    { english: "Wire the circuit in parallel.", thai: "ต่อวงจรแบบขนาน" },
+    { english: "Wire the circuit in series.", thai: "ต่อวงจรแบบอนุกรม" },
+    { english: "Check the polarity.", thai: "ตรวจสอบขั้วให้ถูกต้อง" },
+    { english: "Connect the ground wire.", thai: "ต่อสายกราวด์ด้วย" },
+    { english: "The motor is not spinning.", thai: "มอเตอร์ไม่หมุน" },
+    { english: "Adjust the power supply.", thai: "ปรับแรงดันพาวเวอร์ซัพพลาย" },
+    { english: "Look at the schematic.", thai: "ดูที่วงจรโครงสร้าง" },
+    { english: "What is the output voltage?", thai: "แรงดันไฟขาออกคือเท่าไหร่?" },
+    { english: "The capacitor is swollen.", thai: "ตัวเก็บประจุบวมแล้ว" },
+    { english: "Did you check the diode?", thai: "เช็คไดโอดหรือยัง?" },
+    { english: "Turn on the oscilloscope.", thai: "เปิดออสซิลโลสโคป" },
+    { english: "Calibrate the sensor.", thai: "ปรับเทียบเซ็นเซอร์" },
+    { english: "Solder the components tightly.", thai: "บัดกรีอุปกรณ์ให้แน่น" },
+    { english: "Use the wire strippers.", thai: "ใช้คีมปอกสายไฟ" },
+    { english: "The LED is not lighting up.", thai: "หลอด LED ไม่สว่าง" },
+    { english: "Replace the broken switch.", thai: "เปลี่ยนสวิตช์ที่เสีย" },
+    { english: "Double-check your wiring.", thai: "ตรวจสอบการเดินสายไฟอีกครั้ง" },
+    { english: "Is there a short circuit?", thai: "มีไฟลัดวงจรไหม?" },
+    { english: "Measure the AC voltage.", thai: "วัดแรงดันไฟกระแสสลับ" },
+    { english: "Press the reset button.", thai: "กดปุ่มรีเซ็ต" },
+    { english: "Upload the code to the board.", thai: "อัปโหลดโค้ดลงบอร์ด" },
+    { english: "The inverter is showing an error.", thai: "อินเวอร์เตอร์แจ้งข้อผิดพลาด" },
+    { english: "Check the battery voltage.", thai: "เช็คแรงดันแบตเตอรี่" },
+    { english: "Wear safety glasses.", thai: "ใส่แว่นตานิรภัยด้วย" },
+    { english: "The relay is clicking.", thai: "รีเลย์ทำงานแล้ว (มีเสียงดังคลิก)" },
+    { english: "Tighten the screws.", thai: "ขันสกรูให้แน่น" },
+    { english: "Clean the circuit board.", thai: "ทำความสะอาดแผงวงจร" },
+    { english: "Connect to the Wi-Fi module.", thai: "เชื่อมต่อกับโมดูลไวไฟ" },
+    { english: "Calculate the total power.", thai: "คำนวณกำลังไฟฟ้ารวม" },
+    { english: "Do you have a spare resistor?", thai: "มีตัวต้านทานสำรองไหม?" },
+    { english: "Apply some thermal paste.", thai: "ทาซิลิโคนระบายความร้อนหน่อย" },
+    { english: "The heat sink is very hot.", thai: "ฮีตซิงก์ร้อนมาก" },
+    { english: "Connect the inverter to the grid.", thai: "ต่ออินเวอร์เตอร์เข้ากับระบบไฟ" },
+    { english: "Test the off-grid system.", thai: "ทดสอบระบบออฟกริด" },
+    { english: "The solar charge controller is ready.", thai: "โซลาร์ชาร์จคอนโทรลเลอร์พร้อมทำงาน" },
+    { english: "Read the instruction manual.", thai: "อ่านคู่มือการใช้งาน" },
+    { english: "Assemble the robot parts.", thai: "ประกอบชิ้นส่วนหุ่นยนต์" },
+    { english: "Verify the pin configuration.", thai: "ตรวจสอบการต่อขาอุปกรณ์" },
+    { english: "Clear the workspace.", thai: "จัดพื้นที่ทำงานให้เรียบร้อย" },
+    { english: "Power on the system.", thai: "เปิดระบบไฟได้" }
+    { english: "Check the MPPT charge controller.", thai: "เช็คตัวควบคุมการชาร์จ MPPT" },
+    { english: "The lithium battery is full.", thai: "แบตเตอรี่ลิเธียมเต็มแล้ว" },
+    { english: "Connect the panels in series.", thai: "ต่อแผงโซลาร์เซลล์แบบอนุกรม" },
+    { english: "Measure the open circuit voltage.", thai: "วัดแรงดันวงจรเปิด" },
+    { english: "The off-grid system is running.", thai: "ระบบออฟกริดกำลังทำงาน" },
+    { english: "Turn on the hybrid inverter.", thai: "เปิดอินเวอร์เตอร์แบบไฮบริด" },
+    { english: "Check the DC breaker.", thai: "ตรวจสอบเบรกเกอร์ไฟกระแสตรง" },
+    { english: "The solar pump is working.", thai: "ปั๊มน้ำโซลาร์เซลล์กำลังทำงาน" },
+    { english: "Wire the battery bank correctly.", thai: "ต่อสายชุดแบตเตอรี่ให้ถูกต้อง" },
+    { english: "Connect the DC link.", thai: "เชื่อมต่อจุดเชื่อมโยงไฟกระแสตรง (DC Link)" },
+    { english: "Upload code to the microcontroller.", thai: "อัปโหลดโค้ดลงไมโครคอนโทรลเลอร์" },
+    { english: "Connect the servo motor.", thai: "ต่อสายเซอร์โวมอเตอร์" },
+    { english: "Read the ultrasonic sensor.", thai: "อ่านค่าจากเซ็นเซอร์อัลตราโซนิก" },
+    { english: "The robot is moving forward.", thai: "หุ่นยนต์กำลังเคลื่อนที่ไปข้างหน้า" },
+    { english: "Program the logic controller.", thai: "เขียนโปรแกรมควบคุมลอจิก" },
+    { english: "Adjust the sensor sensitivity.", thai: "ปรับความไวของเซ็นเซอร์" },
+    { english: "Check the motor driver.", thai: "ตรวจสอบโมดูลขับมอเตอร์" },
+    { english: "The infrared sensor is active.", thai: "เซ็นเซอร์อินฟราเรดทำงานแล้ว" },
+    { english: "Debug the source code.", thai: "ตรวจสอบและแก้ไขซอร์สโค้ด" },
+    { english: "Set up the remote control.", thai: "ตั้งค่าระบบควบคุมระยะไกล" },
+    { english: "Adjust the satellite dish angle.", thai: "ปรับมุมจานดาวเทียม" },
+    { english: "Connect the coaxial cable.", thai: "ต่อสายโคแอกเชียล" },
+    { english: "Check the signal strength.", thai: "เช็คความแรงของสัญญาณ" },
+    { english: "Turn on the receiver.", thai: "เปิดเครื่องรับสัญญาณ" },
+    { english: "Scan for missing channels.", thai: "สแกนค้นหาช่องที่หายไป" },
+    { english: "The picture is freezing.", thai: "ภาพบนหน้าจอค้าง" },
+    { english: "Update the firmware.", thai: "อัปเดตเฟิร์มแวร์" },
+    { english: "Secure the antenna pole.", thai: "ยึดเสาอากาศให้แน่น" },
+    { english: "Plug in the HDMI cable.", thai: "เสียบสาย HDMI" },
+    { english: "The display is out of range.", thai: "หน้าจอแสดงผลอยู่นอกขอบเขตสัญญาณ" },
+    { english: "Plug in the EV charger.", thai: "เสียบหัวชาร์จรถยนต์ไฟฟ้า" },
+    { english: "The TOU meter is recording.", thai: "มิเตอร์แบบ TOU กำลังบันทึกค่า" },
+    { english: "Monitor the power consumption.", thai: "ตรวจสอบการใช้พลังงานไฟฟ้า" },
+    { english: "Check the high voltage cable.", thai: "ตรวจสอบสายไฟแรงสูง" },
+    { english: "The charging station is ready.", thai: "สถานีชาร์จพร้อมใช้งาน" },
+    { english: "Disconnect the power grid.", thai: "ตัดการเชื่อมต่อจากระบบไฟการไฟฟ้า" },
+    { english: "Read the smart meter.", thai: "อ่านค่าจากสมาร์ทมิเตอร์" },
+    { english: "The battery management system is on.", thai: "ระบบจัดการแบตเตอรี่เปิดอยู่" },
+    { english: "Check the ground fault.", thai: "ตรวจสอบไฟรั่วลงดิน" },
+    { english: "Avoid the high voltage area.", thai: "หลีกเลี่ยงพื้นที่ไฟฟ้าแรงสูง" },
+    { english: "Desolder the microchip.", thai: "ดูดตะกั่วออกจากไมโครชิป" },
+    { english: "Test the continuity.", thai: "ทดสอบความต่อเนื่องของสายไฟ" },
+    { english: "The breadboard is full.", thai: "เบรดบอร์ดต่ออุปกรณ์เต็มแล้ว" },
+    { english: "Use the logic probe.", thai: "ใช้ลอจิกโพรบวัดสัญญาณ" },
+    { english: "Replace the damaged transistor.", thai: "เปลี่ยนทรานซิสเตอร์ที่ชำรุด" },
+    { english: "The circuit breaker tripped.", thai: "เบรกเกอร์ตัดวงจรแล้ว" },
+    { english: "Put away the soldering iron.", thai: "เก็บหัวแร้งบัดกรีให้เรียบร้อย" },
+    { english: "Check the power dissipation.", thai: "ตรวจสอบการสูญเสียพลังงาน" },
+    { english: "Isolate the faulty component.", thai: "แยกชิ้นส่วนที่เสียออกมา" },
+    { english: "Clean the soldering tip.", thai: "ทำความสะอาดปลายหัวแร้ง" },
+    { english: "Strip the wire carefully.", thai: "ปอกสายไฟอย่างระมัดระวัง" },
+    { english: "The voltage drop is too high.", thai: "แรงดันตกคร่อมสูงเกินไป" },
+    { english: "Match the impedance.", thai: "ปรับค่าอิมพีแดนซ์ให้ตรงกัน" },
+    { english: "Generate a sine wave.", thai: "สร้างสัญญาณรูปคลื่นไซน์" },
+    { english: "Check the frequency response.", thai: "ตรวจสอบการตอบสนองความถี่" },
+    { english: "The component is overheating.", thai: "อุปกรณ์มีความร้อนสูงเกินไป" },
+    { english: "Use a heat shrink tube.", thai: "ใช้ท่อหดหุ้มสายไฟ" },
+    { english: "Apply flux before soldering.", thai: "ทาฟลักซ์ก่อนทำการบัดกรี" },
+    { english: "Read the digital multimeter.", thai: "อ่านค่าจากดิจิตอลมัลติมิเตอร์" },
+    { english: "The output is unstable.", thai: "สัญญาณขาออกไม่เสถียร" },
+    { english: "Set the timer relay.", thai: "ตั้งค่าไทม์เมอร์รีเลย์" },
+    { english: "Bypass the faulty switch.", thai: "ต่อตรงข้ามสวิตช์ที่เสีย" },
+    { english: "Identify the color code.", thai: "ระบุรหัสสีตัวต้านทาน" },
+    { english: "Assemble the power supply.", thai: "ประกอบแหล่งจ่ายไฟ" },
+    { english: "The cooling fan is broken.", thai: "พัดลมระบายความร้อนเสีย" },
+    { english: "Insert the SD card.", thai: "ใส่เมมโมรี่การ์ด" },
+    { english: "Format the storage drive.", thai: "ฟอร์แมตหน่วยความจำ" },
+    { english: "Export the data log.", thai: "ส่งออกข้อมูลการบันทึก" },
+    { english: "The serial port is open.", thai: "พอร์ตอนุกรมเปิดอยู่" },
+    { english: "Configure the IP address.", thai: "ตั้งค่าหมายเลขไอพี" },
+    { english: "Connect to the local network.", thai: "เชื่อมต่อกับเครือข่ายภายใน" },
+    { english: "The transmission is successful.", thai: "การส่งข้อมูลสำเร็จ" },
+    { english: "Reset the factory settings.", thai: "คืนค่าการตั้งค่าจากโรงงาน" },
+    { english: "Calibrate the voltage meter.", thai: "ปรับเทียบเครื่องวัดแรงดันไฟ" },
+    { english: "Hold the test probe steady.", thai: "จับสายวัดโพรบให้เนิ่ง" },
+    { english: "Turn the potentiometer.", thai: "หมุนปรับตัวต้านทานปรับค่าได้" },
+    { english: "The current exceeds the limit.", thai: "กระแสไฟเกินขีดจำกัด" },
+    { english: "Engage the safety switch.", thai: "เปิดสวิตช์นิรภัย" },
+    { english: "Mount the component on the board.", thai: "ติดตั้งอุปกรณ์ลงบนแผงวงจร" },
+    { english: "Inspect the solder joints.", thai: "ตรวจสอบจุดบัดกรี" },
+    { english: "The analog signal is weak.", thai: "สัญญาณแอนะล็อกอ่อน" },
+    { english: "Convert DC to AC.", thai: "แปลงไฟกระแสตรงเป็นกระแสสลับ" },
+    { english: "Calculate the energy efficiency.", thai: "คำนวณประสิทธิภาพการใช้พลังงาน" },
+    { english: "The input voltage is low.", thai: "แรงดันไฟขาเข้าต่ำ" },
+    { english: "Discharge the capacitor first.", thai: "คายประจุตัวเก็บประจุก่อน" },
+    { english: "Wait for the system to boot.", thai: "รอให้ระบบเริ่มต้นทำงาน" },
+    { english: "Check for loose connections.", thai: "ตรวจสอบจุดเชื่อมต่อที่หลวม" },
+    { english: "Install the software driver.", thai: "ติดตั้งไดรเวอร์ซอฟต์แวร์" },
+    { english: "The logic gate is functioning.", thai: "ลอจิกเกตทำงานปกติ" },
+    { english: "Measure the pulse width.", thai: "วัดความกว้างของพัลส์" },
+    { english: "The step-down converter is ready.", thai: "วงจรลดแรงดันพร้อมใช้งาน" },
+    { english: "The step-up converter is ready.", thai: "วงจรเพิ่มแรงดันพร้อมใช้งาน" },
+    { english: "Monitor the battery temperature.", thai: "ตรวจสอบอุณหภูมิแบตเตอรี่" },
+    { english: "Keep the work area dry.", thai: "รักษาพื้นที่ทำงานให้แห้ง" },
+    { english: "Organize the tool box.", thai: "จัดระเบียบกล่องเครื่องมือ" },
+    { english: "Report the equipment damage.", thai: "รายงานความเสียหายของอุปกรณ์" },
+    { english: "Follow the safety guidelines.", thai: "ปฏิบัติตามคู่มือความปลอดภัย" },
+    { english: "Submit your lab report.", thai: "ส่งรายงานผลการทดลอง" },
+    { english: "Turn off all power sources.", thai: "ปิดแหล่งจ่ายไฟทั้งหมด" },
+    { english: "Lock the laboratory door.", thai: "ล็อคประตูห้องปฏิบัติการ" }
+    { english: "Check the main circuit breaker.", thai: "ตรวจสอบเบรกเกอร์หลัก" },
+    { english: "The transformer is humming.", thai: "หม้อแปลงมีเสียงหึ่งๆ" },
+    { english: "Measure the frequency of the AC.", thai: "วัดความถี่ของไฟฟ้ากระแสสลับ" },
+    { english: "Replace the burnt resistor.", thai: "เปลี่ยนตัวต้านทานที่ไหม้" },
+    { english: "Clean the optical sensor lens.", thai: "ทำความสะอาดเลนส์เซ็นเซอร์ออปติคอล" },
+    { english: "The stepper motor is stepping.", thai: "สเต็ปเปอร์มอเตอร์กำลังทำงานทีละสเต็ป" },
+    { english: "Check the encoder signals.", thai: "ตรวจสอบสัญญาณจากเอ็นโคเดอร์" },
+    { english: "Calibrate the weight scale sensor.", thai: "ปรับเทียบเซ็นเซอร์เครื่องชั่งน้ำหนัก" },
+    { english: "The display panel is flickering.", thai: "แผงหน้าจอกำลังกะพริบ" },
+    { english: "Connect the data logger.", thai: "เชื่อมต่อเครื่องบันทึกข้อมูล" },
+    { english: "Verify the logic level.", thai: "ตรวจสอบระดับลอจิก" },
+    { english: "The pull-up resistor is missing.", thai: "ตัวต้านทานแบบพูลอัพหายไป" },
+    { english: "Check the continuity of the track.", thai: "ตรวจสอบความต่อเนื่องของลายวงจร" },
+    { english: "The operational amplifier is stable.", thai: "ออปแอมป์ทำงานอย่างเสถียร" },
+    { english: "Adjust the gain of the amplifier.", thai: "ปรับอัตราขยายของแอมพลิฟายเออร์" },
+    { english: "Measure the ripple voltage.", thai: "วัดแรงดันริปเปิล" },
+    { english: "The switching regulator is active.", thai: "สวิตชิ่งเรกูเลเตอร์ทำงานอยู่" },
+    { english: "Check the diode bridge rectifier.", thai: "ตรวจสอบวงจรเรียงกระแสแบบบริดจ์ไดโอด" },
+    { english: "Isolate the power ground from logic ground.", thai: "แยกกราวด์กำลังออกจากกราวด์ลอจิก" },
+    { english: "The surge protector absorbed the spike.", thai: "อุปกรณ์ป้องกันไฟกระชากดูดซับแรงดันเกินแล้ว" },
+    { english: "Check the solar panel mounting brackets.", thai: "ตรวจสอบโครงยึดแผงโซลาร์เซลล์" },
+    { english: "The string inverter fault light is on.", thai: "ไฟแจ้งข้อผิดพลาดของสตริงอินเวอร์เตอร์ติดอยู่" },
+    { english: "Measure the short circuit current.", thai: "วัดกระแสไฟฟ้าลัดวงจร" },
+    { english: "Clean the dust off the solar modules.", thai: "ทำความสะอาดฝุ่นบนแผงโซลาร์เซลล์" },
+    { english: "The microinverter is synchronized.", thai: "ไมโครอินเวอร์เตอร์ซิงโครไนซ์แล้ว" },
+    { english: "Check the AC combiner box.", thai: "ตรวจสอบตู้รวมสัญญาณไฟฟ้ากระแสสลับ" },
+    { english: "The battery equalization is running.", thai: "ระบบปรับสมดุลแบตเตอรี่กำลังทำงาน" },
+    { english: "Measure the earth resistance.", thai: "วัดความต้านทานดิน" },
+    { english: "The lightning arrester is intact.", thai: "อุปกรณ์ป้องกันฟ้าผ่ายังปกติอยู่" },
+    { english: "Check the solar irradiance level.", thai: "ตรวจสอบระดับความเข้มแสงอาทิตย์" },
+    { english: "Program the microcontroller timer.", thai: "เขียนโปรแกรมตั้งเวลาไมโครคอนโทรลเลอร์" },
+    { english: "Read the analog input pin.", thai: "อ่านค่าจากขาอินพุตแอนะล็อก" },
+    { english: "The PWM signal controls the speed.", thai: "สัญญาณ PWM ควบคุมความเร็ว" },
+    { english: "Connect the Bluetooth module.", thai: "เชื่อมต่อโมดูลบลูทูธ" },
+    { english: "Check the I2C communication lines.", thai: "ตรวจสอบสายสื่อสาร I2C" },
+    { english: "The SPI interface is configured.", thai: "กำหนดค่าอินเทอร์เฟซ SPI เรียบร้อยแล้ว" },
+    { english: "Upload the bootloader.", thai: "อัปโหลดบูตโลเดอร์ลงบอร์ด" },
+    { english: "Test the push button switch.", thai: "ทดสอบสวิตช์ปุ่มกด" },
+    { english: "The buzzer sounds continuously.", thai: "ออดส่งเสียงดังต่อเนื่อง" },
+    { english: "Check the LCD contrast adjustment.", thai: "ตรวจสอบการปรับความคมชัดหน้าจอ LCD" },
+    { english: "Align the satellite dish precisely.", thai: "ปรับแนวรับจานดาวเทียมให้แม่นยำ" },
+    { english: "Check the LNB dual output.", thai: "ตรวจสอบหัวรับสัญญาณ LNB แบบสองขั้ว" },
+    { english: "The signal quality is excellent.", thai: "คุณภาพสัญญาณยอดเยี่ยมมาก" },
+    { english: "Replace the damaged coaxial connector.", thai: "เปลี่ยนหัวต่อโคแอกเชียลที่ชำรุด" },
+    { english: "Scan the transponder frequency.", thai: "สแกนความถี่ทรานสปอนเดอร์" },
+    { english: "The set-top box needs an update.", thai: "กล่องรับสัญญาณต้องการการอัปเดต" },
+    { english: "Check the RF modulator output.", thai: "ตรวจสอบสัญญาณออกของตัวมอดูเลต RF" },
+    { english: "Secure the cable ties tightly.", thai: "รัดเคเบิลไทร์ให้แน่นหนา" },
+    { english: "The television displays no signal.", thai: "โทรทัศน์แสดงข้อความไม่มีสัญญาณ" },
+    { english: "Adjust the antenna elevation angle.", thai: "ปรับมุมเงยของเสาอากาศ" },
+    { english: "Plug the EV into the wall box.", thai: "เสียบรถยนต์ไฟฟ้าเข้ากับเครื่องชาร์จติดผนัง" },
+    { english: "The charging session has started.", thai: "เริ่มต้นช่วงเวลาการชาร์จแล้ว" },
+    { english: "Check the vehicle inlet pins.", thai: "ตรวจสอบขาต่อตัวรับไฟของรถยนต์" },
+    { english: "The smart meter data is updated.", thai: "ข้อมูลจากสมาร์ทมิเตอร์ได้รับการอัปเดตแล้ว" },
+    { english: "Monitor the peak load hours.", thai: "ตรวจสอบช่วงเวลาการใช้ไฟฟ้าสูงสุด" },
+    { english: "The TOU tariff rate is active.", thai: "อัตราค่าไฟฟ้าตามช่วงเวลา (TOU) มีผลใช้งานอยู่" },
+    { english: "Inspect the high voltage insulation.", thai: "ตรวจสอบฉนวนไฟฟ้าแรงสูง" },
+    { english: "The EV battery management system reports normal.", thai: "ระบบจัดการแบตเตอรี่รถยนต์รายงานว่าปกติ" },
+    { english: "Disconnect the charger safely.", thai: "ถอดสายชาร์จอย่างปลอดภัย" },
+    { english: "Check the emergency stop button.", thai: "ตรวจสอบปุ่มหยุดฉุกเฉิน" },
+    { english: "Wear an anti-static wrist strap.", thai: "สวมสายรัดข้อมือป้องกันไฟฟ้าสถิต" },
+    { english: "Store components in ESD bags.", thai: "เก็บอุปกรณ์ในถุงป้องกันไฟฟ้าสถิต" },
+    { english: "Check the PCB for solder bridges.", thai: "ตรวจสอบแผงวงจรว่ามีตะกั่วลัดขาชิดกันไหม" },
+    { english: "Use a magnifying glass for inspection.", thai: "ใช้แว่นขยายช่วยในการตรวจสอบ" },
+    { english: "The surface mount device is aligned.", thai: "อุปกรณ์ยึดผิวหน้า (SMD) วางตรงตำแหน่งแล้ว" },
+    { english: "Test the transistor with a multimeter.", thai: "ทดสอบทรานซิสเตอร์ด้วยมัลติมิเตอร์" },
+    { english: "The zener diode regulates the voltage.", thai: "ซีเนอร์ไดโอดทำหน้าที่ควบคุมแรงดัน" },
+    { english: "Check the potentiometer resistance range.", thai: "ตรวจสอบช่วงความต้านทานของวอลุ่มปรับค่า" },
+    { english: "The inductor stores magnetic energy.", thai: "ตัวเหนี่ยวนำทำหน้าที่เก็บพลังงานแม่เหล็ก" },
+    { english: "Replace the blown thermal fuse.", thai: "เปลี่ยนฟิวส์ความร้อนที่ขาด" },
+    { english: "Calibrate the digital oscilloscope.", thai: "ปรับเทียบออสซิลโลสโคปดิจิทัล" },
+    { english: "Measure the phase angle.", thai: "วัดมุมเฟสของกระแสและแรงดัน" },
+    { english: "The power factor needs improvement.", thai: "ตัวประกอบกำลังไฟฟ้าต้องได้รับการปรับปรุง" },
+    { english: "Check the harmonic distortion.", thai: "ตรวจสอบความเพี้ยนฮาร์มอนิกในระบบ" },
+    { english: "The grounding system is verified.", thai: "ระบบต่อลงดินได้รับการตรวจสอบยืนยันแล้ว" },
+    { english: "Isolate the circuit before maintenance.", thai: "ตัดวงจรก่อนทำการซ่อมบำรุงทุกครั้ง" },
+    { english: "Check the cable insulation resistance.", thai: "ตรวจสอบความต้านทานฉนวนของสายไฟ" },
+    { english: "The relay coil is energized.", thai: "ขดลวดรีเลย์ได้รับพลังงานแล้ว" },
+    { english: "Test the normally open contact.", thai: "ทดสอบหน้าสัมผัสแบบปกติเปิด (NO)" },
+    { english: "Test the normally closed contact.", thai: "ทดสอบหน้าสัมผัสแบบปกติปิด (NC)" },
+    { english: "Reset the overload protection relay.", thai: "รีเซ็ตรีเลย์ป้องกันการ overload" },
+    { english: "Check the pneumatic valve operation.", thai: "ตรวจสอบการทำงานของวาล์วลม" },
+    { english: "The pneumatic cylinder extends fully.", thai: "กระบอกสูบลมยืดออกสุดระยะ" },
+    { english: "Adjust the air pressure regulator.", thai: "ปรับตัวควบคุมความดันลม" },
+    { english: "Clean the air filter unit.", thai: "ทำความสะอาดชุดกรองอากาศ" },
+    { english: "Check the water pump flow rate.", thai: "ตรวจสอบอัตราการไหลของปั๊มน้ำ" },
+    { english: "The water level sensor is triggered.", thai: "เซ็นเซอร์ระดับน้ำทำงานแล้ว" },
+    { english: "Prime the water pump before starting.", thai: "ล่อน้ำในปั๊มก่อนเริ่มเดินเครื่อง" },
+    { english: "Check the pipe connections for leaks.", thai: "ตรวจสอบการรั่วซึมที่ข้อต่อท่อ" },
+    { english: "The drainage system is clear.", thai: "ระบบระบายน้ำไม่มีสิ่งกีดขวาง" },
+    { english: "Log the experimental data accurately.", thai: "บันทึกข้อมูลการทดลองอย่างแม่นยำ" },
+    { english: "Review the safety instruction manual.", thai: "ทบทวนคู่มือคำแนะนำด้านความปลอดภัย" },
+    { english: "Clean up the workbench after testing.", thai: "ทำความสะอาดโต๊ะปฏิบัติงานหลังทดสอบเสร็จ" },
+    { english: "Return tools to the designated cabinet.", thai: "เก็บเครื่องมือเข้าตู้ที่กำหนดไว้" },
+    { english: "Report any faulty equipment immediately.", thai: "รายงานอุปกรณ์ที่ชำรุดทันที" },
+    { english: "Turn off the main power switch.", thai: "ปิดสวิตช์ไฟเมนหลัก" },
+    { english: "Secure all equipment before leaving.", thai: "เก็บรักษาอุปกรณ์ทุกชิ้นให้เรียบร้อยก่อนกลับ" },
+    { english: "Lock the storage room door.", thai: "ล็อกประตูห้องเก็บของ" },
+    { english: "The practical session is finished.", thai: "เสร็จสิ้นคาบปฏิบัติการแล้ว" },
+    { english: "Have a great day in the electronics lab.", thai: "ขอให้มีความสุขกับการเรียนปฏิบัติการอิเล็กทรอนิกส์" }
+    { english: "Form groups of three for this experiment.", thai: "จัดกลุ่มละสามคนสำหรับการทดลองนี้" },
+{ english: "Write down the objective of the experiment.", thai: "เขียนวัตถุประสงค์ของการทดลองลงไป" },
+{ english: "Do not turn on the main breaker without my permission.", thai: "ห้ามเปิดเบรกเกอร์เมนก่อนได้รับอนุญาตจากครู" },
+{ english: "Show me your circuit layout before testing.", thai: "เอาวงจรมาให้ครูตรวจก่อนทำการทดสอบ" },
+{ english: "Record the measured data in your lab book.", thai: "บันทึกข้อมูลที่วัดได้ลงในสมุดปฏิบัติการ" },
+{ english: "Did you calculate the theoretical value?", thai: "พวกเธอได้คำนวณค่าทางทฤษฎีไว้หรือเปล่า?" },
+{ english: "Compare the measured value with the calculated one.", thai: "เปรียบเทียบค่าที่วัดได้กับค่าที่คำนวณไว้" },
+{ english: "Turn on the exhaust fan to remove solder smoke.", thai: "เปิดพัดลมดูดอากาศเพื่อระบายควันตะกั่ว" },
+{ english: "Where is the fire extinguisher located?", thai: "ถังดับเพลิงประจำห้องอยู่ตรงไหน?" },
+{ english: "Wash your hands thoroughly after handling lead.", thai: "ล้างมือให้สะอาดหลังจากจับตะกั่วบัดกรี" },
+{ english: "Use the desoldering pump to remove excess solder.", thai: "ใช้ที่ดูดตะกั่วเอาตะกั่วส่วนเกินออก" },
+{ english: "This is a cold solder joint, please redo it.", thai: "นี่มันรอยบัดกรีเย็น บัดกรีจุดนี้ใหม่เลย" },
+{ english: "Tin the soldering iron tip before you start.", thai: "เคลือบปลายหัวแร้งด้วยตะกั่วก่อนเริ่มงาน" },
+{ english: "Cut the excess component leads with side cutters.", thai: "ใช้คีมตัด ตัดขาอุปกรณ์ส่วนที่ยาวเกินออกด้วย" },
+{ english: "Clean the flux residue with isopropyl alcohol.", thai: "ทำความสะอาดคราบฟลักซ์ด้วยแอลกอฮอล์" },
+{ english: "Drill the holes carefully on the printed circuit board.", thai: "เจาะรูบนแผ่นปรินต์อย่างระมัดระวัง" },
+{ english: "Etch the copper board in the acid solution.", thai: "กัดแผ่นทองแดงในน้ำยากัดปรินต์" },
+{ english: "Do not inhale the toxic soldering fumes.", thai: "อย่าสูดดมควันพิษจากการบัดกรี" },
+{ english: "Apply even heat to both the pad and the pin.", thai: "ให้ความร้อนที่จุดแผ่นวงจรและขาอุปกรณ์ให้สม่ำเสมอ" },
+{ english: "Use a damp sponge to wipe the soldering iron.", thai: "ใช้ฟองน้ำหมาดๆ เช็ดทำความสะอาดหัวแร้ง" },
+{ english: "Identify the base, collector, and emitter pins.", thai: "ระบุตำแหน่งขาเบส คอลเล็กเตอร์ และอิมิตเตอร์" },
+{ english: "Check the polarity of the electrolytic capacitor before inserting.", thai: "ตรวจสอบขั้วของตัวเก็บประจุแบบอิเล็กโทรไลต์ก่อนเสียบ" },
+{ english: "Insert the integrated circuit into the IC socket gently.", thai: "ค่อยๆ เสียบไอซีลงในซ็อกเก็ต" },
+{ english: "Bend the resistor legs properly to fit the board.", thai: "ดัดขาตัวต้านทานให้ได้ฉากพอดีกับรูบอร์ด" },
+{ english: "Wire the push button with a pull-down resistor.", thai: "ต่อสวิตช์ปุ่มกดร่วมกับตัวต้านทานแบบพูลดาวน์" },
+{ english: "The 555 timer is wired as an astable multivibrator.", thai: "ไอซีไทม์เมอร์ 555 ตัวนี้ถูกต่อเป็นวงจรอะสเตเบิลมัลติไวเบรเตอร์" },
+{ english: "Measure the voltage dropping across the load.", thai: "วัดแรงดันที่ตกคร่อมโหลด" },
+{ english: "Calculate the current using Ohm's law.", thai: "คำนวณหากระแสไฟฟ้าโดยใช้กฎของโอห์ม" },
+{ english: "Connect the primary winding to the AC mains.", thai: "ต่อขดลวดปฐมภูมิเข้ากับไฟบ้าน" },
+{ english: "Measure the secondary voltage of the transformer.", thai: "วัดแรงดันไฟฟ้าทุติยภูมิของหม้อแปลง" },
+{ english: "Use different colors of jumper wires to avoid confusion.", thai: "ใช้สายจัมเปอร์สีต่างๆ กันเพื่อป้องกันการสับสน" },
+{ english: "Keep the breadboard wiring neat and flat.", thai: "จัดสายไฟบนเบรดบอร์ดให้เป็นระเบียบและแนบไปกับบอร์ด" },
+{ english: "Do not insert wires that are too thick into the breadboard.", thai: "อย่าเสียบสายไฟที่เส้นใหญ่เกินไปลงในเบรดบอร์ด" },
+{ english: "Connect the top and bottom power rails together.", thai: "ต่อเส้นจ่ายไฟ (Power rails) ด้านบนกับด้านล่างเข้าด้วยกัน" },
+{ english: "The jumper connection on row ten is loose.", thai: "จุดต่อสายไฟที่แถวสิบมันหลวม" },
+{ english: "Trace the signal from the input stage to the output stage.", thai: "ไล่เช็คสัญญาณจากภาคอินพุตไปจนถึงภาคเอาต์พุต" },
+{ english: "Use a decoupling capacitor close to the IC.", thai: "ใช้ตัวเก็บประจุดีคัปปลิงต่อไว้ใกล้ๆ กับตัวไอซี" },
+{ english: "Avoid crossing jumper wires directly over the IC chips.", thai: "หลีกเลี่ยงการเดินสายไฟพาดข้ามตัวไอซี" },
+{ english: "Check if the jumper wire is broken internally.", thai: "เช็คดูว่าสายจัมเปอร์ขาดในหรือเปล่า" },
+{ english: "Push the component firmly into the breadboard holes.", thai: "กดตัวอุปกรณ์ลงในรูเบรดบอร์ดให้แน่น" },
+{ english: "Set the function generator to exactly 1 kilohertz.", thai: "ตั้งค่าเครื่องกำเนิดสัญญาณไปที่ 1 กิโลเฮิรตซ์พอดี" },
+{ english: "Select the square wave form on the generator.", thai: "เลือกรูปแบบสัญญาณคลื่นสี่เหลี่ยมบนเครื่องกำเนิดสัญญาณ" },
+{ english: "Adjust the amplitude to 5 volts peak-to-peak.", thai: "ปรับความแรงสัญญาณเป็น 5 โวลต์พีกทูพีก" },
+{ english: "Connect the oscilloscope probe to test point A.", thai: "ต่อสายโพรบออสซิลโลสโคปเข้ากับจุดทดสอบ A" },
+{ english: "Adjust the time per division knob.", thai: "ปรับลูกบิดฐานเวลา (Time/div)" },
+{ english: "Change the volt per division setting for channel one.", thai: "เปลี่ยนค่าโวลต์ต่อช่อง (Volt/div) สำหรับแชนเนลที่ 1" },
+{ english: "Make sure the probe switch is set to 10X attenuation.", thai: "ตรวจดูให้แน่ใจว่าสวิตช์โพรบตั้งไว้ที่ลดทอน 10 เท่า" },
+{ english: "Zero the analog ohmmeter before measuring.", thai: "ปรับเซ็ตซีโร่ (Zero Adjust) โอห์มมิเตอร์แบบเข็มก่อนทำการวัด" },
+{ english: "Do not measure resistance while the circuit is powered.", thai: "ห้ามวัดความต้านทานขณะที่วงจรยังมีไฟจ่ายอยู่" },
+{ english: "Use the max/min tracking function on the multimeter.", thai: "ใช้ฟังก์ชันติดตามค่าสูงสุด/ต่ำสุดบนมัลติมิเตอร์" },
+{ english: "Check the baud rate setting in the serial monitor.", thai: "ตรวจสอบการตั้งค่าอัตราการรับส่งข้อมูล (Baud rate) ในซีเรียลมอนิเตอร์" },
+{ english: "Declare the global variables before the setup function.", thai: "ประกาศตัวแปรโกลบอลก่อนถึงฟังก์ชัน setup" },
+{ english: "Set digital pin 13 as an output.", thai: "กำหนดให้ขาดิจิทัล 13 ทำหน้าที่เป็นเอาต์พุต" },
+{ english: "The while loop is not terminating as expected.", thai: "ลูป while ทำงานไม่ยอมหยุดตามที่คาดไว้ (ติดลูปอนันต์)" },
+{ english: "Check for missing semicolons or syntax errors in your code.", thai: "ตรวจสอบเซมิโคลอนที่หายไปหรือข้อผิดพลาดทางไวยากรณ์ในโค้ด" },
+{ english: "Connect the relay module logic pin to the microcontroller.", thai: "ต่อขาสัญญาณของโมดูลรีเลย์เข้ากับไมโครคอนโทรลเลอร์" },
+{ english: "Map the analog sensor values to a range of 0 to 255.", thai: "แปลงช่วงค่าแอนะล็อกจากเซ็นเซอร์ให้อยู่ในช่วง 0 ถึง 255" },
+{ english: "Include the correct library for the I2C LCD display.", thai: "เรียกใช้ไลบรารีให้ถูกต้องสำหรับจอแสดงผล LCD แบบ I2C" },
+{ english: "Wire the matrix keypad columns and rows to the digital pins.", thai: "ต่อสายคอลัมน์และแถวของคีย์แพดแบบเมทริกซ์เข้ากับขาดิจิทัล" },
+{ english: "Make sure the ground is common between all connected boards.", thai: "ตรวจสอบให้แน่ใจว่าได้ต่อกราวด์ร่วมกันระหว่างบอร์ดทั้งหมดที่เชื่อมต่ออยู่" },
+{ english: "Measure the starting current of the induction motor.", thai: "วัดกระแสกระชากขณะสตาร์ทของมอเตอร์เหนี่ยวนำ" },
+{ english: "The motor is running in the reverse direction.", thai: "มอเตอร์กำลังหมุนกลับทิศทาง" },
+{ english: "Swap any two phases to reverse the motor rotation.", thai: "สลับเฟสคู่ใดคู่หนึ่งเพื่อเปลี่ยนทิศทางการหมุนของมอเตอร์" },
+{ english: "Check the datasheet for the component's maximum current rating.", thai: "ตรวจสอบกระแสสูงสุดที่อุปกรณ์รองรับได้จากดาต้าชีต" },
+{ english: "Install a flyback diode in parallel with the DC motor.", thai: "ติดตั้งไดโอดฟลายแบ็กขนานคร่อมกับมอเตอร์กระแสตรง" },
+{ english: "The power supply is operating in constant current mode.", thai: "พาวเวอร์ซัพพลายกำลังทำงานอยู่ในโหมดจำกัดกระแสคงที่" },
+{ english: "Set the power supply current limit to exactly 2 amps.", thai: "ตั้งค่าจำกัดกระแสของแหล่งจ่ายไฟไว้ที่ 2 แอมป์" },
+{ english: "Use a thicker gauge wire for the high current path.", thai: "ใช้สายไฟเบอร์ใหญ่ขึ้นสำหรับเส้นทางที่มีกระแสไหลสูง" },
+{ english: "Monitor the operating temperature of the voltage regulator IC.", thai: "คอยสังเกตอุณหภูมิการทำงานของไอซีเรกูเลเตอร์" },
+{ english: "The buck converter steps down the voltage very efficiently.", thai: "วงจรบั๊กคอนเวอร์เตอร์ทำหน้าที่ลดระดับแรงดันไฟฟ้าได้อย่างมีประสิทธิภาพสูง" },
+{ english: "Perform a thorough visual inspection of the board first.", thai: "ทำการตรวจดูแผงวงจรด้วยสายตาอย่างละเอียดก่อนเป็นอันดับแรก" },
+{ english: "Smell the circuit board to check for burnt components.", thai: "ลองดมกลิ่นแผงวงจรดูว่ามีอุปกรณ์ตัวไหนไหม้หรือไม่" },
+{ english: "Touch the IC gently with your finger to see if it is unusually hot.", thai: "ใช้นิ้วแตะที่ตัวไอซีเบาๆ เพื่อดูว่ามันร้อนผิดปกติไหม" },
+{ english: "Check if the power supply voltage drops when loaded.", thai: "เช็คดูว่าแรงดันซัพพลายตกไหมเมื่อต่อโหลดเข้าไป" },
+{ english: "Replace the dead batteries in the testing equipment.", thai: "เปลี่ยนแบตเตอรี่ที่หมดแล้วในเครื่องมือวัด" },
+{ english: "The multimeter test leads are faulty or broken internally.", thai: "สายวัดของมัลติมิเตอร์มีปัญหาหรือขาดใน" },
+{ english: "Simulate the circuit using Proteus or Multisim first.", thai: "จำลองการทำงานของวงจรในโปรแกรม Proteus หรือ Multisim ก่อน" },
+{ english: "Isolate the power supply section from the main circuit.", thai: "แยกภาคจ่ายไฟออกจากวงจรหลักเพื่อแยกจุดวิเคราะห์" },
+{ english: "Look closely for micro-cracks on the PCB copper traces.", thai: "มองหารอยร้าวเล็กๆ บนลายทองแดงของแผงวงจร" },
+{ english: "Test the toggle switch with the continuity beeper mode.", thai: "ทดสอบสวิตช์โยกด้วยโหมดเสียงเตือนความต่อเนื่อง" },
+{ english: "Terminate the CAN bus network with a 120-ohm resistor.", thai: "ปิดท้ายสายเครือข่าย CAN bus ด้วยตัวต้านทาน 120 โอห์ม" },
+{ english: "Verify the RS485 differential communication lines.", thai: "ตรวจสอบสายสื่อสารความแตกต่าง (A/B) ของ RS485" },
+{ english: "Flash the new firmware to the board via the USB port.", thai: "แฟลชเฟิร์มแวร์เวอร์ชันใหม่ลงบอร์ดผ่านพอร์ต USB" },
+{ english: "Pair the Bluetooth module with your smartphone.", thai: "จับคู่โมดูลบลูทูธเข้ากับสมาร์ทโฟนของนักเรียน" },
+{ english: "The RFID reader module is not scanning the key tag.", thai: "โมดูลเครื่องอ่าน RFID ไม่ยอมสแกนแท็กพวงกุญแจ" },
+{ english: "Mount the proximity sensor securely on the metal bracket.", thai: "ติดตั้งพร็อกซิมิตี้เซ็นเซอร์บนโครงยึดเหล็กให้แน่น" },
+{ english: "Configure the local router for port forwarding.", thai: "ตั้งค่าเราเตอร์ภายในเครือข่ายสำหรับการทำพอร์ตฟอร์เวิร์ด" },
+{ english: "Check the MAC address assigned to the Ethernet shield.", thai: "ตรวจสอบหมายเลขแมคแอดเดรสของอีเทอร์เน็ตชิลด์" },
+{ english: "The cloud server is receiving the MQTT payload correctly.", thai: "คลาวด์เซิร์ฟเวอร์กำลังรับชุดข้อมูล MQTT ได้อย่างถูกต้อง" },
+{ english: "Wire the load cell sensor to the HX711 amplifier module.", thai: "ต่อสายเซ็นเซอร์โหลดเซลล์เข้ากับโมดูลขยายสัญญาณ HX711" },
+{ english: "Please sign your name on the equipment checkout sheet.", thai: "กรุณาเซ็นชื่อในใบเบิกอุปกรณ์ปฏิบัติการด้วย" },
+{ english: "Who is the appointed group leader for today?", thai: "ใครเป็นหัวหน้ากลุ่มที่ได้รับมอบหมายสำหรับวันนี้?" },
+{ english: "Help your classmates if they are stuck on a step.", thai: "ช่วยเหลือเพื่อนในห้องด้วยถ้าพวกเขาติดขัดในขั้นตอนไหน" },
+{ english: "Draw the complete circuit diagram on the whiteboard.", thai: "วาดผังวงจรฉบับสมบูรณ์ลงบนกระดานไวท์บอร์ด" },
+{ english: "Do not bring any food, snacks, or drinks into the lab.", thai: "ห้ามนำอาหาร ขนม หรือเครื่องดื่มใดๆ เข้ามาในห้องปฏิบัติการ" },
+{ english: "Ensure the machine chassis is properly grounded.", thai: "ตรวจสอบให้แน่ใจว่าโครงเครื่องจักรต่อสายดินเรียบร้อยแล้ว" },
+{ english: "Uncoil the extension cord completely before plugging high loads.", thai: "คลายสายไฟต่อพ่วงแบบม้วนออกให้หมดก่อนเสียบใช้งานกับโหลดที่กินไฟสูง" },
+{ english: "Keep your long hair tied back while operating rotating machines.", thai: "มัดผมที่ยาวให้เรียบร้อยขณะใช้งานเครื่องจักรที่มีจุดหมุน" },
+{ english: "Review your lab notes for the final practical examination.", thai: "ทบทวนสมุดจดบันทึกของเธอสำหรับการสอบปฏิบัติปลายภาค" },
+{ english: "Let's summarize the key points we learned today.", thai: "มาสรุปประเด็นสำคัญที่เราได้เรียนรู้กันในวันนี้เถอะ" }  
+        // วางข้อมูลข้อสอบข้อที่ 21-300 ต่อลงมาตรงนี้ได้เลยครับ
         ];
+
+        // ตัวแปรใหม่สำหรับตั้งค่าจำนวนข้อที่จะให้สุ่ม และเก็บข้อสอบที่สุ่มมาแล้ว
+        const NUM_QUESTIONS_TO_PLAY = 20;
+        let activeQuestions = []; 
 
         let currentQuestion = 0;
         let totalScore = 0;
@@ -240,6 +595,17 @@
         let timeLeft = 10;
         let isRunning = false;
 
+        // ฟังก์ชันสำหรับสับเปลี่ยนและสุ่มข้อสอบ
+        function getRandomQuestions(sourceArray, numItems) {
+            let shuffled = [...sourceArray];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            // ป้องกันกรณีที่คลังข้อสอบมีน้อยกว่าจำนวนที่ต้องการสุ่ม
+            return shuffled.slice(0, Math.min(numItems, shuffled.length));
+        }
+
         window.onload = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -249,7 +615,6 @@
             }
 
             recognition = new SpeechRecognition();
-            // ปรับเป็นภาษาอังกฤษ (สหรัฐอเมริกา)
             recognition.lang = 'en-US'; 
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
@@ -260,7 +625,8 @@
                 clearInterval(countdownInterval);
 
                 const speechResult = event.results[0][0].transcript;
-                const target = questions[currentQuestion].english; // ดึงค่าจาก key "english"
+                // เปลี่ยนไปดึงคำศัพท์จาก activeQuestions ที่สุ่มมาแล้ว
+                const target = activeQuestions[currentQuestion].english; 
                 const score = similarity(target, speechResult);
 
                 document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
@@ -268,7 +634,7 @@
                 totalScore += score;
                 document.getElementById("totalScore").innerHTML = totalScore;
 
-                if (score >= 80) { // เกณฑ์ผ่านรายข้อ
+                if (score >= 80) { 
                     passCount++;
                     document.getElementById("passCount").innerHTML = passCount;
                     document.getElementById("status").innerHTML = "PASS ✅";
@@ -280,8 +646,11 @@
                     document.getElementById("status").className = "status fail";
                 }
 
-                setTimeout(nextQuestion, 2000); // หน่วงเวลาให้เด็กเห็นผลลัพธ์นานขึ้นนิดนึง
+                setTimeout(nextQuestion, 2000);
             };
+
+            // สร้างชุดข้อสอบสุ่ม 20 ข้อ ก่อนเริ่มโหลดข้อแรก
+            activeQuestions = getRandomQuestions(questionBank, NUM_QUESTIONS_TO_PLAY);
 
             loadQuestion(0);
             monitorMachine(); 
@@ -314,9 +683,10 @@
         // 4. ระบบดำเนินข้อสอบ และตัดสินผล
         // ======================================
         function loadQuestion(index) {
-            document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${questions.length}`;
-            document.getElementById("englishText").innerHTML = questions[index].english; // ใช้ key "english"
-            document.getElementById("thaiText").innerHTML = questions[index].thai;
+            // อ้างอิงความยาวและข้อมูลจาก activeQuestions แทน
+            document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${activeQuestions.length}`;
+            document.getElementById("englishText").innerHTML = activeQuestions[index].english; 
+            document.getElementById("thaiText").innerHTML = activeQuestions[index].thai;
             document.getElementById("countdown").innerHTML = "10";
             
             document.getElementById("score").innerHTML = "0%";
@@ -360,7 +730,8 @@
 
         function nextQuestion() {
             currentQuestion++;
-            if (currentQuestion >= questions.length) {
+            // เช็คว่าหมดข้อสอบที่สุ่มมา 20 ข้อหรือยัง
+            if (currentQuestion >= activeQuestions.length) {
                 evaluateFinalResult();
             } else {
                 loadQuestion(currentQuestion);
@@ -393,7 +764,6 @@
         // 5. ตัวช่วยคำนวณและบันทึกข้อมูล
         // ======================================
         function similarity(s1, s2) {
-            // แปลงเป็นตัวพิมพ์เล็กทั้งหมด และตัดเครื่องหมายวรรคตอนภาษาอังกฤษออก เพื่อให้เปรียบเทียบคำได้แม่นยำขึ้น
             s1 = s1.toLowerCase().replace(/[.,!?\s]/g, "");
             s2 = s2.toLowerCase().replace(/[.,!?\s]/g, "");
             
