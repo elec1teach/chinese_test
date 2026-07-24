@@ -159,7 +159,8 @@
 
         <div class="main-grid">
             <div class="sentence-box glass">
-                <div class="question-number" id="questionNumber">ข้อที่ 1 / 20</div>
+                <!-- แก้ไข UI ส่วนนี้ให้สอดคล้องกับข้อสอบ 5 ข้อ -->
+                <div class="question-number" id="questionNumber">ข้อที่ 1 / 5</div>
                 <div class="english-text" id="englishText">Check the voltage.</div>
                 <div class="thai-text" id="thaiText">เช็คแรงดันไฟหน่อย</div>
                 <div class="countdown-wrapper">
@@ -190,7 +191,9 @@
         // 1. ตั้งค่า API และ Firebase
         // ======================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
-        const PASS_REQUIREMENT = 10; 
+        
+        // แก้ไข 1: เปลี่ยนเกณฑ์การผ่านจาก 10 เป็น 3
+        const PASS_REQUIREMENT = 3; 
 
         const firebaseConfig = {
            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
@@ -259,48 +262,11 @@
             { english: "Measure the AC voltage.", thai: "วัดแรงดันไฟกระแสสลับ" },
             { english: "Press the reset button.", thai: "กดปุ่มรีเซ็ต" },
             { english: "Upload the code to the board.", thai: "อัปโหลดโค้ดลงบอร์ด" },
-            { english: "The inverter is showing an error.", thai: "อินเวอร์เตอร์แจ้งข้อผิดพลาด" },
-            { english: "Check the battery voltage.", thai: "เช็คแรงดันแบตเตอรี่" },
-            { english: "Wear safety glasses.", thai: "ใส่แว่นตานิรภัยด้วย" },
-            { english: "The relay is clicking.", thai: "รีเลย์ทำงานแล้ว (มีเสียงดังคลิก)" },
-            { english: "Tighten the screws.", thai: "ขันสกรูให้แน่น" },
-            { english: "Clean the circuit board.", thai: "ทำความสะอาดแผงวงจร" },
-            { english: "Connect to the Wi-Fi module.", thai: "เชื่อมต่อกับโมดูลไวไฟ" },
-            { english: "Calculate the total power.", thai: "คำนวณกำลังไฟฟ้ารวม" },
-            { english: "Do you have a spare resistor?", thai: "มีตัวต้านทานสำรองไหม?" },
-            { english: "Apply some thermal paste.", thai: "ทาซิลิโคนระบายความร้อนหน่อย" },
-            { english: "The heat sink is very hot.", thai: "ฮีตซิงก์ร้อนมาก" },
-            { english: "Connect the inverter to the grid.", thai: "ต่ออินเวอร์เตอร์เข้ากับระบบไฟ" },
-            { english: "Test the off-grid system.", thai: "ทดสอบระบบออฟกริด" },
-            { english: "The solar charge controller is ready.", thai: "โซลาร์ชาร์จคอนโทรลเลอร์พร้อมทำงาน" },
-            { english: "Read the instruction manual.", thai: "อ่านคู่มือการใช้งาน" },
-            { english: "Assemble the robot parts.", thai: "ประกอบชิ้นส่วนหุ่นยนต์" },
-            { english: "Verify the pin configuration.", thai: "ตรวจสอบการต่อขาอุปกรณ์" },
-            { english: "Clear the workspace.", thai: "จัดพื้นที่ทำงานให้เรียบร้อย" },
-            { english: "Power on the system.", thai: "เปิดระบบไฟได้" },
-            { english: "Check the MPPT charge controller.", thai: "เช็คตัวควบคุมการชาร์จ MPPT" },
-            { english: "The lithium battery is full.", thai: "แบตเตอรี่ลิเธียมเต็มแล้ว" },
-            { english: "Connect the panels in series.", thai: "ต่อแผงโซลาร์เซลล์แบบอนุกรม" },
-            { english: "Measure the open circuit voltage.", thai: "วัดแรงดันวงจรเปิด" },
-            { english: "The off-grid system is running.", thai: "ระบบออฟกริดกำลังทำงาน" },
-            { english: "Turn on the hybrid inverter.", thai: "เปิดอินเวอร์เตอร์แบบไฮบริด" },
-            { english: "Check the DC breaker.", thai: "ตรวจสอบเบรกเกอร์ไฟกระแสตรง" },
-            { english: "The solar pump is working.", thai: "ปั๊มน้ำโซลาร์เซลล์กำลังทำงาน" },
-            { english: "Wire the battery bank correctly.", thai: "ต่อสายชุดแบตเตอรี่ให้ถูกต้อง" },
-            { english: "Connect the DC link.", thai: "เชื่อมต่อจุดเชื่อมโยงไฟกระแสตรง (DC Link)" },
-            { english: "Upload code to the microcontroller.", thai: "อัปโหลดโค้ดลงไมโครคอนโทรลเลอร์" },
-            { english: "Connect the servo motor.", thai: "ต่อสายเซอร์โวมอเตอร์" },
-            { english: "Read the ultrasonic sensor.", thai: "อ่านค่าจากเซ็นเซอร์อัลตราโซนิก" },
-            { english: "The robot is moving forward.", thai: "หุ่นยนต์กำลังเคลื่อนที่ไปข้างหน้า" },
-            { english: "Program the logic controller.", thai: "เขียนโปรแกรมควบคุมลอจิก" },
-            { english: "Adjust the sensor sensitivity.", thai: "ปรับความไวของเซ็นเซอร์" },
-            { english: "Check the motor driver.", thai: "ตรวจสอบโมดูลขับมอเตอร์" },
-            { english: "The infrared sensor is active.", thai: "เซ็นเซอร์อินฟราเรดทำงานแล้ว" },
-            { english: "Debug the source code.", thai: "ตรวจสอบและแก้ไขซอร์สโค้ด" }
-        ];
+            ];
 
         // ตัวแปรสำหรับตั้งค่าและเก็บสถานะ
-        const NUM_QUESTIONS_TO_PLAY = 20;
+        // แก้ไข 2: เปลี่ยนจำนวนข้อที่จะทดสอบจาก 20 เป็น 5
+        const NUM_QUESTIONS_TO_PLAY = 5;
         let activeQuestions = []; 
 
         let currentQuestion = 0;
