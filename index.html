@@ -295,6 +295,18 @@
                 startBtn.innerHTML = "🎙️ กำลังฟัง...";
             };
 
+            // 🌟 เพิ่มฟังก์ชันใหม่ตรงนี้: ดักจับเวลาไมค์ตัดเองบนมือถือ 🌟
+            recognition.onend = function() {
+                // หากเวลายังเหลือและสถานะระบบกำลังรันอยู่ ให้บังคับเปิดไมค์ต่อ
+                if (isRunning && timeLeft > 1) {
+                    try {
+                        recognition.start();
+                    } catch(e) {
+                        console.log("พยายามเปิดไมค์อีกครั้ง...", e);
+                    }
+                }
+            };
+
             // เมื่อจับเสียงและแปลงเป็นข้อความได้สำเร็จ
             recognition.onresult = function(event) {
                 if (!isRunning) return;
@@ -335,7 +347,7 @@
                     document.getElementById("startBtn").disabled = false;
                     document.getElementById("startBtn").innerHTML = "🎤 ลองอีกครั้ง";
                 }
-                // ถ้าเป็น error ชนิด 'no-speech' เราจะปล่อยให้ตัวจับเวลา 10 วิ ทำงานจนหมดเวลาและตัดจบเองเพื่อความเสถียร
+                // ถ้าเป็น error ชนิด 'no-speech' เราจะปล่อยให้ event.onend และตัวจับเวลา 10 วิ ทำงานแทน
             };
 
             activeQuestions = questionBank.slice(0, NUM_QUESTIONS_TO_PLAY);
