@@ -109,6 +109,18 @@
         .teacher-title { font-weight: bold; color: #90dfff; margin-bottom: 8px; font-size: 20px; }
         .footer { margin-top: 25px; text-align: center; color: #92a4c9; font-size: 14px; letter-spacing: 2px; }
 
+        /* CSS สำหรับแจ้งเตือน In-App Browser */
+        .in-app-overlay {
+            position: fixed; inset: 0; background: rgba(4, 8, 22, 0.95);
+            z-index: 9999; display: none; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            padding: 30px; backdrop-filter: blur(10px);
+        }
+        .in-app-overlay h2 { color: var(--red); font-size: 28px; margin-bottom: 10px; }
+        .in-app-overlay p { color: white; font-size: 18px; margin-bottom: 25px; line-height: 1.6; }
+        .force-chrome-btn { background: #fff; color: #000; padding: 15px 30px; border-radius: 99px; text-decoration: none; font-weight: bold; font-size: 18px; transition: 0.3s; }
+        .force-chrome-btn:hover { background: var(--cyan); color: #000; }
+
         @media(max-width:900px) { .main-grid { grid-template-columns: 1fr; } h1 { font-size: 38px; } .english-text { font-size: 38px; } }
         @media(max-width:600px) {
             body { padding: 8px; } .header { padding: 15px; margin-bottom: 12px; border-radius: 20px; }
@@ -129,6 +141,13 @@
 </head>
 
 <body>
+    <!-- แจ้งเตือน In-App Browser และบังคับเปิด Chrome -->
+    <div class="in-app-overlay" id="inAppOverlay">
+        <h2>⚠️ ไม่รองรับเบราว์เซอร์นี้</h2>
+        <p>แอปพลิเคชันที่คุณกำลังใช้อยู่ (เช่น LINE, Messenger) ปิดกั้นการทำงานของไมโครโฟน<br><br>กรุณากดปุ่มด้านล่างเพื่อเปิดระบบใน <b>Google Chrome</b> หรือ <b>Safari</b></p>
+        <a href="#" id="forceChromeBtn" class="force-chrome-btn">🌐 เปิดแอป Google Chrome</a>
+    </div>
+
     <div class="orb orb1"></div>
     <div class="orb orb2"></div>
     <div class="orb orb3"></div>
@@ -187,20 +206,42 @@
 
     <script>
         // ======================================
+        // 0. ตรวจจับ In-App Browser (LINE, Messenger, FB)
+        // ======================================
+        (function detectAndRedirect() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isInApp = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1) || (ua.indexOf("Instagram") > -1);
+            
+            if (isInApp) {
+                document.getElementById('inAppOverlay').style.display = 'flex';
+                const currentUrl = window.location.href.replace(/^https?:\/\//, '');
+                const btn = document.getElementById('forceChromeBtn');
+                
+                if (/android/i.test(ua)) {
+                    // ใช้ intent เพื่อบังคับเปิด Chrome ใน Android
+                    btn.href = `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+                } else {
+                    // สำหรับ iOS แจ้งให้เปิดใน Safari แทน
+                    btn.innerHTML = "🔗 โปรดคัดลอกลิงก์ไปเปิดใน Safari";
+                    btn.onclick = (e) => { e.preventDefault(); alert("กรุณากดจุดสามจุดมุมขวาบน แล้วเลือก 'Open in Browser' หรือ 'เปิดในเบราว์เซอร์เริ่มต้น'"); };
+                }
+            }
+        })();
+
+        // ======================================
         // 1. ตั้งค่า API และ Firebase
         // ======================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
-        
         const PASS_REQUIREMENT = 3; 
 
         const firebaseConfig = {
-           apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
-           authDomain: "engteststation.firebaseapp.com",
-           databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app",
-           projectId: "engteststation",
-           storageBucket: "engteststation.firebasestorage.app",
-           messagingSenderId: "719237352141",
-           appId: "1:719237352141:web:04359357c9646c5bcd3784"
+            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
+            authDomain: "engteststation.firebaseapp.com",
+            databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "engteststation",
+            storageBucket: "engteststation.firebasestorage.app",
+            messagingSenderId: "719237352141",
+            appId: "1:719237352141:web:04359357c9646c5bcd3784"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -215,10 +256,8 @@
             { english: "Is the power on?", thai: "ไฟเข้าหรือยัง?" },
             { english: "Pass me the multimeter.", thai: "ส่งมัลติมิเตอร์ให้ครูหน่อย" },
             { english: "Solder this wire.", thai: "บัดกรีสายไฟเส้นนี้เลย" }
-            // คุณสามารถเก็บข้ออื่นๆ ไว้ด้านล่างนี้ได้ตามต้องการ แต่ระบบจะดึงตามลำดับ 5 ข้อแรกเสมอ
         ];
 
-        // ตัวแปรสำหรับตั้งค่าและเก็บสถานะ
         const NUM_QUESTIONS_TO_PLAY = 5;
         let activeQuestions = []; 
 
@@ -245,11 +284,22 @@
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
+            // เมื่อเริ่มฟังสำเร็จ
+            recognition.onstart = function() {
+                document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
+                document.getElementById("status").className = "status";
+                document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
+                
+                const startBtn = document.getElementById("startBtn");
+                startBtn.disabled = true;
+                startBtn.innerHTML = "🎙️ กำลังฟัง...";
+            };
+
+            // เมื่อจับเสียงและแปลงเป็นข้อความได้สำเร็จ
             recognition.onresult = function(event) {
                 if (!isRunning) return;
-                isRunning = false;
-                clearInterval(countdownInterval);
-
+                stopAndClearTimer(); 
+                
                 const speechResult = event.results[0][0].transcript;
                 const target = activeQuestions[currentQuestion].english; 
                 const score = similarity(target, speechResult);
@@ -271,12 +321,24 @@
                     document.getElementById("status").className = "status fail";
                 }
 
-                setTimeout(nextQuestion, 2000);
+                setTimeout(nextQuestion, 2000); // ดีเลย์ให้ผู้ใช้เห็นผลลัพธ์แล้วข้ามข้อ
             };
 
-            // เตรียมคำถามโดยดึงเรียงตามลำดับ ไม่มีการสุ่มแล้ว
+            // จัดการ Error (เช่น ไม่ได้อนุญาตไมค์) ป้องกันหน้าจอค้าง
+            recognition.onerror = function(event) {
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    stopAndClearTimer();
+                    alert("กรุณาอนุญาตให้เว็บไซต์ใช้งานไมโครโฟนได้ (Allow Microphone Access)");
+                    document.getElementById("status").innerHTML = "⚠️ ไมค์ถูกบล็อก";
+                    document.getElementById("status").className = "status fail";
+                    document.getElementById("heardText").innerHTML = "กรุณาเปิดสิทธิ์ไมโครโฟนแล้วกดเริ่มใหม่";
+                    document.getElementById("startBtn").disabled = false;
+                    document.getElementById("startBtn").innerHTML = "🎤 ลองอีกครั้ง";
+                }
+                // ถ้าเป็น error ชนิด 'no-speech' เราจะปล่อยให้ตัวจับเวลา 10 วิ ทำงานจนหมดเวลาและตัดจบเองเพื่อความเสถียร
+            };
+
             activeQuestions = questionBank.slice(0, NUM_QUESTIONS_TO_PLAY);
-            
             loadQuestion(0);
             monitorMachine(); 
         };
@@ -294,7 +356,6 @@
                     ui.innerHTML = "MACHINE READY";
                     ui.style.color = "#1dff95";
                     
-                    // เปิดปุ่มเฉพาะเวลาที่ไม่ได้กำลังจับเวลาอยู่ และสอบยังไม่เสร็จ
                     if (!isRunning && currentQuestion < activeQuestions.length) {
                         startBtn.disabled = false;
                         startBtn.innerHTML = "🎤 เริ่มพูด";
@@ -314,7 +375,7 @@
         }
 
         // ======================================
-        // 4. ระบบดำเนินข้อสอบ และตัดสินผล
+        // 4. ระบบดำเนินข้อสอบ
         // ======================================
         function loadQuestion(index) {
             document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${activeQuestions.length}`;
@@ -327,10 +388,15 @@
             document.getElementById("status").className = "status";
             document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
 
-            // รีเซ็ตปุ่มให้กลับมากดได้อีกครั้ง
             const startBtn = document.getElementById("startBtn");
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
+        }
+
+        function stopAndClearTimer() {
+            clearInterval(countdownInterval);
+            isRunning = false;
+            try { recognition.stop(); } catch(e) {}
         }
 
         function startRecognition() {
@@ -342,31 +408,30 @@
             timeLeft = 10;
             
             document.getElementById("countdown").innerHTML = timeLeft;
-            document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
-            document.getElementById("status").className = "status";
-            document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
+            
+            try {
+                recognition.start();
+            } catch(err) {
+                console.warn("Recognition already started or error:", err);
+            }
 
-            // ปิดการใช้งานปุ่มชั่วคราวขณะอัดเสียง
-            const startBtn = document.getElementById("startBtn");
-            startBtn.disabled = true;
-            startBtn.innerHTML = "🎙️ กำลังฟัง...";
-
-            recognition.start();
-
+            // ตัวจับเวลาจะวิ่งอิสระ ถ้าครบเวลาแล้วไม่ได้คำตอบ บังคับตกและข้ามข้อทันที
             countdownInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById("countdown").innerHTML = timeLeft;
+                
                 if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    recognition.stop();
-                    isRunning = false;
-                    if(document.getElementById("status").innerHTML === "🎤 AI กำลังฟัง...") {
-                        document.getElementById("status").innerHTML = "⏳ หมดเวลา";
-                        document.getElementById("status").className = "status fail";
-                        failCount++;
-                        document.getElementById("failCount").innerHTML = failCount;
-                        setTimeout(nextQuestion, 1500);
-                    }
+                    stopAndClearTimer();
+                    
+                    // ปรับให้ข้ามข้ออัตโนมัติเมื่อหมดเวลา ไม่ต้องรีโหลดหน้า
+                    document.getElementById("status").innerHTML = "⏳ หมดเวลา / ไม่ได้ยินเสียง";
+                    document.getElementById("status").className = "status fail";
+                    document.getElementById("heardText").innerHTML = "ตัดจบรอบนี้ ข้ามไปข้อถัดไป";
+                    
+                    failCount++;
+                    document.getElementById("failCount").innerHTML = failCount;
+                    
+                    setTimeout(nextQuestion, 1500); // ข้ามข้ออัตโนมัติ
                 }
             }, 1000);
         }
@@ -386,7 +451,6 @@
             document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
             document.getElementById("countdown").innerHTML = "-";
             
-            // ปิดปุ่มถาวรเมื่อสอบเสร็จ
             const startBtn = document.getElementById("startBtn");
             startBtn.disabled = true; 
             startBtn.innerHTML = "✅ จบการทดสอบ";
@@ -395,7 +459,6 @@
                 document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! กดปุ่มเลือกของรางวัลที่ตู้ได้เลย";
                 document.getElementById("status").className = "status pass";
                 
-                // สื่อสารไปยัง Firebase ว่าผู้ใช้ผ่านเกณฑ์ เพื่อให้ ESP32 รับรู้
                 db.ref('machine').update({ 
                     status: 'unlocked',
                     currentUser: document.getElementById("studentName").value 
@@ -403,8 +466,6 @@
             } else {
                 document.getElementById("status").innerHTML = "❌ เสียใจด้วย คะแนนรวมไม่ถึงเกณฑ์";
                 document.getElementById("status").className = "status fail";
-                
-                // ถ้ายกเลิกคิวให้กลับมาพร้อมใช้งานใหม่
                 db.ref('machine').update({ status: 'ready' });
             }
             saveToGAS();
