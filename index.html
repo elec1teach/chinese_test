@@ -196,7 +196,7 @@
         const firebaseConfig = {
            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
            authDomain: "engteststation.firebaseapp.com",
-           databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app", // เพิ่ม URL ฐานข้อมูลโซนเอเชีย
+           databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app",
            projectId: "engteststation",
            storageBucket: "engteststation.firebasestorage.app",
            messagingSenderId: "719237352141",
@@ -214,54 +214,9 @@
             { english: "Turn off the power.", thai: "ปิดสวิตช์ไฟก่อน" },
             { english: "Is the power on?", thai: "ไฟเข้าหรือยัง?" },
             { english: "Pass me the multimeter.", thai: "ส่งมัลติมิเตอร์ให้ครูหน่อย" },
-            { english: "Solder this wire.", thai: "บัดกรีสายไฟเส้นนี้เลย" },
-            { english: "Watch out for short circuit.", thai: "ระวังไฟช็อตนะ" },
-            { english: "Read the diagram.", thai: "ดูวงจรซิ" },
-            { english: "Connect positive to red.", thai: "ต่อขั้วบวกเข้ากับสายสีแดง" },
-            { english: "The fuse is blown.", thai: "ฟิวส์ขาดแล้ว" },
-            { english: "Ground this pin.", thai: "ต่อพินนี้ลงกราวด์" },
-            { english: "Test the circuit now.", thai: "ทดสอบวงจรได้เลย" },
-            { english: "Do you need help?", thai: "กลุ่มนี้ต้องการให้ช่วยไหม?" },
-            { english: "Use the breadboard.", thai: "ใช้เบรดบอร์ดต่อวงจรนะ" },
-            { english: "Check the resistor value.", thai: "เช็คค่าตัวต้านทานหน่อยว่าตรงไหม" },
-            { english: "Strip the wire.", thai: "ปอกสายไฟเตรียมไว้" },
-            { english: "It is getting hot.", thai: "อุปกรณ์มันเริ่มร้อนแล้วนะ" },
-            { english: "Are you done?", thai: "พวกเธอทำเสร็จหรือยัง?" },
-            { english: "Clean up your tools.", thai: "เก็บเครื่องมือให้เรียบร้อยด้วย" },
-            { english: "Good job team.", thai: "ทำได้ดีมากทุกคน!" },
-            { english: "Any questions?", thai: "มีคำถามอะไรเพิ่มเติมไหม?" },
-            { english: "Measure the current.", thai: "วัดกระแสไฟดู" },
-            { english: "Check the resistance.", thai: "เช็คค่าความต้านทานหน่อย" },
-            { english: "Is the battery fully charged?", thai: "แบตเตอรี่ชาร์จเต็มหรือยัง?" },
-            { english: "Connect the solar panel.", thai: "ต่อแผงโซลาร์เซลล์เลย" },
-            { english: "Set the multimeter to DC.", thai: "ตั้งค่ามัลติมิเตอร์เป็นไฟกระแสตรง" },
-            { english: "Be careful with the hot soldering iron.", thai: "ระวังหัวแร้งร้อนนะ" },
-            { english: "Unplug it before working.", thai: "ถอดปลั๊กก่อนเริ่มทำงาน" },
-            { english: "The circuit is incomplete.", thai: "วงจรยังไม่สมบูรณ์" },
-            { english: "Change the blown fuse.", thai: "เปลี่ยนฟิวส์ที่ขาดด้วย" },
-            { english: "Do not touch the bare wire.", thai: "อย่าแตะสายไฟเปลือย" },
-            { english: "Wire the circuit in parallel.", thai: "ต่อวงจรแบบขนาน" },
-            { english: "Wire the circuit in series.", thai: "ต่อวงจรแบบอนุกรม" },
-            { english: "Check the polarity.", thai: "ตรวจสอบขั้วให้ถูกต้อง" },
-            { english: "Connect the ground wire.", thai: "ต่อสายกราวด์ด้วย" },
-            { english: "The motor is not spinning.", thai: "มอเตอร์ไม่หมุน" },
-            { english: "Adjust the power supply.", thai: "ปรับแรงดันพาวเวอร์ซัพพลาย" },
-            { english: "Look at the schematic.", thai: "ดูที่วงจรโครงสร้าง" },
-            { english: "What is the output voltage?", thai: "แรงดันไฟขาออกคือเท่าไหร่?" },
-            { english: "The capacitor is swollen.", thai: "ตัวเก็บประจุบวมแล้ว" },
-            { english: "Did you check the diode?", thai: "เช็คไดโอดหรือยัง?" },
-            { english: "Turn on the oscilloscope.", thai: "เปิดออสซิลโลสโคป" },
-            { english: "Calibrate the sensor.", thai: "ปรับเทียบเซ็นเซอร์" },
-            { english: "Solder the components tightly.", thai: "บัดกรีอุปกรณ์ให้แน่น" },
-            { english: "Use the wire strippers.", thai: "ใช้คีมปอกสายไฟ" },
-            { english: "The LED is not lighting up.", thai: "หลอด LED ไม่สว่าง" },
-            { english: "Replace the broken switch.", thai: "เปลี่ยนสวิตช์ที่เสีย" },
-            { english: "Double-check your wiring.", thai: "ตรวจสอบการเดินสายไฟอีกครั้ง" },
-            { english: "Is there a short circuit?", thai: "มีไฟลัดวงจรไหม?" },
-            { english: "Measure the AC voltage.", thai: "วัดแรงดันไฟกระแสสลับ" },
-            { english: "Press the reset button.", thai: "กดปุ่มรีเซ็ต" },
-            { english: "Upload the code to the board.", thai: "อัปโหลดโค้ดลงบอร์ด" },
-            ];
+            { english: "Solder this wire.", thai: "บัดกรีสายไฟเส้นนี้เลย" }
+            // คุณสามารถเก็บข้ออื่นๆ ไว้ด้านล่างนี้ได้ตามต้องการ แต่ระบบจะดึงตามลำดับ 5 ข้อแรกเสมอ
+        ];
 
         // ตัวแปรสำหรับตั้งค่าและเก็บสถานะ
         const NUM_QUESTIONS_TO_PLAY = 5;
@@ -276,16 +231,6 @@
         let countdownInterval;
         let timeLeft = 10;
         let isRunning = false;
-
-        // สุ่มข้อสอบ
-        function getRandomQuestions(sourceArray, numItems) {
-            let shuffled = [...sourceArray];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled.slice(0, Math.min(numItems, shuffled.length));
-        }
 
         window.onload = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -329,8 +274,9 @@
                 setTimeout(nextQuestion, 2000);
             };
 
-            // เตรียมคำถาม
-            activeQuestions = getRandomQuestions(questionBank, NUM_QUESTIONS_TO_PLAY);
+            // เตรียมคำถามโดยดึงเรียงตามลำดับ ไม่มีการสุ่มแล้ว
+            activeQuestions = questionBank.slice(0, NUM_QUESTIONS_TO_PLAY);
+            
             loadQuestion(0);
             monitorMachine(); 
         };
@@ -353,6 +299,11 @@
                         startBtn.disabled = false;
                         startBtn.innerHTML = "🎤 เริ่มพูด";
                     }
+                } else if (status === 'unlocked') {
+                    ui.innerHTML = "MACHINE UNLOCKED";
+                    ui.style.color = "#35d8ff";
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
                 } else {
                     ui.innerHTML = "MACHINE BUSY";
                     ui.style.color = "#ff4d6d";
@@ -441,9 +392,10 @@
             startBtn.innerHTML = "✅ จบการทดสอบ";
 
             if (passCount >= PASS_REQUIREMENT) {
-                document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! คุณได้รับสิทธิ์รับรางวัล";
+                document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! กดปุ่มเลือกของรางวัลที่ตู้ได้เลย";
                 document.getElementById("status").className = "status pass";
                 
+                // สื่อสารไปยัง Firebase ว่าผู้ใช้ผ่านเกณฑ์ เพื่อให้ ESP32 รับรู้
                 db.ref('machine').update({ 
                     status: 'unlocked',
                     currentUser: document.getElementById("studentName").value 
@@ -451,6 +403,9 @@
             } else {
                 document.getElementById("status").innerHTML = "❌ เสียใจด้วย คะแนนรวมไม่ถึงเกณฑ์";
                 document.getElementById("status").className = "status fail";
+                
+                // ถ้ายกเลิกคิวให้กลับมาพร้อมใช้งานใหม่
+                db.ref('machine').update({ status: 'ready' });
             }
             saveToGAS();
         }
