@@ -159,7 +159,6 @@
 
         <div class="main-grid">
             <div class="sentence-box glass">
-                <!-- แก้ไข UI ส่วนนี้ให้สอดคล้องกับข้อสอบ 5 ข้อ -->
                 <div class="question-number" id="questionNumber">ข้อที่ 1 / 5</div>
                 <div class="english-text" id="englishText">Check the voltage.</div>
                 <div class="thai-text" id="thaiText">เช็คแรงดันไฟหน่อย</div>
@@ -192,12 +191,12 @@
         // ======================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
         
-        // แก้ไข 1: เปลี่ยนเกณฑ์การผ่านจาก 10 เป็น 3
         const PASS_REQUIREMENT = 3; 
 
         const firebaseConfig = {
            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
            authDomain: "engteststation.firebaseapp.com",
+           databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app", // เพิ่ม URL ฐานข้อมูลโซนเอเชีย
            projectId: "engteststation",
            storageBucket: "engteststation.firebasestorage.app",
            messagingSenderId: "719237352141",
@@ -265,7 +264,6 @@
             ];
 
         // ตัวแปรสำหรับตั้งค่าและเก็บสถานะ
-        // แก้ไข 2: เปลี่ยนจำนวนข้อที่จะทดสอบจาก 20 เป็น 5
         const NUM_QUESTIONS_TO_PLAY = 5;
         let activeQuestions = []; 
 
