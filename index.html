@@ -368,7 +368,7 @@ border:1px solid rgba(255,255,255,0.1);
 
 .countdown{
 position:relative;
-font-size:72px;
+font-size:42px; /* ลดจาก 72px เพื่อให้พอดีกับรูปแบบ MM:SS */
 font-family:'Orbitron',sans-serif;
 font-weight:900;
 z-index:1;
@@ -726,7 +726,7 @@ h1{ font-size:20px; letter-spacing:0px; }
 
 .countdown-wrapper{ margin:20px auto 10px; width:100px; height:100px; }
 .countdown-wrapper::before{ width:80px; height:80px; }
-.countdown{ font-size:36px; }
+.countdown{ font-size:28px; } /* ลดจาก 36px สำหรับมือถือ */
 
 .controls{ margin-top:15px; }
 button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
@@ -794,7 +794,7 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 <div class="english-text" id="englishText">Listen to me please</div>
 <div class="thai-text" id="thaiText">กรุณาฟังครูครับ</div>
 <div class="countdown-wrapper">
-<div class="countdown" id="countdown">10</div>
+<div class="countdown" id="countdown">01:00</div>
 </div>
 <div class="controls">
 <button class="start-btn" id="startBtn" onclick="startRecognition()">🎤 เริ่มพูด</button>
@@ -861,6 +861,20 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
     </div>
 </div>
 <!-- สิ้นสุดส่วนควบคุม Stock -->
+
+<!-- ส่วนควบคุมเวลาทำแบบทดสอบ -->
+<div class="stock-control-container">
+    <div class="stock-item">
+        <div class="stock-label">
+            ⏱️ เวลาทดสอบรวม (นาที)
+        </div>
+        <div class="stock-btns" style="flex-direction: row; align-items: center;">
+            <input type="number" id="adminTimeInput" min="1" max="60" value="1" style="width: 60px; text-align: center; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 16px;">
+            <button class="stock-btn plus" onclick="updateTestTime()" style="width: auto; padding: 0 15px; margin-left: 10px; font-size: 14px;">บันทึก</button>
+        </div>
+    </div>
+</div>
+<!-- สิ้นสุดส่วนควบคุมเวลา -->
 
 <div class="switch-container">
 <span class="switch-label">🔧 Restock Mode</span>
@@ -930,9 +944,12 @@ let passCount = 0;
 let failCount = 0;
 
 let recognition;
-let countdownInterval;
-let timeLeft = 10;
-let isRunning = false;
+// ตัวแปรสำหรับจัดการเวลารวม
+let totalTestTimeMinutes = 1; // ค่าเริ่มต้น 1 นาที
+let totalTimeLeftSeconds = 0;
+let testTimerInterval = null;
+let isTestRunning = false; // เช็คว่าเริ่มทำข้อสอบหรือยัง
+let isRunning = false; // เช็คสถานะไมค์
 let isAdminLoggedIn = false;
 
 // ตัวแปรเก็บ Stock ปัจจุบัน
@@ -961,7 +978,6 @@ recognition.maxAlternatives = 1;
 recognition.onresult = function(event){
     if(!isRunning) return;
     isRunning = false;
-    clearInterval(countdownInterval);
 
     const speechResult = event.results[0][0].transcript;
     const target = questions[currentQuestion].english;
@@ -989,7 +1005,10 @@ recognition.onresult = function(event){
     document.getElementById("startBtn").disabled = true;
 
     setTimeout(() => {
-        nextQuestion();
+        // หากเวลายังไม่หมดและยังมีข้อสอบเหลือ ให้ไปข้อต่อไป
+        if (totalTimeLeftSeconds > 0) {
+            nextQuestion();
+        }
     }, 1500);
 };
 
@@ -997,7 +1016,6 @@ recognition.onresult = function(event){
 recognition.onerror = function(event){
     console.log("Recognition Error:", event.error);
     isRunning = false; 
-    clearInterval(countdownInterval);
     document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
     document.getElementById("status").className = "status fail";
     document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
@@ -1011,8 +1029,9 @@ recognition.onend = function() {
 
 loadQuestion(currentQuestion);
 monitorMachine(); 
-monitorAdminSwitches(); // ตรวจสอบสถานะสวิตช์ Admin จาก Firebase
-monitorStock(); // ตรวจสอบ Stock จาก Firebase
+monitorAdminSwitches(); 
+monitorStock(); 
+monitorTestTime(); // เรียกใช้การตรวจสอบเวลาจาก Firebase
 };
 
 // ======================================
@@ -1042,6 +1061,20 @@ function monitorMachine() {
             ui.style.color = "#ff4d6d";
             startBtn.disabled = true;
             startBtn.innerHTML = "🔒 รอคิวใช้งาน";
+        }
+    });
+}
+
+function monitorTestTime() {
+    db.ref('machine/testDurationMinutes').on('value', (snap) => {
+        let mins = snap.val();
+        if (!mins) { mins = 1; } // ถ้ายังไม่เคยตั้งค่า ให้เป็น 1 นาที
+        totalTestTimeMinutes = mins;
+        document.getElementById("adminTimeInput").value = mins;
+        
+        // อัปเดตหน้าจอถ้ายังไม่ได้เริ่มทำข้อสอบ
+        if (!isTestRunning) {
+            updateTimerDisplay(totalTestTimeMinutes * 60);
         }
     });
 }
@@ -1125,9 +1158,63 @@ function monitorAdminSwitches() {
     });
 }
 
+// ฟังก์ชันบันทึกเวลาไปที่ Firebase
+function updateTestTime() {
+    let newTime = parseInt(document.getElementById("adminTimeInput").value);
+    if (newTime >= 1) {
+        db.ref('machine/testDurationMinutes').set(newTime);
+        alert("บันทึกเวลาสำเร็จ: " + newTime + " นาที");
+    } else {
+        alert("กรุณาใส่เวลาอย่างน้อย 1 นาที");
+    }
+}
+
 // ======================================
-// 5. QUESTION LOGIC
+// 5. QUESTION LOGIC & GLOBAL TIMER
 // ======================================
+// ฟังก์ชันอัปเดตการแสดงผลเวลาให้อยู่ในรูปแบบ MM:SS
+function updateTimerDisplay(seconds) {
+    let m = Math.floor(seconds / 60);
+    let s = seconds % 60;
+    document.getElementById("countdown").innerHTML = 
+        (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+}
+
+// ฟังก์ชันเริ่มจับเวลารวม
+function startGlobalTimer() {
+    isTestRunning = true;
+    totalTimeLeftSeconds = totalTestTimeMinutes * 60;
+    updateTimerDisplay(totalTimeLeftSeconds);
+
+    testTimerInterval = setInterval(() => {
+        totalTimeLeftSeconds--;
+        updateTimerDisplay(totalTimeLeftSeconds);
+
+        // เมื่อเวลาหมด
+        if (totalTimeLeftSeconds <= 0) {
+            clearInterval(testTimerInterval);
+            forceEndTest();
+        }
+    }, 1000);
+}
+
+// บังคับจบการทดสอบเมื่อเวลาหมด
+function forceEndTest() {
+    isRunning = false;
+    try { recognition.stop(); } catch(e){}
+    
+    document.getElementById("status").innerHTML = "หมดเวลาทดสอบรวม ⏰";
+    document.getElementById("status").className = "status fail";
+    document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
+    
+    playFailSound();
+    
+    // หน่วงเวลา 2 วินาทีแล้วไปหน้าสรุปผลทันที
+    setTimeout(() => {
+        evaluateFinalResult();
+    }, 2000);
+}
+
 function loadQuestion(index){
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
     document.getElementById("englishText").innerHTML = questions[index].english;
@@ -1136,7 +1223,11 @@ function loadQuestion(index){
     document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
-    document.getElementById("countdown").innerHTML = "10";
+    
+    // รีเซ็ตหน้าจอเวลาเฉพาะตอนยังไม่เริ่ม
+    if(!isTestRunning) {
+        updateTimerDisplay(totalTestTimeMinutes * 60);
+    }
 
     const startBtn = document.getElementById("startBtn");
     startBtn.disabled = false;
@@ -1156,6 +1247,10 @@ function nextQuestion(){
 // 6. FINAL EVALUATION 
 // ======================================
 function evaluateFinalResult() {
+    // หยุดจับเวลารวม
+    clearInterval(testTimerInterval);
+    isTestRunning = false;
+
     document.getElementById("questionNumber").innerHTML = "สรุปผลการทดสอบ";
     document.getElementById("englishText").innerHTML = "TEST COMPLETED";
     document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
@@ -1212,15 +1307,17 @@ function startRecognition(){
         return;
     }
 
+    // เริ่มจับเวลารวมหากนี่คือการกดเริ่มครั้งแรก
+    if(!isTestRunning && currentQuestion === 0) {
+        startGlobalTimer();
+    }
+
     if(isRunning) {
         try { recognition.stop(); } catch(e){}
     }
 
     isRunning = true;
-    clearInterval(countdownInterval);
-    timeLeft = 10;
-
-    document.getElementById("countdown").innerHTML = timeLeft;
+    
     document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "Listening...";
@@ -1234,7 +1331,6 @@ function startRecognition(){
     } catch(err){
         console.log("Start Error:", err);
         isRunning = false; 
-        clearInterval(countdownInterval);
         document.getElementById("status").innerHTML = "เปิดไมค์ไม่ได้ ❌";
         document.getElementById("status").className = "status fail";
         document.getElementById("heardText").innerHTML = "กรุณารีเฟรชหน้าเว็บและอนุญาตให้ใช้ไมค์";
@@ -1242,31 +1338,6 @@ function startRecognition(){
         startBtn.innerHTML = "🎤 ลองพูดใหม่";
         return; 
     }
-
-    countdownInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById("countdown").innerHTML = timeLeft;
-
-        if(timeLeft <= 0){
-            clearInterval(countdownInterval);
-            if(isRunning){
-                isRunning = false;
-                try { recognition.stop(); } catch(e){}
-
-                failCount++;
-                document.getElementById("failCount").innerHTML = failCount;
-                document.getElementById("status").innerHTML = "หมดเวลา ⏰";
-                document.getElementById("status").className = "status fail";
-                document.getElementById("heardText").innerHTML = "ไม่มีการพูด";
-                
-                playFailSound();
-
-                setTimeout(() => {
-                    nextQuestion();
-                }, 1500);
-            }
-        }
-    }, 1000);
 }
 
 function saveScoreToGoogleSheet(){
