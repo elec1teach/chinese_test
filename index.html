@@ -10,7 +10,6 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <!-- นำเข้า Firebase SDK เพื่อการสื่อสารกับ ESP32 และฐานข้อมูล -->
@@ -18,7 +17,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
-
 :root{
 --bg1:#040816;
 --bg2:#0a1025;
@@ -187,6 +185,13 @@ color:var(--muted);
 line-height:1.8;
 }
 
+/* Status & Admin area */
+.status-area {
+display:flex;
+align-items:center;
+gap:15px;
+}
+
 .live{
 padding:12px 20px;
 border-radius:999px;
@@ -209,6 +214,25 @@ height:10px;
 border-radius:50%;
 background:currentColor;
 box-shadow:0 0 15px currentColor;
+}
+
+.admin-btn {
+background: rgba(255,255,255,0.1);
+border: 1px solid rgba(255,255,255,0.2);
+color: white;
+width: 45px;
+height: 45px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+font-size: 20px;
+transition: 0.3s;
+}
+.admin-btn:hover {
+background: rgba(255,255,255,0.2);
+transform: scale(1.1);
 }
 
 /* INPUT */
@@ -468,6 +492,133 @@ font-size:14px;
 letter-spacing:2px;
 }
 
+/* ==================================
+   ADMIN MODAL & SWITCH CSS 
+   ================================== */
+.modal-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.8);
+z-index: 100;
+align-items: center;
+justify-content: center;
+backdrop-filter: blur(5px);
+}
+
+.modal-content {
+width: 90%;
+max-width: 400px;
+padding: 30px;
+border-radius: 25px;
+text-align: center;
+position: relative;
+}
+
+.close-modal {
+position: absolute;
+top: 15px;
+right: 20px;
+font-size: 24px;
+color: var(--muted);
+cursor: pointer;
+background: none;
+border: none;
+padding: 0;
+}
+
+.close-modal:hover { color: white; }
+
+.modal-title {
+font-size: 24px;
+font-weight: bold;
+margin-bottom: 20px;
+color: var(--cyan);
+}
+
+.admin-login-group { display: block; }
+.admin-control-group { display: none; }
+
+.admin-input {
+width: 100%;
+padding: 15px;
+border-radius: 12px;
+border: 1px solid rgba(255,255,255,0.2);
+background: rgba(0,0,0,0.5);
+color: white;
+font-size: 18px;
+margin-bottom: 15px;
+text-align: center;
+}
+
+.admin-btn-action {
+width: 100%;
+background: var(--blue);
+color: white;
+padding: 15px;
+border-radius: 12px;
+}
+
+/* Custom Toggle Switch */
+.switch-container {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+background: rgba(255,255,255,0.05);
+padding: 15px 20px;
+border-radius: 15px;
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+.switch-label {
+font-size: 18px;
+font-weight: 500;
+}
+
+.switch {
+position: relative;
+display: inline-block;
+width: 60px;
+height: 34px;
+}
+
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0; left: 0; right: 0; bottom: 0;
+background-color: rgba(255,255,255,0.2);
+transition: .4s;
+border-radius: 34px;
+}
+
+.slider:before {
+position: absolute;
+content: "";
+height: 26px;
+width: 26px;
+left: 4px;
+bottom: 4px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+
+input:checked + .slider {
+background-color: var(--cyan);
+box-shadow: 0 0 15px rgba(53,216,255,0.5);
+}
+
+input:checked + .slider:before {
+transform: translateX(26px);
+}
+
 /* RESPONSIVE */
 @media(max-width:900px){
 .main-grid{ grid-template-columns:1fr; }
@@ -484,6 +635,7 @@ body{ padding:8px; }
 h1{ font-size:20px; letter-spacing:0px; }
 .subtitle{ font-size:12px; margin-top:5px; line-height:1.4; }
 .live{ padding:6px 12px; font-size:10px; }
+.admin-btn { width: 35px; height: 35px; font-size: 16px; }
 
 .login-box{ margin-bottom:12px; }
 .login-box input{ padding:12px; font-size:16px; border-radius:12px; }
@@ -535,7 +687,10 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 <div class="subtitle">ระบบวัดการออกเสียงภาษาอังกฤษอัตโนมัติด้วย AI แบบ Real-Time</div>
 </div>
 </div>
+<div class="status-area">
 <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
+<div class="admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
+</div>
 </div>
 </div>
 
@@ -591,14 +746,49 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 
 </div>
 
+<!-- Admin Modal Panel -->
+<div class="modal-overlay" id="adminModal">
+<div class="modal-content glass">
+<button class="close-modal" onclick="closeAdminModal()">✕</button>
+<div class="modal-title">Admin Panel</div>
+
+<!-- Login Section -->
+<div id="adminLoginGroup" class="admin-login-group">
+<input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
+<button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
+<p id="adminError" style="color:var(--red); font-size:14px; display:none;">รหัสผ่านไม่ถูกต้อง!</p>
+</div>
+
+<!-- Controls Section -->
+<div id="adminControlGroup" class="admin-control-group">
+<div class="switch-container">
+<span class="switch-label">🔧 Restock Mode</span>
+<label class="switch">
+<input type="checkbox" id="restockSwitch" onchange="toggleRestock(this.checked)">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="switch-container">
+<span class="switch-label">⚙️ Test Mode</span>
+<label class="switch">
+<input type="checkbox" id="testSwitch" onchange="toggleTest(this.checked)">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+</div>
+</div>
+
 <script>
 // ======================================
 // 1. SETTINGS & FIREBASE CONFIG
 // ======================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
-
-// กำหนดเกณฑ์การผ่านเพื่อรับรางวัล (ตามที่ระบุคือ 5 ข้อ)
 const PASS_REQUIREMENT = 5;
+
+// รหัสผ่าน Admin (คุณสามารถเปลี่ยนเป็นรหัสที่ต้องการได้ที่นี่)
+const ADMIN_PASSWORD = "1234"; 
 
 // ตั้งค่า Firebase
 const firebaseConfig = {
@@ -615,7 +805,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ======================================
-// 2. QUESTIONS (คัดมา 10 ข้อจากโค้ด 1)
+// 2. QUESTIONS
 // ======================================
 const questions = [
 { english:"Listen to me please", thai:"กรุณาฟังครูครับ" },
@@ -642,12 +832,12 @@ let recognition;
 let countdownInterval;
 let timeLeft = 10;
 let isRunning = false;
+let isAdminLoggedIn = false;
 
 // ======================================
 // INIT
 // ======================================
 window.onload = () => {
-
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
@@ -660,9 +850,7 @@ recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-// ======================================
-// RESULT HANDLER (ใช้ความเสถียรจากโค้ด 1)
-// ======================================
+// RESULT HANDLER
 recognition.onresult = function(event){
     if(!isRunning) return;
     isRunning = false;
@@ -691,7 +879,6 @@ recognition.onresult = function(event){
         playFailSound();
     }
 
-    // ปิดปุ่มไว้ก่อนระหว่างรอข้อต่อไป
     document.getElementById("startBtn").disabled = true;
 
     setTimeout(() => {
@@ -699,9 +886,7 @@ recognition.onresult = function(event){
     }, 1500);
 };
 
-// ======================================
 // ERROR HANDLER
-// ======================================
 recognition.onerror = function(event){
     console.log("Recognition Error:", event.error);
     isRunning = false; 
@@ -713,15 +898,13 @@ recognition.onerror = function(event){
     document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
 };
 
-// ======================================
 recognition.onend = function() {
-    if(isRunning) {
-        console.log("Recognition ended unexpectedly.");
-    }
+    if(isRunning) { console.log("Recognition ended unexpectedly."); }
 };
 
 loadQuestion(currentQuestion);
-monitorMachine(); // เริ่มตรวจสอบสถานะตู้
+monitorMachine(); 
+monitorAdminSwitches(); // ตรวจสอบสถานะสวิตช์ Admin จาก Firebase
 };
 
 // ======================================
@@ -737,7 +920,6 @@ function monitorMachine() {
             ui.innerHTML = "MACHINE READY";
             ui.style.color = "#1dff95";
             
-            // เปิดปุ่มเฉพาะเวลาที่ไม่ได้กำลังจับเวลาอยู่ และสอบยังไม่เสร็จ
             if (!isRunning && currentQuestion < questions.length) {
                 startBtn.disabled = false;
                 startBtn.innerHTML = "🎤 เริ่มพูด";
@@ -757,7 +939,58 @@ function monitorMachine() {
 }
 
 // ======================================
-// 4. QUESTION LOGIC
+// 4. ADMIN PANEL FUNCTIONS
+// ======================================
+function openAdminModal() {
+    document.getElementById("adminModal").style.display = "flex";
+    if(isAdminLoggedIn) {
+        document.getElementById("adminLoginGroup").style.display = "none";
+        document.getElementById("adminControlGroup").style.display = "block";
+    } else {
+        document.getElementById("adminLoginGroup").style.display = "block";
+        document.getElementById("adminControlGroup").style.display = "none";
+        document.getElementById("adminError").style.display = "none";
+        document.getElementById("adminPassword").value = "";
+    }
+}
+
+function closeAdminModal() {
+    document.getElementById("adminModal").style.display = "none";
+}
+
+function verifyAdmin() {
+    const pass = document.getElementById("adminPassword").value;
+    if(pass === ADMIN_PASSWORD) {
+        isAdminLoggedIn = true;
+        document.getElementById("adminLoginGroup").style.display = "none";
+        document.getElementById("adminControlGroup").style.display = "block";
+    } else {
+        document.getElementById("adminError").style.display = "block";
+    }
+}
+
+// อัปเดตค่าสวิตช์ไปยัง Firebase เมื่อมีการกด
+function toggleRestock(isChecked) {
+    db.ref('machine/restock').set(isChecked);
+}
+
+function toggleTest(isChecked) {
+    db.ref('machine/test').set(isChecked);
+}
+
+// ดึงสถานะปัจจุบันของสวิตช์จาก Firebase แบบ Real-time
+function monitorAdminSwitches() {
+    db.ref('machine/restock').on('value', (snap) => {
+        document.getElementById("restockSwitch").checked = snap.val() || false;
+    });
+    
+    db.ref('machine/test').on('value', (snap) => {
+        document.getElementById("testSwitch").checked = snap.val() || false;
+    });
+}
+
+// ======================================
+// 5. QUESTION LOGIC
 // ======================================
 function loadQuestion(index){
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
@@ -776,7 +1009,6 @@ function loadQuestion(index){
 
 function nextQuestion(){
     currentQuestion++;
-
     if(currentQuestion >= questions.length){
         evaluateFinalResult();
     } else {
@@ -785,7 +1017,7 @@ function nextQuestion(){
 }
 
 // ======================================
-// 5. FINAL EVALUATION (รางวัล & Firebase)
+// 6. FINAL EVALUATION 
 // ======================================
 function evaluateFinalResult() {
     document.getElementById("questionNumber").innerHTML = "สรุปผลการทดสอบ";
@@ -793,7 +1025,6 @@ function evaluateFinalResult() {
     document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
     document.getElementById("countdown").innerHTML = "-";
     
-    // ปิดปุ่มถาวรเมื่อสอบเสร็จ
     const startBtn = document.getElementById("startBtn");
     startBtn.disabled = true; 
 
@@ -802,7 +1033,6 @@ function evaluateFinalResult() {
         document.getElementById("status").className = "status pass";
         startBtn.innerHTML = "🎁 โปรดรับรางวัลที่ตู้";
         
-        // สื่อสารไปยัง Firebase ว่าผู้ใช้ผ่านเกณฑ์ เพื่อให้ ESP32 รับรู้
         db.ref('machine').update({ 
             status: 'unlocked',
             currentUser: document.getElementById("studentName").value 
@@ -812,14 +1042,13 @@ function evaluateFinalResult() {
         document.getElementById("status").className = "status fail";
         startBtn.innerHTML = "✅ จบการทดสอบ";
         
-        // ถ้ายกเลิกคิวให้กลับมาพร้อมใช้งานใหม่
         db.ref('machine').update({ status: 'ready' });
     }
     saveScoreToGoogleSheet();
 }
 
 // ======================================
-// UTILS & RECOGNITION START
+// 7. UTILS & RECOGNITION START
 // ======================================
 function similarity(a,b){
     a = a.toLowerCase().replace(/[^\w]/g,"");
