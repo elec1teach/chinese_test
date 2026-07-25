@@ -692,7 +692,6 @@ border-color: var(--blue);
 .stock-btn.plus { color: var(--green); }
 .stock-btn.plus:hover { background: var(--green); color: white; border-color: var(--green); }
 
-
 /* RESPONSIVE */
 @media(max-width:900px){
 .main-grid{ grid-template-columns:1fr; }
@@ -835,8 +834,15 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 
 <!-- Controls Section -->
 <div id="adminControlGroup" class="admin-control-group">
+
+<!-- ปุ่มควบคุมส่วนเคลียร์สถานะ Firebase ที่เพิ่มเข้ามาใหม่ -->
+<div class="switch-container">
+    <span class="switch-label">🔄 Reset Status to Ready</span>
+    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="forceReadyStatus()">Clear Status</button>
+</div>
+<!-- สิ้นสุดส่วนเคลียร์สถานะ -->
     
-<!-- ส่วนควบคุม Stock ใหม่ที่เพิ่มเข้ามา -->
+<!-- ส่วนควบคุม Stock -->
 <div class="stock-control-container">
     <div class="stock-item">
         <div class="stock-label">
@@ -1133,6 +1139,17 @@ function verifyAdmin() {
     } else {
         document.getElementById("adminError").style.display = "block";
     }
+}
+
+// ฟังก์ชันเพิ่มใหม่สำหรับการรีเซ็ตสถานะบน Firebase เป็น Ready 
+function forceReadyStatus() {
+    db.ref('machine/status').set('ready')
+        .then(() => {
+            alert("✅ ระบบถูกรีเซ็ตสถานะเป็น Ready สำหรับการทดสอบเรียบร้อยแล้ว!");
+        })
+        .catch((error) => {
+            alert("❌ เกิดข้อผิดพลาดในการอัปเดต Firebase: " + error);
+        });
 }
 
 // ฟังก์ชันเพิ่ม/ลด Stock
