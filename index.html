@@ -5,27 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI English Pronunciation Test - Electronics Lab</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <!-- นำเข้า Firebase SDK -->
+    <!-- นำเข้า Firebase SDK (ถ้ามีแผนจะใช้) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         :root {
-            --bg1: #040816;
-            --bg2: #0a1025;
-            --panel: rgba(12, 18, 40, 0.72);
-            --line: rgba(255, 255, 255, 0.10);
-            --cyan: #35d8ff;
-            --blue: #6d7cff;
-            --violet: #b56cff;
-            --green: #1dff95;
-            --red: #ff4d6d;
-            --text: #edf5ff;
-            --muted: #9db2d9;
+            --bg1: #040816; --bg2: #0a1025; --panel: rgba(12, 18, 40, 0.72); --line: rgba(255, 255, 255, 0.10);
+            --cyan: #35d8ff; --blue: #6d7cff; --violet: #b56cff; --green: #1dff95; --red: #ff4d6d;
+            --text: #edf5ff; --muted: #9db2d9;
         }
 
         * { box-sizing: border-box; }
@@ -45,6 +38,7 @@
             background-size: 40px 40px; opacity: 0.25;
         }
 
+        /* FLOATING LIGHTS */
         .orb { position: fixed; border-radius: 50%; filter: blur(45px); opacity: 0.25; pointer-events: none; animation: float 8s ease-in-out infinite; }
         .orb1 { width: 240px; height: 240px; background: var(--cyan); top: 60px; left: -60px; }
         .orb2 { width: 300px; height: 300px; background: var(--violet); top: 100px; right: -100px; animation-delay: -3s; }
@@ -55,6 +49,7 @@
         .container { max-width: 1150px; margin: auto; position: relative; z-index: 1; }
         .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(53, 216, 255, 0.05); }
         
+        /* HEADER */
         .header { padding: 30px; border-radius: 30px; margin-bottom: 22px; position: relative; overflow: hidden; }
         .header::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(53, 216, 255, 0.07), transparent); transform: translateX(-100%); animation: scan 7s linear infinite; }
         @keyframes scan { 100% { transform: translateX(100%); } }
@@ -62,49 +57,55 @@
         .top-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
         .logo-area { display: flex; align-items: center; gap: 18px; }
         .logo { width: 70px; height: 70px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color: #07101f; box-shadow: 0 0 30px rgba(53, 216, 255, 0.35); }
-        
         h1 { margin: 0; font-size: 52px; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; line-height: 1.1; }
         .subtitle { margin-top: 12px; font-size: 20px; color: var(--muted); line-height: 1.8; }
         
         .live { padding: 12px 20px; border-radius: 999px; background: rgba(29, 255, 149, 0.08); border: 1px solid rgba(29, 255, 149, 0.25); color: #87ffca; font-weight: bold; letter-spacing: 2px; font-size: 14px; display: flex; align-items: center; gap: 10px; transition: 0.3s;}
         .live::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: currentColor; box-shadow: 0 0 15px currentColor; }
         
+        /* INPUT */
         .login-box { margin-bottom: 20px; }
         .login-box input { width: 100%; padding: 18px; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(7, 12, 30, 0.75); color: white; font-size: 20px; outline: none; transition: 0.3s; }
         .login-box input::placeholder { color: #8ea5cf; }
         .login-box input:focus { border-color: rgba(53, 216, 255, 0.45); box-shadow: 0 0 20px rgba(53, 216, 255, 0.15); }
         
+        /* STATS */
         .top-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat { padding: 18px; border-radius: 22px; position: relative; overflow: hidden; text-align: center; }
         .stat::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
         .stat-title { font-size: 15px; color: var(--muted); }
         .stat-value { margin-top: 10px; font-size: 34px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
         
+        /* MAIN GRID */
         .main-grid { display: grid; grid-template-columns: 1.3fr 0.8fr; gap: 20px; }
+        
         .sentence-box { padding: 35px; border-radius: 30px; position: relative; overflow: hidden; text-align: center; }
         .question-number { display: inline-block; padding: 10px 18px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); font-size: 14px; letter-spacing: 2px; color: #c6d6f4; }
-        .english-text { margin-top: 25px; font-size: 46px; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(53, 216, 255, 0.15); color: var(--cyan); }
+        .english-text { margin-top: 25px; font-size: 46px; font-weight: 900; line-height: 1.2; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(53, 216, 255, 0.15); color: var(--cyan); }
         .thai-text { margin-top: 14px; font-size: 24px; color: #b6c6e8; line-height: 1.7; }
         
+        /* COUNTDOWN */
         .countdown-wrapper { margin: 35px auto 10px; width: 180px; height: 180px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation: pulse 2s infinite; box-shadow: 0 0 35px rgba(53, 216, 255, 0.2); }
         .countdown-wrapper::before { content: ""; position: absolute; width: 145px; height: 145px; border-radius: 50%; background: #07101f; border: 1px solid rgba(255, 255, 255, 0.1); }
         .countdown { position: relative; font-size: 72px; font-family: 'Orbitron', sans-serif; font-weight: 900; z-index: 1; text-shadow: 0 0 18px rgba(53, 216, 255, 0.3); }
         @keyframes pulse { 50% { transform: scale(1.04); } }
         
+        /* BUTTON */
         .controls { margin-top: 25px; text-align: center; }
         button { border: none; padding: 18px 35px; border-radius: 18px; cursor: pointer; font-size: 20px; font-weight: bold; transition: 0.3s; }
         button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         .start-btn { background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color: #07101f; box-shadow: 0 10px 35px rgba(53, 216, 255, 0.2); width: 100%; }
         .start-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53, 216, 255, 0.3); }
         
+        /* RESULT BOX */
         .result-box { padding: 35px; border-radius: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .score { font-size: 90px; font-weight: 900; font-family: 'Orbitron', sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 25px rgba(53, 216, 255, 0.2); }
         .status { margin-top: 10px; font-size: 36px; font-weight: bold; }
         .pass { color: var(--green); text-shadow: 0 0 18px rgba(29, 255, 149, 0.25); }
         .fail { color: var(--red); text-shadow: 0 0 18px rgba(255, 77, 109, 0.25); }
-        
         .heard-text { margin-top: 18px; width: 100%; padding: 16px; border-radius: 18px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #c0d0ed; font-size: 18px; min-height: 60px; display: flex; align-items: center; justify-content: center; }
         
+        /* TEACHER BOX */
         .teacher-box { margin-top: 25px; padding: 20px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); line-height: 1.9; font-size: 18px; text-align: center; }
         .teacher-title { font-weight: bold; color: #90dfff; margin-bottom: 8px; font-size: 20px; }
         .footer { margin-top: 25px; text-align: center; color: #92a4c9; font-size: 14px; letter-spacing: 2px; }
@@ -121,6 +122,7 @@
         .force-chrome-btn { background: #fff; color: #000; padding: 15px 30px; border-radius: 99px; text-decoration: none; font-weight: bold; font-size: 18px; transition: 0.3s; }
         .force-chrome-btn:hover { background: var(--cyan); color: #000; }
 
+        /* RESPONSIVE */
         @media(max-width:900px) { .main-grid { grid-template-columns: 1fr; } h1 { font-size: 38px; } .english-text { font-size: 38px; } }
         @media(max-width:600px) {
             body { padding: 8px; } .header { padding: 15px; margin-bottom: 12px; border-radius: 20px; }
@@ -134,53 +136,62 @@
             .countdown-wrapper { margin: 20px auto 10px; width: 100px; height: 100px; } .countdown-wrapper::before { width: 80px; height: 80px; } .countdown { font-size: 36px; }
             .controls { margin-top: 15px; } button { padding: 14px; font-size: 18px; border-radius: 14px; }
             .result-box { padding: 20px; border-radius: 20px; margin-top: 12px; } .score { font-size: 50px; } .status { font-size: 24px; }
-            .heard-text { font-size: 14px; padding: 12px; margin-top: 12px; } .teacher-box { margin-top: 15px; padding: 15px; border-radius: 15px; font-size: 14px; }
+            .heard-text { font-size: 14px; padding: 12px; margin-top: 12px; min-height:auto; } .teacher-box { margin-top: 15px; padding: 15px; border-radius: 15px; font-size: 14px; }
             .teacher-title { font-size: 16px; margin-bottom: 5px; } .footer { margin-top: 15px; margin-bottom: 15px; font-size: 12px; }
         }
     </style>
 </head>
 
 <body>
-    <!-- แจ้งเตือน In-App Browser และบังคับเปิด Chrome -->
-    <div class="in-app-overlay" id="inAppOverlay">
-        <h2>⚠️ ไม่รองรับเบราว์เซอร์นี้</h2>
-        <p>แอปพลิเคชันที่คุณกำลังใช้อยู่ (เช่น LINE, Messenger) ปิดกั้นการทำงานของไมโครโฟน<br><br>กรุณากดปุ่มด้านล่างเพื่อเปิดระบบใน <b>Google Chrome</b> หรือ <b>Safari</b></p>
-        <a href="#" id="forceChromeBtn" class="force-chrome-btn">🌐 เปิดแอป Google Chrome</a>
+    <!-- แจ้งเตือน In-App Browser -->
+    <div id="inAppOverlay" class="in-app-overlay">
+        <h2>⚠️ เบราว์เซอร์นี้ไม่รองรับไมโครโฟน</h2>
+        <p>ดูเหมือนคุณกำลังเปิดลิงก์ผ่านแอป (เช่น LINE หรือ Facebook)<br>กรุณากดปุ่มด้านล่าง หรือกดที่เมนูมุมขวาบนแล้วเลือก<br><b>"เปิดในเบราว์เซอร์ (Open in Browser)"</b><br>เพื่อใช้งานระบบทดสอบเสียงครับ</p>
+        <button class="force-chrome-btn" onclick="copyUrl()">📋 คัดลอกลิงก์ไปเปิดใน Chrome/Safari</button>
     </div>
 
     <div class="orb orb1"></div>
     <div class="orb orb2"></div>
     <div class="orb orb3"></div>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <div class="header glass">
             <div class="top-header">
                 <div class="logo-area">
-                    <div class="logo">EN</div>
+                    <div class="logo">AI</div>
                     <div>
-                        <h1>AI Pronunciation Test Station</h1>
-                        <div class="subtitle">ระบบฝึกออกเสียงภาษาอังกฤษอัตโนมัติ สำหรับช่างอิเล็กทรอนิกส์</div>
+                        <h1>AI Pronunciation Test</h1>
+                        <div class="subtitle">ระบบวัดการออกเสียงภาษาอังกฤษอัตโนมัติด้วย AI แบบ Real-Time</div>
                     </div>
                 </div>
-                <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
+                <div class="live">SYSTEM ONLINE</div>
             </div>
         </div>
 
         <div class="login-box">
-            <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ (หรือชื่อกลุ่ม)" />
+            <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
         </div>
 
         <div class="top-bar">
-            <div class="stat glass"><div class="stat-title">TOTAL SCORE</div><div class="stat-value"><span id="totalScore">0</span></div></div>
-            <div class="stat glass"><div class="stat-title">PASS</div><div class="stat-value"><span id="passCount">0</span></div></div>
-            <div class="stat glass"><div class="stat-title">FAIL</div><div class="stat-value"><span id="failCount">0</span></div></div>
+            <div class="stat glass">
+                <div class="stat-title">TOTAL SCORE</div>
+                <div class="stat-value"><span id="totalScore">0</span></div>
+            </div>
+            <div class="stat glass">
+                <div class="stat-title">PASS</div>
+                <div class="stat-value"><span id="passCount">0</span></div>
+            </div>
+            <div class="stat glass">
+                <div class="stat-title">FAIL</div>
+                <div class="stat-value"><span id="failCount">0</span></div>
+            </div>
         </div>
 
         <div class="main-grid">
             <div class="sentence-box glass">
-                <div class="question-number" id="questionNumber">ข้อที่ 1 / 5</div>
-                <div class="english-text" id="englishText">Check the voltage.</div>
-                <div class="thai-text" id="thaiText">เช็คแรงดันไฟหน่อย</div>
+                <div class="question-number" id="questionNumber">ข้อที่ 1 / 16</div>
+                <div class="english-text" id="englishText">Listen to me please</div>
+                <div class="thai-text" id="thaiText">กรุณาฟังครูครับ</div>
                 <div class="countdown-wrapper">
                     <div class="countdown" id="countdown">10</div>
                 </div>
@@ -197,8 +208,10 @@
         </div>
 
         <div class="teacher-box glass">
-            <div class="teacher-title">ผู้ดูแลระบบและการฝึกปฏิบัติ</div>
-            ครูวิทยากร วรรณา<br>แผนกอิเล็กทรอนิกส์<br>วิทยาลัยสารพัดช่างศรีสะเกษ
+            <div class="teacher-title">ผู้พัฒนาโครงการ</div>
+            ครูวิทยากร วรรณา<br>
+            แผนกอิเล็กทรอนิกส์<br>
+            วิทยาลัยสารพัดช่างศรีสะเกษ
         </div>
 
         <div class="footer">AI Reward Learning Machine © 2026</div>
@@ -206,60 +219,47 @@
 
     <script>
         // ======================================
-        // 0. ตรวจจับ In-App Browser (LINE, Messenger, FB)
+        // 1. IN-APP BROWSER DETECTION
         // ======================================
-        (function detectAndRedirect() {
+        function detectInAppBrowser() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
-            const isInApp = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1) || (ua.indexOf("Instagram") > -1);
-            
-            if (isInApp) {
-                document.getElementById('inAppOverlay').style.display = 'flex';
-                const currentUrl = window.location.href.replace(/^https?:\/\//, '');
-                const btn = document.getElementById('forceChromeBtn');
-                
-                if (/android/i.test(ua)) {
-                    // ใช้ intent เพื่อบังคับเปิด Chrome ใน Android
-                    btn.href = `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
-                } else {
-                    // สำหรับ iOS แจ้งให้เปิดใน Safari แทน
-                    btn.innerHTML = "🔗 โปรดคัดลอกลิงก์ไปเปิดใน Safari";
-                    btn.onclick = (e) => { e.preventDefault(); alert("กรุณากดจุดสามจุดมุมขวาบน แล้วเลือก 'Open in Browser' หรือ 'เปิดในเบราว์เซอร์เริ่มต้น'"); };
-                }
+            if (ua.indexOf("FBAN") > -1 || ua.indexOf("FBAV") > -1 || ua.indexOf("Line") > -1 || ua.indexOf("Instagram") > -1) {
+                document.getElementById("inAppOverlay").style.display = "flex";
+                document.getElementById("mainContainer").style.display = "none";
+                return true;
             }
-        })();
+            return false;
+        }
+
+        function copyUrl() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert("คัดลอกลิงก์สำเร็จ! กรุณานำไปวางใน Chrome หรือ Safari");
+            });
+        }
 
         // ======================================
-        // 1. ตั้งค่า API และ Firebase
+        // SETTINGS & QUESTIONS
         // ======================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP1hff3VYxYAhH5kMmApwoR-DJwwOChcgCcHFuLrKOyX-zIFZ3zqJ8WQf2yPURX2s/exec";
-        const PASS_REQUIREMENT = 3; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
-            authDomain: "engteststation.firebaseapp.com",
-            databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "engteststation",
-            storageBucket: "engteststation.firebasestorage.app",
-            messagingSenderId: "719237352141",
-            appId: "1:719237352141:web:04359357c9646c5bcd3784"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // ======================================
-        // 2. คลังข้อมูลข้อสอบ
-        // ======================================
-        const questionBank = [
-            { english: "Check the voltage.", thai: "เช็คแรงดันไฟหน่อย" },
-            { english: "Turn off the power.", thai: "ปิดสวิตช์ไฟก่อน" },
-            { english: "Is the power on?", thai: "ไฟเข้าหรือยัง?" },
-            { english: "Pass me the multimeter.", thai: "ส่งมัลติมิเตอร์ให้ครูหน่อย" },
-            { english: "Solder this wire.", thai: "บัดกรีสายไฟเส้นนี้เลย" }
+        const questions = [
+            { english:"Listen to me please", thai:"กรุณาฟังครูครับ" },
+            { english:"Turn on the power", thai:"เปิดแหล่งจ่ายไฟ" },
+            { english:"Turn off the power", thai:"ปิดแหล่งจ่ายไฟ" },
+            { english:"Plug it in", thai:"เสียบปลั๊ก" },
+            { english:"Unplug it please", thai:"ถอดปลั๊กด้วยครับ" },
+            { english:"Check the circuit first", thai:"ตรวจเช็กวงจรก่อน" },
+            { english:"Please be careful", thai:"ระมัดระวังด้วยครับ" },
+            { english:"Have you finished", thai:"ทำงานเสร็จหรือยัง" },
+            { english:"Hurry up please", thai:"เร่งมือหน่อยครับ" },
+            { english:"Times up stop working", thai:"หมดเวลาแล้ว หยุดปฏิบัติงาน" },
+            { english:"Clean your desk and keep your equipment", thai:"ทำความสะอาดโต๊ะและเก็บอุปกรณ์" },
+            { english:"Teacher may I go out", thai:"ขออนุญาตออกนอกห้องครับ" },
+            { english:"Teacher may I come in", thai:"ขออนุญาตเข้าห้องครับ" },
+            { english:"I have finished", thai:"ผมทำเสร็จแล้วครับ" },
+            { english:"Can you help me please", thai:"ครูช่วยผมหน่อยได้ไหมครับ" },
+            { english:"I dont understand this part", thai:"ผมไม่เข้าใจตรงส่วนนี้ครับ" }
         ];
-
-        const NUM_QUESTIONS_TO_PLAY = 5;
-        let activeQuestions = []; 
 
         let currentQuestion = 0;
         let totalScore = 0;
@@ -271,7 +271,12 @@
         let timeLeft = 10;
         let isRunning = false;
 
+        // ======================================
+        // INITIALIZE SYSTEM
+        // ======================================
         window.onload = () => {
+            if (detectInAppBrowser()) return; // หยุดการทำงานถ้าเปิดผ่าน LINE/FB
+
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if (!SpeechRecognition) {
@@ -280,40 +285,19 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; 
+            recognition.lang = 'en-US';
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
-            // เมื่อเริ่มฟังสำเร็จ
-            recognition.onstart = function() {
-                document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
-                document.getElementById("status").className = "status";
-                document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
-                
-                const startBtn = document.getElementById("startBtn");
-                startBtn.disabled = true;
-                startBtn.innerHTML = "🎙️ กำลังฟัง...";
-            };
+            // เมื่อได้ผลลัพธ์เสียง
+            recognition.onresult = function(event){
+                if(!isRunning) return;
+                isRunning = false;
+                clearInterval(countdownInterval);
+                document.getElementById("startBtn").disabled = false;
 
-            // 🌟 เพิ่มฟังก์ชันใหม่ตรงนี้: ดักจับเวลาไมค์ตัดเองบนมือถือ 🌟
-            recognition.onend = function() {
-                // หากเวลายังเหลือและสถานะระบบกำลังรันอยู่ ให้บังคับเปิดไมค์ต่อ
-                if (isRunning && timeLeft > 1) {
-                    try {
-                        recognition.start();
-                    } catch(e) {
-                        console.log("พยายามเปิดไมค์อีกครั้ง...", e);
-                    }
-                }
-            };
-
-            // เมื่อจับเสียงและแปลงเป็นข้อความได้สำเร็จ
-            recognition.onresult = function(event) {
-                if (!isRunning) return;
-                stopAndClearTimer(); 
-                
                 const speechResult = event.results[0][0].transcript;
-                const target = activeQuestions[currentQuestion].english; 
+                const target = questions[currentQuestion].english;
                 const score = similarity(target, speechResult);
 
                 document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
@@ -321,191 +305,179 @@
                 totalScore += score;
                 document.getElementById("totalScore").innerHTML = totalScore;
 
-                if (score >= 80) { 
+                if(score >= 80){
                     passCount++;
                     document.getElementById("passCount").innerHTML = passCount;
                     document.getElementById("status").innerHTML = "PASS ✅";
                     document.getElementById("status").className = "status pass";
+                    playPassSound();
                 } else {
                     failCount++;
                     document.getElementById("failCount").innerHTML = failCount;
                     document.getElementById("status").innerHTML = "FAIL ❌";
                     document.getElementById("status").className = "status fail";
+                    playFailSound();
                 }
 
-                setTimeout(nextQuestion, 2000); // ดีเลย์ให้ผู้ใช้เห็นผลลัพธ์แล้วข้ามข้อ
+                setTimeout(() => { nextQuestion(); }, 2000);
             };
 
-            // จัดการ Error (เช่น ไม่ได้อนุญาตไมค์) ป้องกันหน้าจอค้าง
-            recognition.onerror = function(event) {
-                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                    stopAndClearTimer();
-                    alert("กรุณาอนุญาตให้เว็บไซต์ใช้งานไมโครโฟนได้ (Allow Microphone Access)");
-                    document.getElementById("status").innerHTML = "⚠️ ไมค์ถูกบล็อก";
-                    document.getElementById("status").className = "status fail";
-                    document.getElementById("heardText").innerHTML = "กรุณาเปิดสิทธิ์ไมโครโฟนแล้วกดเริ่มใหม่";
+            // เมื่อเกิด Error (เช่น ไม่อนุญาตไมค์ หรือฟังไม่ได้ยิน)
+            recognition.onerror = function(event){
+                console.log("Recognition Error:", event.error);
+                isRunning = false; 
+                clearInterval(countdownInterval);
+                document.getElementById("startBtn").disabled = false;
+                
+                document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
+                document.getElementById("status").className = "status fail";
+                
+                if (event.error === 'not-allowed') {
+                    document.getElementById("heardText").innerHTML = "กรุณาอนุญาตการใช้ไมโครโฟนที่ด้านบนเบราว์เซอร์";
+                } else {
+                    document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ กรุณากดเริ่มพูดใหม่";
+                }
+            };
+
+            // การแก้ไขปัญหา "หน้าจอค้าง" กุญแจสำคัญอยู่ที่ตรงนี้
+            recognition.onend = function() {
+                // ถ้า API หยุดตัวเอง แต่เรายังรอมันอยู่ (isRunning = true)
+                if(isRunning) {
+                    console.log("ไมค์หยุดทำงานเองก่อนหมดเวลา");
+                    isRunning = false;
+                    clearInterval(countdownInterval);
                     document.getElementById("startBtn").disabled = false;
-                    document.getElementById("startBtn").innerHTML = "🎤 ลองอีกครั้ง";
+                    
+                    document.getElementById("status").innerHTML = "เสียงขาดหาย ❌";
+                    document.getElementById("status").className = "status fail";
+                    document.getElementById("heardText").innerHTML = "เบราว์เซอร์หยุดรับเสียง กรุณากดปุ่มพูดอีกครั้ง";
                 }
-                // ถ้าเป็น error ชนิด 'no-speech' เราจะปล่อยให้ event.onend และตัวจับเวลา 10 วิ ทำงานแทน
             };
 
-            activeQuestions = questionBank.slice(0, NUM_QUESTIONS_TO_PLAY);
-            loadQuestion(0);
-            monitorMachine(); 
+            loadQuestion(currentQuestion);
         };
 
         // ======================================
-        // 3. ระบบจัดการ Firebase และเซ็นเซอร์ตู้
+        // FUNCTIONS
         // ======================================
-        function monitorMachine() {
-            db.ref('machine/status').on('value', (snap) => {
-                const status = snap.val();
-                const ui = document.getElementById("machineStatusUI");
-                const startBtn = document.getElementById("startBtn");
-
-                if(status === 'ready') {
-                    ui.innerHTML = "MACHINE READY";
-                    ui.style.color = "#1dff95";
-                    
-                    if (!isRunning && currentQuestion < activeQuestions.length) {
-                        startBtn.disabled = false;
-                        startBtn.innerHTML = "🎤 เริ่มพูด";
-                    }
-                } else if (status === 'unlocked') {
-                    ui.innerHTML = "MACHINE UNLOCKED";
-                    ui.style.color = "#35d8ff";
-                    startBtn.disabled = true;
-                    startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
-                } else {
-                    ui.innerHTML = "MACHINE BUSY";
-                    ui.style.color = "#ff4d6d";
-                    startBtn.disabled = true;
-                    startBtn.innerHTML = "🔒 รอคิวใช้งาน";
-                }
-            });
-        }
-
-        // ======================================
-        // 4. ระบบดำเนินข้อสอบ
-        // ======================================
-        function loadQuestion(index) {
-            document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${activeQuestions.length}`;
-            document.getElementById("englishText").innerHTML = activeQuestions[index].english; 
-            document.getElementById("thaiText").innerHTML = activeQuestions[index].thai;
-            document.getElementById("countdown").innerHTML = "10";
-            
+        function loadQuestion(index){
+            document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
+            document.getElementById("englishText").innerHTML = questions[index].english;
+            document.getElementById("thaiText").innerHTML = questions[index].thai;
             document.getElementById("score").innerHTML = "0%";
-            document.getElementById("status").innerHTML = "พร้อมทดสอบข้อถัดไป";
+            document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
             document.getElementById("status").className = "status";
             document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
-
-            const startBtn = document.getElementById("startBtn");
-            startBtn.disabled = false;
-            startBtn.innerHTML = "🎤 เริ่มพูด";
+            document.getElementById("countdown").innerHTML = "10";
         }
 
-        function stopAndClearTimer() {
-            clearInterval(countdownInterval);
-            isRunning = false;
-            try { recognition.stop(); } catch(e) {}
+        function nextQuestion(){
+            currentQuestion++;
+            if(currentQuestion >= questions.length){
+                saveScoreToGoogleSheet();
+                alert("จบทดสอบแล้ว\nคะแนนรวม: " + totalScore);
+
+                totalScore = 0; passCount = 0; failCount = 0;
+                document.getElementById("totalScore").innerHTML = 0;
+                document.getElementById("passCount").innerHTML = 0;
+                document.getElementById("failCount").innerHTML = 0;
+                currentQuestion = 0;
+            }
+            loadQuestion(currentQuestion);
         }
 
-        function startRecognition() {
+        function similarity(a,b){
+            a = a.toLowerCase().replace(/[^\w]/g,"");
+            b = b.toLowerCase().replace(/[^\w]/g,"");
+            let longer = a.length > b.length ? a : b;
+            let shorter = a.length > b.length ? b : a;
+            let same = 0;
+            if (longer.length === 0) return 0;
+            for(let i=0; i<shorter.length; i++){
+                if(shorter[i] === longer[i]) same++;
+            }
+            return Math.floor((same / longer.length) * 100);
+        }
+
+        function startRecognition(){
             const studentName = document.getElementById("studentName").value;
-            if (!studentName) return alert("กรุณากรอกชื่อก่อนเริ่มทดสอบครับ");
-            
-            if (isRunning) return;
-            isRunning = true;
-            timeLeft = 10;
-            
-            document.getElementById("countdown").innerHTML = timeLeft;
-            
-            try {
-                recognition.start();
-            } catch(err) {
-                console.warn("Recognition already started or error:", err);
+
+            if(studentName.trim() === ""){
+                alert("กรุณากรอกชื่อ");
+                return;
             }
 
-            // ตัวจับเวลาจะวิ่งอิสระ ถ้าครบเวลาแล้วไม่ได้คำตอบ บังคับตกและข้ามข้อทันที
+            if(isRunning) {
+                try { recognition.stop(); } catch(e){}
+            }
+
+            isRunning = true;
+            clearInterval(countdownInterval);
+            timeLeft = 10;
+
+            document.getElementById("countdown").innerHTML = timeLeft;
+            document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
+            document.getElementById("status").className = "status";
+            document.getElementById("heardText").innerHTML = "Listening...";
+            document.getElementById("startBtn").disabled = true; // ป้องกันการกดซ้ำซ้อน
+
+            try {
+                recognition.start();
+            } catch(err){
+                console.log("Start Error:", err);
+                isRunning = false; 
+                clearInterval(countdownInterval);
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("status").innerHTML = "เปิดไมค์ไม่ได้ ❌";
+                document.getElementById("status").className = "status fail";
+                document.getElementById("heardText").innerHTML = "กรุณารีเฟรชหน้าเว็บและอนุญาตให้ใช้ไมค์";
+                return; 
+            }
+
             countdownInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById("countdown").innerHTML = timeLeft;
-                
-                if (timeLeft <= 0) {
-                    stopAndClearTimer();
-                    
-                    // ปรับให้ข้ามข้ออัตโนมัติเมื่อหมดเวลา ไม่ต้องรีโหลดหน้า
-                    document.getElementById("status").innerHTML = "⏳ หมดเวลา / ไม่ได้ยินเสียง";
-                    document.getElementById("status").className = "status fail";
-                    document.getElementById("heardText").innerHTML = "ตัดจบรอบนี้ ข้ามไปข้อถัดไป";
-                    
-                    failCount++;
-                    document.getElementById("failCount").innerHTML = failCount;
-                    
-                    setTimeout(nextQuestion, 1500); // ข้ามข้ออัตโนมัติ
+
+                if(timeLeft <= 0){
+                    clearInterval(countdownInterval);
+                    if(isRunning){
+                        isRunning = false;
+                        document.getElementById("startBtn").disabled = false;
+                        try { recognition.stop(); } catch(e){}
+
+                        failCount++;
+                        document.getElementById("failCount").innerHTML = failCount;
+                        document.getElementById("status").innerHTML = "หมดเวลา ⏰";
+                        document.getElementById("status").className = "status fail";
+                        document.getElementById("heardText").innerHTML = "ไม่มีการพูด";
+                        
+                        playFailSound();
+
+                        setTimeout(() => { nextQuestion(); }, 1500);
+                    }
                 }
             }, 1000);
         }
 
-        function nextQuestion() {
-            currentQuestion++;
-            if (currentQuestion >= activeQuestions.length) {
-                evaluateFinalResult();
-            } else {
-                loadQuestion(currentQuestion);
-            }
+        function saveScoreToGoogleSheet(){
+            const studentName = document.getElementById("studentName").value;
+            fetch(GOOGLE_SCRIPT_URL, {
+                method:"POST", mode:"no-cors",
+                headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify({ name: studentName, score: totalScore, pass: passCount, fail: failCount })
+            }).then(() => {
+                console.log("Saved To Google Sheet");
+            }).catch(error => console.log("Google Sheet Error:", error));
         }
 
-        function evaluateFinalResult() {
-            document.getElementById("questionNumber").innerHTML = "สรุปผลการทดสอบ";
-            document.getElementById("englishText").innerHTML = "TEST COMPLETED";
-            document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
-            document.getElementById("countdown").innerHTML = "-";
-            
-            const startBtn = document.getElementById("startBtn");
-            startBtn.disabled = true; 
-            startBtn.innerHTML = "✅ จบการทดสอบ";
-
-            if (passCount >= PASS_REQUIREMENT) {
-                document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! กดปุ่มเลือกของรางวัลที่ตู้ได้เลย";
-                document.getElementById("status").className = "status pass";
-                
-                db.ref('machine').update({ 
-                    status: 'unlocked',
-                    currentUser: document.getElementById("studentName").value 
-                });
-            } else {
-                document.getElementById("status").innerHTML = "❌ เสียใจด้วย คะแนนรวมไม่ถึงเกณฑ์";
-                document.getElementById("status").className = "status fail";
-                db.ref('machine').update({ status: 'ready' });
-            }
-            saveToGAS();
+        function playPassSound(){
+            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+            audio.play().catch(e => console.log("Audio Play Blocked:", e));
         }
 
-        // ======================================
-        // 5. ตัวช่วยคำนวณและบันทึกข้อมูล
-        // ======================================
-        function similarity(s1, s2) {
-            s1 = s1.toLowerCase().replace(/[.,!?\s]/g, "");
-            s2 = s2.toLowerCase().replace(/[.,!?\s]/g, "");
-            
-            let same = 0;
-            const len = Math.max(s1.length, s2.length);
-            if (len === 0) return 0;
-            for (let i = 0; i < Math.min(s1.length, s2.length); i++) {
-                if (s1[i] === s2[i]) same++;
-            }
-            return Math.floor((same / len) * 100);
-        }
-
-        function saveToGAS() {
-            const formData = new URLSearchParams();
-            formData.append("name", document.getElementById("studentName").value);
-            formData.append("score", totalScore);
-            formData.append("pass", passCount);
-            formData.append("fail", failCount);
-            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: formData });
+        function playFailSound(){
+            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+            audio.play().catch(e => console.log("Audio Play Blocked:", e));
         }
     </script>
 </body>
