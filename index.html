@@ -790,14 +790,14 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 <div class="main-grid">
 
 <div class="sentence-box glass">
-<div class="question-number" id="questionNumber">ข้อที่ 1 / 10</div>
-<div class="english-text" id="englishText">Listen to me please</div>
-<div class="thai-text" id="thaiText">กรุณาฟังครูครับ</div>
+<div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
+<div class="english-text" id="englishText">Loading...</div>
+<div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
 <div class="countdown-wrapper">
 <div class="countdown" id="countdown">01:00</div>
 </div>
 <div class="controls">
-<button class="start-btn" id="startBtn" onclick="startRecognition()">🎤 เริ่มพูด</button>
+<button class="start-btn" id="startBtn" onclick="startRecognition()" disabled>⏳ กรุณารอสักครู่</button>
 </div>
 </div>
 
@@ -905,6 +905,9 @@ const PASS_REQUIREMENT = 5;
 // รหัสผ่าน Admin (คุณสามารถเปลี่ยนเป็นรหัสที่ต้องการได้ที่นี่)
 const ADMIN_PASSWORD = "1234"; 
 
+// 🔗 นำ URL ของเว็บแอป GAS จากขั้นตอนที่ 2 มาวางตรงนี้ครับ 
+const GAS_QUESTION_URL = "นำ_URL_เว็บแอป_GAS_จากขั้นตอนที่_2_มาวางตรงนี้";
+
 // ตั้งค่า Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
@@ -922,18 +925,8 @@ const db = firebase.database();
 // ======================================
 // 2. QUESTIONS
 // ======================================
-const questions = [
-{ english:"Listen to me please", thai:"กรุณาฟังครูครับ" },
-{ english:"Turn on the power", thai:"เปิดแหล่งจ่ายไฟ" },
-{ english:"Turn off the power", thai:"ปิดแหล่งจ่ายไฟ" },
-{ english:"Plug it in", thai:"เสียบปลั๊ก" },
-{ english:"Unplug it please", thai:"ถอดปลั๊กด้วยครับ" },
-{ english:"Check the circuit first", thai:"ตรวจเช็กวงจรก่อน" },
-{ english:"Please be careful", thai:"ระมัดระวังด้วยครับ" },
-{ english:"Have you finished", thai:"ทำงานเสร็จหรือยัง" },
-{ english:"Hurry up please", thai:"เร่งมือหน่อยครับ" },
-{ english:"Times up stop working", thai:"หมดเวลาแล้ว หยุดปฏิบัติงาน" }
-];
+// เปลี่ยนจาก Hardcode เป็น Array ว่างเพื่อรองรับข้อมูล Dynamic
+let questions = [];
 
 // ======================================
 // VARIABLES
@@ -961,7 +954,8 @@ let currentStock = {
 // ======================================
 // INIT
 // ======================================
-window.onload = () => {
+// เปลี่ยนให้รองรับ async เพื่อรอข้อสอบจาก GAS
+window.onload = async () => {
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
@@ -1019,20 +1013,50 @@ recognition.onerror = function(event){
     document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
     document.getElementById("status").className = "status fail";
     document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
-    document.getElementById("startBtn").disabled = false;
-    document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
+    
+    // ตรวจสอบก่อนเปิดปุ่มว่าโหลดข้อสอบเสร็จแล้ว
+    if(questions.length > 0) {
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
+    }
 };
 
 recognition.onend = function() {
     if(isRunning) { console.log("Recognition ended unexpectedly."); }
 };
 
-loadQuestion(currentQuestion);
+// --- ดึงข้อสอบจาก GAS ให้เรียบร้อยก่อนเริ่มระบบอื่นๆ ---
+await fetchQuestionsFromGAS();
+
+// เริ่มทำงานฟังก์ชันติดตามสถานะต่างๆ หลังโหลดข้อสอบเสร็จ
 monitorMachine(); 
 monitorAdminSwitches(); 
 monitorStock(); 
 monitorTestTime(); // เรียกใช้การตรวจสอบเวลาจาก Firebase
 };
+
+// ======================================
+// 2.5 FETCH QUESTIONS FROM GAS
+// ======================================
+async function fetchQuestionsFromGAS() {
+    try {
+        const response = await fetch(GAS_QUESTION_URL);
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            questions = data;
+            currentQuestion = 0;
+            loadQuestion(currentQuestion); // แสดงข้อสอบข้อแรก
+        } else {
+            document.getElementById("englishText").innerHTML = "Error";
+            document.getElementById("thaiText").innerHTML = "ไม่พบข้อสอบในระบบ กรุณาตรวจสอบ Google Sheet";
+        }
+    } catch (error) {
+        console.error("Error fetching questions:", error);
+        document.getElementById("englishText").innerHTML = "Connection Error";
+        document.getElementById("thaiText").innerHTML = "ไม่สามารถเชื่อมต่อคลังข้อสอบได้";
+    }
+}
 
 // ======================================
 // 3. FIREBASE MACHINE MONITOR
@@ -1047,7 +1071,8 @@ function monitorMachine() {
             ui.innerHTML = "MACHINE READY";
             ui.style.color = "#1dff95";
             
-            if (!isRunning && currentQuestion < questions.length) {
+            // เปิดปุ่มก็ต่อเมื่อมีข้อสอบและไม่ได้อยู่ในระหว่างสอบ
+            if (!isRunning && questions.length > 0 && currentQuestion < questions.length) {
                 startBtn.disabled = false;
                 startBtn.innerHTML = "🎤 เริ่มพูด";
             }
@@ -1216,6 +1241,8 @@ function forceEndTest() {
 }
 
 function loadQuestion(index){
+    if (!questions || questions.length === 0) return;
+
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
     document.getElementById("englishText").innerHTML = questions[index].english;
     document.getElementById("thaiText").innerHTML = questions[index].thai;
@@ -1303,7 +1330,7 @@ function startRecognition(){
     const studentName = document.getElementById("studentName").value;
 
     if(studentName.trim() === ""){
-        alert("กรุณากรอกชื่อ");
+        alert("กรุณากรอกชื่อก่อนเริ่มทำแบบทดสอบ");
         return;
     }
 
@@ -1334,8 +1361,11 @@ function startRecognition(){
         document.getElementById("status").innerHTML = "เปิดไมค์ไม่ได้ ❌";
         document.getElementById("status").className = "status fail";
         document.getElementById("heardText").innerHTML = "กรุณารีเฟรชหน้าเว็บและอนุญาตให้ใช้ไมค์";
-        startBtn.disabled = false;
-        startBtn.innerHTML = "🎤 ลองพูดใหม่";
+        
+        if (questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 ลองพูดใหม่";
+        }
         return; 
     }
 }
