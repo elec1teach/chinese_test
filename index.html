@@ -1,18 +1,38 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <title>AI Pronunciation Test Station</title>
+
+<!-- 🚀 สคริปต์บังคับเปิดใน Google Chrome / External Browser อัตโนมัติ -->
+<script>
+(function forceExternalBrowser() {
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    var currentUrl = window.location.href;
+
+    var isLine = /Line/i.test(userAgent);
+    var isFacebook = /FBAN|FBAV|Messenger/i.test(userAgent);
+    var isAndroid = /Android/i.test(userAgent);
+
+    if (isLine) {
+        if (currentUrl.indexOf("openExternalBrowser=1") === -1) {
+            var separator = currentUrl.indexOf("?") > -1 ? "&" : "?";
+            window.location.href = currentUrl + separator + "openExternalBrowser=1";
+        }
+    } else if (isFacebook && isAndroid) {
+        var urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, "");
+        var chromeIntent = "intent://" + urlWithoutProtocol + "#Intent;scheme=https;package=com.android.chrome;end;";
+        window.location.href = chromeIntent;
+    }
+})();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-<!-- นำเข้า Firebase SDK เพื่อการสื่อสารกับ ESP32 และฐานข้อมูล -->
+<!-- นำเข้า Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -31,726 +51,149 @@
 --muted:#9db2d9;
 }
 
-*{
-box-sizing:border-box;
-}
+*{ box-sizing:border-box; }
 
 body{
-margin:0;
-padding:20px;
-font-family:'Prompt',sans-serif;
-color:var(--text);
-background:
-radial-gradient(circle at 10% 20%, rgba(53,216,255,0.18), transparent 25%),
-radial-gradient(circle at 90% 10%, rgba(181,108,255,0.15), transparent 25%),
-linear-gradient(to bottom,var(--bg1),var(--bg2));
-overflow-x:hidden;
-min-height:100vh;
+margin:0; padding:20px; font-family:'Prompt',sans-serif; color:var(--text);
+background: radial-gradient(circle at 10% 20%, rgba(53,216,255,0.18), transparent 25%),
+            radial-gradient(circle at 90% 10%, rgba(181,108,255,0.15), transparent 25%),
+            linear-gradient(to bottom,var(--bg1),var(--bg2));
+overflow-x:hidden; min-height:100vh;
 }
 
 /* GRID EFFECT */
 body::before{
-content:"";
-position:fixed;
-inset:0;
-pointer-events:none;
-background:
-linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-background-size:40px 40px;
-opacity:0.25;
+content:""; position:fixed; inset:0; pointer-events:none;
+background: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+background-size:40px 40px; opacity:0.25;
 }
 
 /* FLOATING LIGHTS */
-.orb{
-position:fixed;
-border-radius:50%;
-filter:blur(45px);
-opacity:0.25;
-pointer-events:none;
-animation:float 8s ease-in-out infinite;
-}
+.orb{ position:fixed; border-radius:50%; filter:blur(45px); opacity:0.25; pointer-events:none; animation:float 8s ease-in-out infinite; }
+.orb1{ width:240px; height:240px; background:var(--cyan); top:60px; left:-60px; }
+.orb2{ width:300px; height:300px; background:var(--violet); top:100px; right:-100px; animation-delay:-3s; }
+.orb3{ width:180px; height:180px; background:var(--blue); bottom:-50px; left:45%; animation-delay:-5s; }
+@keyframes float{ 0%,100%{ transform:translateY(0px); } 50%{ transform:translateY(-25px); } }
 
-.orb1{
-width:240px;
-height:240px;
-background:var(--cyan);
-top:60px;
-left:-60px;
-}
+.container{ max-width:1150px; margin:auto; position:relative; z-index:1; }
 
-.orb2{
-width:300px;
-height:300px;
-background:var(--violet);
-top:100px;
-right:-100px;
-animation-delay:-3s;
-}
-
-.orb3{
-width:180px;
-height:180px;
-background:var(--blue);
-bottom:-50px;
-left:45%;
-animation-delay:-5s;
-}
-
-@keyframes float{
-0%,100%{ transform:translateY(0px); }
-50%{ transform:translateY(-25px); }
-}
-
-/* MAIN CONTAINER */
-.container{
-max-width:1150px;
-margin:auto;
-position:relative;
-z-index:1;
-}
-
-/* GLASS PANEL */
-.glass{
-background:rgba(255,255,255,0.05);
-border:1px solid var(--line);
-backdrop-filter:blur(18px);
--webkit-backdrop-filter:blur(18px);
-box-shadow: 0 15px 40px rgba(0,0,0,0.35), 0 0 20px rgba(53,216,255,0.05);
-}
+.glass{ background:rgba(255,255,255,0.05); border:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow: 0 15px 40px rgba(0,0,0,0.35), 0 0 20px rgba(53,216,255,0.05); }
 
 /* HEADER */
-.header{
-padding:30px;
-border-radius:30px;
-margin-bottom:22px;
-position:relative;
-overflow:hidden;
-}
+.header{ padding:30px; border-radius:30px; margin-bottom:22px; position:relative; overflow:hidden; }
+.header::before{ content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(53,216,255,0.07), transparent); transform:translateX(-100%); animation:scan 7s linear infinite; }
+@keyframes scan{ 100%{ transform:translateX(100%); } }
+.top-header{ display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+.logo-area{ display:flex; align-items:center; gap:18px; }
+.logo{ width:70px; height:70px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:30px; font-weight:900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 0 30px rgba(53,216,255,0.35); }
+h1{ margin:0; font-size:52px; font-family:'Orbitron',sans-serif; letter-spacing:1px; line-height:1.1; }
+.subtitle{ margin-top:12px; font-size:20px; color:var(--muted); line-height:1.8; }
 
-.header::before{
-content:"";
-position:absolute;
-inset:0;
-background: linear-gradient(90deg, transparent, rgba(53,216,255,0.07), transparent);
-transform:translateX(-100%);
-animation:scan 7s linear infinite;
-}
-
-@keyframes scan{
-100%{ transform:translateX(100%); }
-}
-
-.top-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:20px;
-flex-wrap:wrap;
-}
-
-.logo-area{
-display:flex;
-align-items:center;
-gap:18px;
-}
-
-.logo{
-width:70px;
-height:70px;
-border-radius:22px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-family:'Orbitron',sans-serif;
-font-size:30px;
-font-weight:900;
-background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet));
-color:#07101f;
-box-shadow: 0 0 30px rgba(53,216,255,0.35);
-}
-
-h1{
-margin:0;
-font-size:52px;
-font-family:'Orbitron',sans-serif;
-letter-spacing:1px;
-line-height:1.1;
-}
-
-.subtitle{
-margin-top:12px;
-font-size:20px;
-color:var(--muted);
-line-height:1.8;
-}
-
-/* Status & Admin area */
-.status-area {
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-.live{
-padding:12px 20px;
-border-radius:999px;
-background:rgba(29,255,149,0.08);
-border:1px solid rgba(29,255,149,0.25);
-color:#87ffca;
-font-weight:bold;
-letter-spacing:2px;
-font-size:14px;
-display:flex;
-align-items:center;
-gap:10px;
-transition:0.3s;
-}
-
-.live::before{
-content:"";
-width:10px;
-height:10px;
-border-radius:50%;
-background:currentColor;
-box-shadow:0 0 15px currentColor;
-}
-
-.admin-btn {
-background: rgba(255,255,255,0.1);
-border: 1px solid rgba(255,255,255,0.2);
-color: white;
-width: 45px;
-height: 45px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-font-size: 20px;
-transition: 0.3s;
-}
-.admin-btn:hover {
-background: rgba(255,255,255,0.2);
-transform: scale(1.1);
-}
+.status-area { display:flex; align-items:center; gap:15px; }
+.live{ padding:12px 20px; border-radius:999px; background:rgba(29,255,149,0.08); border:1px solid rgba(29,255,149,0.25); color:#87ffca; font-weight:bold; letter-spacing:2px; font-size:14px; display:flex; align-items:center; gap:10px; transition:0.3s; }
+.live::before{ content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 15px currentColor; }
+.admin-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; }
+.admin-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
 
 /* INPUT */
-.login-box{
-margin-bottom:20px;
-}
-
-.login-box input{
-width:100%;
-padding:18px;
-border-radius:18px;
-border:1px solid rgba(255,255,255,0.12);
-background:rgba(7,12,30,0.75);
-color:white;
-font-size:20px;
-outline:none;
-transition:0.3s;
-}
-
-.login-box input::placeholder{
-color:#8ea5cf;
-}
-
-.login-box input:focus{
-border-color:rgba(53,216,255,0.45);
-box-shadow: 0 0 20px rgba(53,216,255,0.15);
-}
+.login-box{ margin-bottom:20px; }
+.login-box input{ width:100%; padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:20px; outline:none; transition:0.3s; }
+.login-box input::placeholder{ color:#8ea5cf; }
+.login-box input:focus{ border-color:rgba(53,216,255,0.45); box-shadow: 0 0 20px rgba(53,216,255,0.15); }
 
 /* STATS */
-.top-bar{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:15px;
-margin-bottom:20px;
-}
-
-.stat{
-padding:18px;
-border-radius:22px;
-position:relative;
-overflow:hidden;
-text-align:center;
-}
-
-.stat::after{
-content:"";
-position:absolute;
-bottom:0;
-left:0;
-width:100%;
-height:4px;
-background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue));
-}
-
-.stat-title{
-font-size:15px;
-color:var(--muted);
-}
-
-.stat-value{
-margin-top:10px;
-font-size:34px;
-font-weight:bold;
-font-family:'Orbitron',sans-serif;
-}
+.top-bar{ display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
+.stat{ padding:18px; border-radius:22px; position:relative; overflow:hidden; text-align:center; }
+.stat::after{ content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat-title{ font-size:15px; color:var(--muted); }
+.stat-value{ margin-top:10px; font-size:34px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
 /* MAIN GRID */
-.main-grid{
-display:grid;
-grid-template-columns:1.3fr 0.8fr;
-gap:20px;
-}
+.main-grid{ display:grid; grid-template-columns:1.3fr 0.8fr; gap:20px; }
 
-/* QUESTION PANEL */
-.sentence-box{
-padding:35px;
-border-radius:30px;
-position:relative;
-overflow:hidden;
-text-align:center;
-}
-
-.question-number{
-display:inline-block;
-padding:10px 18px;
-border-radius:999px;
-background:rgba(255,255,255,0.06);
-font-size:14px;
-letter-spacing:2px;
-color:#c6d6f4;
-}
-
-.english-text{
-margin-top:25px;
-font-size:58px;
-font-weight:900;
-line-height:1.15;
-font-family:'Orbitron',sans-serif;
-text-shadow: 0 0 20px rgba(53,216,255,0.15);
-}
-
-.thai-text{
-margin-top:14px;
-font-size:24px;
-color:#b6c6e8;
-line-height:1.7;
-}
+.sentence-box{ padding:35px; border-radius:30px; position:relative; overflow:hidden; text-align:center; }
+.question-number{ display:inline-block; padding:10px 18px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
+.english-text{ margin-top:25px; font-size:58px; font-weight:900; line-height:1.15; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
+.thai-text{ margin-top:14px; font-size:24px; color:#b6c6e8; line-height:1.7; }
 
 /* COUNTDOWN */
-.countdown-wrapper{
-margin:35px auto 10px;
-width:180px;
-height:180px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-position:relative;
-background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan));
-animation:pulse 2s infinite;
-box-shadow: 0 0 35px rgba(53,216,255,0.2);
-}
+.countdown-wrapper{ margin:35px auto 10px; width:180px; height:180px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
+.countdown-wrapper::before{ content:""; position:absolute; width:145px; height:145px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); }
+.countdown{ position:relative; font-size:42px; font-family:'Orbitron',sans-serif; font-weight:900; z-index:1; text-shadow: 0 0 18px rgba(53,216,255,0.3); }
+@keyframes pulse{ 50%{ transform:scale(1.04); } }
 
-.countdown-wrapper::before{
-content:"";
-position:absolute;
-width:145px;
-height:145px;
-border-radius:50%;
-background:#07101f;
-border:1px solid rgba(255,255,255,0.1);
-}
-
-.countdown{
-position:relative;
-font-size:42px; /* ลดจาก 72px เพื่อให้พอดีกับรูปแบบ MM:SS */
-font-family:'Orbitron',sans-serif;
-font-weight:900;
-z-index:1;
-text-shadow: 0 0 18px rgba(53,216,255,0.3);
-}
-
-@keyframes pulse{
-50%{ transform:scale(1.04); }
-}
-
-/* BUTTON */
-.controls{
-margin-top:25px;
-text-align:center;
-}
-
-button{
-border:none;
-padding:18px 35px;
-border-radius:18px;
-cursor:pointer;
-font-size:20px;
-font-weight:bold;
-transition:0.3s;
-}
-
-button:disabled { 
-filter: grayscale(100%); 
-cursor: not-allowed; 
-opacity: 0.5; 
-}
-
-.start-btn{
-background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet));
-color:#07101f;
-box-shadow: 0 10px 35px rgba(53,216,255,0.2);
-}
-
-.start-btn:hover:not(:disabled){
-transform:translateY(-3px) scale(1.02);
-box-shadow: 0 15px 45px rgba(53,216,255,0.3);
-}
+.controls{ margin-top:25px; text-align:center; }
+button{ border:none; padding:18px 35px; border-radius:18px; cursor:pointer; font-size:20px; font-weight:bold; transition:0.3s; }
+button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
+.start-btn{ background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); }
+.start-btn:hover:not(:disabled){ transform:translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53,216,255,0.3); }
 
 /* RESULT BOX */
-.result-box{
-padding:35px;
-border-radius:30px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-}
+.result-box{ padding:35px; border-radius:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+.score{ font-size:90px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
+.status{ margin-top:10px; font-size:36px; font-weight:bold; }
+.pass{ color:var(--green); text-shadow: 0 0 18px rgba(29,255,149,0.25); }
+.fail{ color:var(--red); text-shadow: 0 0 18px rgba(255,77,109,0.25); }
+.heard-text{ margin-top:18px; width:100%; padding:16px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#c0d0ed; font-size:18px; min-height:60px; display:flex; align-items:center; justify-content:center; }
 
-.score{
-font-size:90px;
-font-weight:900;
-font-family:'Orbitron',sans-serif;
-background: linear-gradient(135deg, var(--cyan), white, var(--violet));
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-text-shadow: 0 0 25px rgba(53,216,255,0.2);
-}
+.teacher-box{ margin-top:25px; padding:20px; border-radius:22px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.9; font-size:18px; text-align:center; }
+.teacher-title{ font-weight:bold; color:#90dfff; margin-bottom:8px; font-size:20px; }
+.footer{ margin-top:25px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; }
 
-.status{
-margin-top:10px;
-font-size:36px;
-font-weight:bold;
-}
-
-.pass{
-color:var(--green);
-text-shadow: 0 0 18px rgba(29,255,149,0.25);
-}
-
-.fail{
-color:var(--red);
-text-shadow: 0 0 18px rgba(255,77,109,0.25);
-}
-
-.heard-text{
-margin-top:18px;
-width:100%;
-padding:16px;
-border-radius:18px;
-background:rgba(255,255,255,0.05);
-border:1px solid rgba(255,255,255,0.08);
-color:#c0d0ed;
-font-size:18px;
-min-height:60px;
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-/* TEACHER BOX */
-.teacher-box{
-margin-top:25px;
-padding:20px;
-border-radius:22px;
-background:rgba(255,255,255,0.03);
-border:1px solid rgba(255,255,255,0.08);
-line-height:1.9;
-font-size:18px;
-text-align:center;
-}
-
-.teacher-title{
-font-weight:bold;
-color:#90dfff;
-margin-bottom:8px;
-font-size:20px;
-}
-
-/* FOOTER */
-.footer{
-margin-top:25px;
-text-align:center;
-color:#92a4c9;
-font-size:14px;
-letter-spacing:2px;
-}
-
-/* ==================================
-   ADMIN MODAL & SWITCH CSS 
-   ================================== */
-.modal-overlay {
-display: none;
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.8);
-z-index: 100;
-align-items: center;
-justify-content: center;
-backdrop-filter: blur(5px);
-}
-
-.modal-content {
-width: 90%;
-max-width: 400px;
-padding: 30px;
-border-radius: 25px;
-text-align: center;
-position: relative;
-/* ทำให้ Modal มี Scroll หากเนื้อหาล้นในจอมือถือ */
-max-height: 90vh;
-overflow-y: auto;
-}
-
-.close-modal {
-position: absolute;
-top: 15px;
-right: 20px;
-font-size: 24px;
-color: var(--muted);
-cursor: pointer;
-background: none;
-border: none;
-padding: 0;
-}
-
+/* ADMIN MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+.modal-content { width: 90%; max-width: 400px; padding: 30px; border-radius: 25px; text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
+.close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
-
-.modal-title {
-font-size: 24px;
-font-weight: bold;
-margin-bottom: 20px;
-color: var(--cyan);
-}
-
+.modal-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); }
 .admin-login-group { display: block; }
 .admin-control-group { display: none; }
+.admin-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; font-size: 18px; margin-bottom: 15px; text-align: center; }
+.admin-btn-action { width: 100%; background: var(--blue); color: white; padding: 15px; border-radius: 12px; }
+.switch-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.switch-label { font-size: 18px; font-weight: 500; }
+.switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--cyan); box-shadow: 0 0 15px rgba(53,216,255,0.5); }
+input:checked + .slider:before { transform: translateX(26px); }
 
-.admin-input {
-width: 100%;
-padding: 15px;
-border-radius: 12px;
-border: 1px solid rgba(255,255,255,0.2);
-background: rgba(0,0,0,0.5);
-color: white;
-font-size: 18px;
-margin-bottom: 15px;
-text-align: center;
-}
-
-.admin-btn-action {
-width: 100%;
-background: var(--blue);
-color: white;
-padding: 15px;
-border-radius: 12px;
-}
-
-/* Custom Toggle Switch */
-.switch-container {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 15px;
-background: rgba(255,255,255,0.05);
-padding: 15px 20px;
-border-radius: 15px;
-border: 1px solid rgba(255,255,255,0.1);
-}
-
-.switch-label {
-font-size: 18px;
-font-weight: 500;
-}
-
-.switch {
-position: relative;
-display: inline-block;
-width: 60px;
-height: 34px;
-}
-
-.switch input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-
-.slider {
-position: absolute;
-cursor: pointer;
-top: 0; left: 0; right: 0; bottom: 0;
-background-color: rgba(255,255,255,0.2);
-transition: .4s;
-border-radius: 34px;
-}
-
-.slider:before {
-position: absolute;
-content: "";
-height: 26px;
-width: 26px;
-left: 4px;
-bottom: 4px;
-background-color: white;
-transition: .4s;
-border-radius: 50%;
-}
-
-input:checked + .slider {
-background-color: var(--cyan);
-box-shadow: 0 0 15px rgba(53,216,255,0.5);
-}
-
-input:checked + .slider:before {
-transform: translateX(26px);
-}
-
-/* Admin Stock Control CSS */
-.stock-control-container {
-background: rgba(255,255,255,0.05);
-padding: 15px 20px;
-border-radius: 15px;
-border: 1px solid rgba(255,255,255,0.1);
-margin-bottom: 15px;
-}
-
-.stock-item {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 12px;
-}
-
-.stock-item:last-child {
-margin-bottom: 0;
-}
-
-.stock-label {
-font-size: 16px;
-font-weight: 500;
-display: flex;
-align-items: center;
-gap: 10px;
-}
-
-.stock-display-badge {
-background: rgba(53,216,255,0.2);
-color: var(--cyan);
-padding: 2px 10px;
-border-radius: 8px;
-font-weight: bold;
-min-width: 40px;
-display: inline-block;
-text-align: center;
-}
-
-.stock-btns {
-display: flex;
-gap: 8px;
-}
-
-.stock-btn {
-width: 36px;
-height: 36px;
-padding: 0;
-border-radius: 8px;
-background: rgba(255,255,255,0.1);
-border: 1px solid rgba(255,255,255,0.2);
-color: white;
-font-size: 20px;
-display: flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-transition: 0.3s;
-}
-
-.stock-btn:hover {
-background: var(--blue);
-border-color: var(--blue);
-}
-
+.stock-control-container { background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
+.stock-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.stock-item:last-child { margin-bottom: 0; }
+.stock-label { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+.stock-display-badge { background: rgba(53,216,255,0.2); color: var(--cyan); padding: 2px 10px; border-radius: 8px; font-weight: bold; min-width: 40px; display: inline-block; text-align: center; }
+.stock-btns { display: flex; gap: 8px; }
+.stock-btn { width: 36px; height: 36px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+.stock-btn:hover { background: var(--blue); border-color: var(--blue); }
 .stock-btn.minus { color: var(--red); }
 .stock-btn.minus:hover { background: var(--red); color: white; border-color: var(--red); }
 .stock-btn.plus { color: var(--green); }
 .stock-btn.plus:hover { background: var(--green); color: white; border-color: var(--green); }
 
 /* RESPONSIVE */
-@media(max-width:900px){
-.main-grid{ grid-template-columns:1fr; }
-h1{ font-size:38px; }
-.english-text{ font-size:42px; }
-}
-
+@media(max-width:900px){ .main-grid{ grid-template-columns:1fr; } h1{ font-size:38px; } .english-text{ font-size:42px; } }
 @media(max-width:600px){
-body{ padding:8px; }
-.header{ padding:15px; margin-bottom:12px; border-radius:20px; }
-.top-header{ gap:10px; }
-.logo-area{ gap:12px; }
-.logo{ width:45px; height:45px; font-size:18px; border-radius:12px; }
-h1{ font-size:20px; letter-spacing:0px; }
-.subtitle{ font-size:12px; margin-top:5px; line-height:1.4; }
-.live{ padding:6px 12px; font-size:10px; }
-.admin-btn { width: 35px; height: 35px; font-size: 16px; }
-
-.login-box{ margin-bottom:12px; }
-.login-box input{ padding:12px; font-size:16px; border-radius:12px; }
-
-.top-bar{ gap:8px; margin-bottom:12px; grid-template-columns:repeat(3,1fr); }
-.stat{ padding:10px; border-radius:15px; }
-.stat-title{ font-size:10px; }
-.stat-value{ margin-top:5px; font-size:18px; }
-
-.sentence-box{ padding:20px; border-radius:20px; }
-.question-number{ font-size:12px; padding:6px 12px; }
-.english-text{ font-size:26px; margin-top:15px; }
-.thai-text{ font-size:16px; margin-top:8px; }
-
-.countdown-wrapper{ margin:20px auto 10px; width:100px; height:100px; }
-.countdown-wrapper::before{ width:80px; height:80px; }
-.countdown{ font-size:28px; } /* ลดจาก 36px สำหรับมือถือ */
-
-.controls{ margin-top:15px; }
-button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
-
-.result-box{ padding:20px; border-radius:20px; margin-top:12px; }
-.score{ font-size:50px; }
-.status{ font-size:24px; margin-top:5px; }
-.heard-text{ font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
-
-.teacher-box{ margin-top:15px; padding:15px; border-radius:15px; font-size:14px; }
-.teacher-title{ font-size:16px; margin-bottom:5px; }
-.footer{ margin-top:15px; margin-bottom:15px; font-size:12px; }
+body{ padding:8px; } .header{ padding:15px; margin-bottom:12px; border-radius:20px; } .top-header{ gap:10px; } .logo-area{ gap:12px; } .logo{ width:45px; height:45px; font-size:18px; border-radius:12px; } h1{ font-size:20px; letter-spacing:0px; } .subtitle{ font-size:12px; margin-top:5px; line-height:1.4; } .live{ padding:6px 12px; font-size:10px; } .admin-btn { width: 35px; height: 35px; font-size: 16px; }
+.login-box{ margin-bottom:12px; } .login-box input{ padding:12px; font-size:16px; border-radius:12px; }
+.top-bar{ gap:8px; margin-bottom:12px; grid-template-columns:repeat(3,1fr); } .stat{ padding:10px; border-radius:15px; } .stat-title{ font-size:10px; } .stat-value{ margin-top:5px; font-size:18px; }
+.sentence-box{ padding:20px; border-radius:20px; } .question-number{ font-size:12px; padding:6px 12px; } .english-text{ font-size:26px; margin-top:15px; } .thai-text{ font-size:16px; margin-top:8px; }
+.countdown-wrapper{ margin:20px auto 10px; width:100px; height:100px; } .countdown-wrapper::before{ width:80px; height:80px; } .countdown{ font-size:28px; }
+.controls{ margin-top:15px; } button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
+.result-box{ padding:20px; border-radius:20px; margin-top:12px; } .score{ font-size:50px; } .status{ font-size:24px; margin-top:5px; } .heard-text{ font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
+.teacher-box{ margin-top:15px; padding:15px; border-radius:15px; font-size:14px; } .teacher-title{ font-size:16px; margin-bottom:5px; } .footer{ margin-top:15px; margin-bottom:15px; font-size:12px; }
 }
-
 </style>
 </head>
 
 <body>
-
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
 <div class="container">
-
 <div class="header glass">
 <div class="top-header">
 <div class="logo-area">
@@ -787,7 +230,6 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 </div>
 
 <div class="main-grid">
-
 <div class="sentence-box glass">
 <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
 <div class="english-text" id="englishText">Loading...</div>
@@ -805,7 +247,6 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 <div class="status" id="status">รอเริ่มทดสอบ</div>
 <div class="heard-text" id="heardText">AI พร้อมรับเสียง...</div>
 </div>
-
 </div>
 
 <div class="teacher-box glass">
@@ -816,7 +257,6 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 </div>
 
 <div class="footer">AI Reward Learning Machine © 2026</div>
-
 </div>
 
 <!-- Admin Modal Panel -->
@@ -825,24 +265,18 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 <button class="close-modal" onclick="closeAdminModal()">✕</button>
 <div class="modal-title">Admin Panel</div>
 
-<!-- Login Section -->
 <div id="adminLoginGroup" class="admin-login-group">
 <input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
 <button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
 <p id="adminError" style="color:var(--red); font-size:14px; display:none;">รหัสผ่านไม่ถูกต้อง!</p>
 </div>
 
-<!-- Controls Section -->
 <div id="adminControlGroup" class="admin-control-group">
-
-<!-- ปุ่มควบคุมส่วนเคลียร์สถานะ Firebase ที่เพิ่มเข้ามาใหม่ -->
 <div class="switch-container">
     <span class="switch-label">🔄 Reset Status to Ready</span>
     <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="forceReadyStatus()">Clear Status</button>
 </div>
-<!-- สิ้นสุดส่วนเคลียร์สถานะ -->
     
-<!-- ส่วนควบคุม Stock -->
 <div class="stock-control-container">
     <div class="stock-item">
         <div class="stock-label">
@@ -854,7 +288,6 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
             <button class="stock-btn plus" onclick="updateStock('slot1', 1)">+</button>
         </div>
     </div>
-    
     <div class="stock-item">
         <div class="stock-label">
             📦 Slot 2
@@ -866,9 +299,7 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
         </div>
     </div>
 </div>
-<!-- สิ้นสุดส่วนควบคุม Stock -->
 
-<!-- ส่วนควบคุมเวลาทำแบบทดสอบ -->
 <div class="stock-control-container">
     <div class="stock-item">
         <div class="stock-label">
@@ -880,7 +311,6 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
         </div>
     </div>
 </div>
-<!-- สิ้นสุดส่วนควบคุมเวลา -->
 
 <div class="switch-container">
 <span class="switch-label">🔧 Restock Mode</span>
@@ -901,20 +331,13 @@ button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
 </div>
 </div>
 
+<!-- SCRIPT ระบบการทำงานหลัก -->
 <script>
-// ======================================
-// 1. SETTINGS & FIREBASE CONFIG
-// ======================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
 const PASS_REQUIREMENT = 5;
-
-// รหัสผ่าน Admin (คุณสามารถเปลี่ยนเป็นรหัสที่ต้องการได้ที่นี่)
 const ADMIN_PASSWORD = "1234"; 
-
-// 🔗 นำ URL ของเว็บแอป GAS จากขั้นตอนที่ 2 มาวางตรงนี้ครับ 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbwXNCOVd_sTH3_aVFLWudAvMSHx6vhDKy7Fn1PeGZ2ew4WdqjqKLkFAL3zSw8qdP2QN/exec";
 
-// ตั้งค่า Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
     authDomain: "engteststation.firebaseapp.com",
@@ -928,122 +351,95 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ======================================
-// 2. QUESTIONS
-// ======================================
-// เปลี่ยนจาก Hardcode เป็น Array ว่างเพื่อรองรับข้อมูล Dynamic
 let questions = [];
-
-// ======================================
-// VARIABLES
-// ======================================
 let currentQuestion = 0;
 let totalScore = 0;
 let passCount = 0;
 let failCount = 0;
 
 let recognition;
-// ตัวแปรสำหรับจัดการเวลารวม
-let totalTestTimeMinutes = 1; // ค่าเริ่มต้น 1 นาที
+let totalTestTimeMinutes = 1; 
 let totalTimeLeftSeconds = 0;
 let testTimerInterval = null;
-let isTestRunning = false; // เช็คว่าเริ่มทำข้อสอบหรือยัง
-let isRunning = false; // เช็คสถานะไมค์
+let isTestRunning = false; 
+let isRunning = false; 
 let isAdminLoggedIn = false;
 
-// ตัวแปรเก็บ Stock ปัจจุบัน
-let currentStock = {
-    slot1: 0,
-    slot2: 0
-};
+let currentStock = { slot1: 0, slot2: 0 };
 
-// ======================================
-// INIT
-// ======================================
-// เปลี่ยนให้รองรับ async เพื่อรอข้อสอบจาก GAS
 window.onload = async () => {
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-if (!SpeechRecognition) {
-    alert("เบราว์เซอร์ของคุณไม่รองรับระบบแยกแยะเสียง กรุณาเปิดด้วย Google Chrome หรือ Safari");
-    return;
-}
-
-recognition = new SpeechRecognition();
-recognition.lang = 'en-US';
-recognition.interimResults = false;
-recognition.maxAlternatives = 1;
-
-// RESULT HANDLER
-recognition.onresult = function(event){
-    if(!isRunning) return;
-    isRunning = false;
-
-    const speechResult = event.results[0][0].transcript;
-    const target = questions[currentQuestion].english;
-    const score = similarity(target,speechResult);
-
-    document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
-    document.getElementById("score").innerHTML = score + "%";
-    totalScore += score;
-    document.getElementById("totalScore").innerHTML = totalScore;
-
-    if(score >= 80){
-        passCount++;
-        document.getElementById("passCount").innerHTML = passCount;
-        document.getElementById("status").innerHTML = "PASS ✅";
-        document.getElementById("status").className = "status pass";
-        playPassSound();
-    }else{
-        failCount++;
-        document.getElementById("failCount").innerHTML = failCount;
-        document.getElementById("status").innerHTML = "FAIL ❌";
-        document.getElementById("status").className = "status fail";
-        playFailSound();
+    if (!SpeechRecognition) {
+        alert("เบราว์เซอร์ของคุณไม่รองรับระบบแยกแยะเสียง กรุณาเปิดด้วย Google Chrome หรือ Safari");
+        return;
     }
 
-    document.getElementById("startBtn").disabled = true;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
-    setTimeout(() => {
-        // หากเวลายังไม่หมดและยังมีข้อสอบเหลือ ให้ไปข้อต่อไป
-        if (totalTimeLeftSeconds > 0) {
-            nextQuestion();
+    recognition.onresult = function(event){
+        if(!isRunning) return;
+        isRunning = false;
+
+        const speechResult = event.results[0][0].transcript;
+        const target = questions[currentQuestion].english;
+        const score = similarity(target,speechResult);
+
+        document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
+        document.getElementById("score").innerHTML = score + "%";
+        totalScore += score;
+        document.getElementById("totalScore").innerHTML = totalScore;
+
+        if(score >= 80){
+            passCount++;
+            document.getElementById("passCount").innerHTML = passCount;
+            document.getElementById("status").innerHTML = "PASS ✅";
+            document.getElementById("status").className = "status pass";
+            playPassSound();
+        }else{
+            failCount++;
+            document.getElementById("failCount").innerHTML = failCount;
+            document.getElementById("status").innerHTML = "FAIL ❌";
+            document.getElementById("status").className = "status fail";
+            playFailSound();
         }
-    }, 1500);
+
+        document.getElementById("startBtn").disabled = true;
+
+        setTimeout(() => {
+            if (totalTimeLeftSeconds > 0) {
+                nextQuestion();
+            }
+        }, 1500);
+    };
+
+    recognition.onerror = function(event){
+        console.log("Recognition Error:", event.error);
+        isRunning = false; 
+        document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
+        document.getElementById("status").className = "status fail";
+        document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
+        
+        if(questions.length > 0) {
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
+        }
+    };
+
+    recognition.onend = function() {
+        if(isRunning) { console.log("Recognition ended unexpectedly."); }
+    };
+
+    await fetchQuestionsFromGAS();
+    monitorMachine(); 
+    monitorAdminSwitches(); 
+    monitorStock(); 
+    monitorTestTime(); 
 };
 
-// ERROR HANDLER
-recognition.onerror = function(event){
-    console.log("Recognition Error:", event.error);
-    isRunning = false; 
-    document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
-    document.getElementById("status").className = "status fail";
-    document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
-    
-    // ตรวจสอบก่อนเปิดปุ่มว่าโหลดข้อสอบเสร็จแล้ว
-    if(questions.length > 0) {
-        document.getElementById("startBtn").disabled = false;
-        document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
-    }
-};
-
-recognition.onend = function() {
-    if(isRunning) { console.log("Recognition ended unexpectedly."); }
-};
-
-// --- ดึงข้อสอบจาก GAS ให้เรียบร้อยก่อนเริ่มระบบอื่นๆ ---
-await fetchQuestionsFromGAS();
-
-// เริ่มทำงานฟังก์ชันติดตามสถานะต่างๆ หลังโหลดข้อสอบเสร็จ
-monitorMachine(); 
-monitorAdminSwitches(); 
-monitorStock(); 
-monitorTestTime(); // เรียกใช้การตรวจสอบเวลาจาก Firebase
-};
-
-// ======================================
-// 2.5 FETCH QUESTIONS FROM GAS
-// ======================================
 async function fetchQuestionsFromGAS() {
     try {
         const response = await fetch(GAS_QUESTION_URL);
@@ -1052,7 +448,7 @@ async function fetchQuestionsFromGAS() {
         if (Array.isArray(data) && data.length > 0) {
             questions = data;
             currentQuestion = 0;
-            loadQuestion(currentQuestion); // แสดงข้อสอบข้อแรก
+            loadQuestion(currentQuestion);
         } else {
             document.getElementById("englishText").innerHTML = "Error";
             document.getElementById("thaiText").innerHTML = "ไม่พบข้อสอบในระบบ กรุณาตรวจสอบ Google Sheet";
@@ -1064,9 +460,6 @@ async function fetchQuestionsFromGAS() {
     }
 }
 
-// ======================================
-// 3. FIREBASE MACHINE MONITOR
-// ======================================
 function monitorMachine() {
     db.ref('machine/status').on('value', (snap) => {
         const status = snap.val();
@@ -1077,7 +470,6 @@ function monitorMachine() {
             ui.innerHTML = "MACHINE READY";
             ui.style.color = "#1dff95";
             
-            // เปิดปุ่มก็ต่อเมื่อมีข้อสอบและไม่ได้อยู่ในระหว่างสอบ
             if (!isRunning && questions.length > 0 && currentQuestion < questions.length) {
                 startBtn.disabled = false;
                 startBtn.innerHTML = "🎤 เริ่มพูด";
@@ -1099,20 +491,16 @@ function monitorMachine() {
 function monitorTestTime() {
     db.ref('machine/testDurationMinutes').on('value', (snap) => {
         let mins = snap.val();
-        if (!mins) { mins = 1; } // ถ้ายังไม่เคยตั้งค่า ให้เป็น 1 นาที
+        if (!mins) { mins = 1; } 
         totalTestTimeMinutes = mins;
         document.getElementById("adminTimeInput").value = mins;
         
-        // อัปเดตหน้าจอถ้ายังไม่ได้เริ่มทำข้อสอบ
         if (!isTestRunning) {
             updateTimerDisplay(totalTestTimeMinutes * 60);
         }
     });
 }
 
-// ======================================
-// 4. ADMIN PANEL FUNCTIONS
-// ======================================
 function openAdminModal() {
     document.getElementById("adminModal").style.display = "flex";
     if(isAdminLoggedIn) {
@@ -1126,9 +514,7 @@ function openAdminModal() {
     }
 }
 
-function closeAdminModal() {
-    document.getElementById("adminModal").style.display = "none";
-}
+function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; }
 
 function verifyAdmin() {
     const pass = document.getElementById("adminPassword").value;
@@ -1141,66 +527,38 @@ function verifyAdmin() {
     }
 }
 
-// ฟังก์ชันเพิ่มใหม่สำหรับการรีเซ็ตสถานะบน Firebase เป็น Ready 
 function forceReadyStatus() {
     db.ref('machine/status').set('ready')
-        .then(() => {
-            alert("✅ ระบบถูกรีเซ็ตสถานะเป็น Ready สำหรับการทดสอบเรียบร้อยแล้ว!");
-        })
-        .catch((error) => {
-            alert("❌ เกิดข้อผิดพลาดในการอัปเดต Firebase: " + error);
-        });
+        .then(() => alert("✅ ระบบถูกรีเซ็ตสถานะเป็น Ready สำหรับการทดสอบเรียบร้อยแล้ว!"))
+        .catch((error) => alert("❌ เกิดข้อผิดพลาด: " + error));
 }
 
-// ฟังก์ชันเพิ่ม/ลด Stock
 function updateStock(slot, changeAmount) {
     let newValue = currentStock[slot] + changeAmount;
-    
-    // ป้องกันไม่ให้ค่าติดลบ
-    if (newValue < 0) {
-        newValue = 0;
-    }
-    
-    // บันทึกค่าใหม่ลง Firebase
+    if (newValue < 0) newValue = 0;
     db.ref(`machine/stock/${slot}`).set(newValue);
 }
 
-// ติดตามค่า Stock แบบ Real-time
 function monitorStock() {
     db.ref('machine/stock').on('value', (snap) => {
         const data = snap.val();
         if (data) {
             currentStock.slot1 = data.slot1 || 0;
             currentStock.slot2 = data.slot2 || 0;
-            
-            // อัปเดตตัวเลขในหน้า Admin
             document.getElementById("slot1StockUI").innerText = currentStock.slot1;
             document.getElementById("slot2StockUI").innerText = currentStock.slot2;
         }
     });
 }
 
-// อัปเดตค่าสวิตช์ไปยัง Firebase เมื่อมีการกด
-function toggleRestock(isChecked) {
-    db.ref('machine/restock').set(isChecked);
-}
+function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
+function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
 
-function toggleTest(isChecked) {
-    db.ref('machine/test').set(isChecked);
-}
-
-// ดึงสถานะปัจจุบันของสวิตช์จาก Firebase แบบ Real-time
 function monitorAdminSwitches() {
-    db.ref('machine/restock').on('value', (snap) => {
-        document.getElementById("restockSwitch").checked = snap.val() || false;
-    });
-    
-    db.ref('machine/test').on('value', (snap) => {
-        document.getElementById("testSwitch").checked = snap.val() || false;
-    });
+    db.ref('machine/restock').on('value', (snap) => { document.getElementById("restockSwitch").checked = snap.val() || false; });
+    db.ref('machine/test').on('value', (snap) => { document.getElementById("testSwitch").checked = snap.val() || false; });
 }
 
-// ฟังก์ชันบันทึกเวลาไปที่ Firebase
 function updateTestTime() {
     let newTime = parseInt(document.getElementById("adminTimeInput").value);
     if (newTime >= 1) {
@@ -1211,18 +569,12 @@ function updateTestTime() {
     }
 }
 
-// ======================================
-// 5. QUESTION LOGIC & GLOBAL TIMER
-// ======================================
-// ฟังก์ชันอัปเดตการแสดงผลเวลาให้อยู่ในรูปแบบ MM:SS
 function updateTimerDisplay(seconds) {
     let m = Math.floor(seconds / 60);
     let s = seconds % 60;
-    document.getElementById("countdown").innerHTML = 
-        (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+    document.getElementById("countdown").innerHTML = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
 }
 
-// ฟังก์ชันเริ่มจับเวลารวม
 function startGlobalTimer() {
     isTestRunning = true;
     totalTimeLeftSeconds = totalTestTimeMinutes * 60;
@@ -1232,7 +584,6 @@ function startGlobalTimer() {
         totalTimeLeftSeconds--;
         updateTimerDisplay(totalTimeLeftSeconds);
 
-        // เมื่อเวลาหมด
         if (totalTimeLeftSeconds <= 0) {
             clearInterval(testTimerInterval);
             forceEndTest();
@@ -1240,7 +591,6 @@ function startGlobalTimer() {
     }, 1000);
 }
 
-// บังคับจบการทดสอบเมื่อเวลาหมด
 function forceEndTest() {
     isRunning = false;
     try { recognition.stop(); } catch(e){}
@@ -1251,10 +601,7 @@ function forceEndTest() {
     
     playFailSound();
     
-    // หน่วงเวลา 2 วินาทีแล้วไปหน้าสรุปผลทันที
-    setTimeout(() => {
-        evaluateFinalResult();
-    }, 2000);
+    setTimeout(() => { evaluateFinalResult(); }, 2000);
 }
 
 function loadQuestion(index){
@@ -1268,10 +615,7 @@ function loadQuestion(index){
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
     
-    // รีเซ็ตหน้าจอเวลาเฉพาะตอนยังไม่เริ่ม
-    if(!isTestRunning) {
-        updateTimerDisplay(totalTestTimeMinutes * 60);
-    }
+    if(!isTestRunning) { updateTimerDisplay(totalTestTimeMinutes * 60); }
 
     const startBtn = document.getElementById("startBtn");
     startBtn.disabled = false;
@@ -1287,141 +631,136 @@ function nextQuestion(){
     }
 }
 
-// ======================================
-// 6. FINAL EVALUATION 
-// ======================================
-function evaluateFinalResult() {
-    // หยุดจับเวลารวม
-    clearInterval(testTimerInterval);
-    isTestRunning = false;
-
-    document.getElementById("questionNumber").innerHTML = "สรุปผลการทดสอบ";
-    document.getElementById("englishText").innerHTML = "TEST COMPLETED";
-    document.getElementById("thaiText").innerHTML = "ทดสอบเสร็จสิ้น";
-    document.getElementById("countdown").innerHTML = "-";
-    
-    const startBtn = document.getElementById("startBtn");
-    startBtn.disabled = true; 
-
-    if (passCount >= PASS_REQUIREMENT) {
-        document.getElementById("status").innerHTML = "🎉 ยอดเยี่ยม! กดปุ่มเลือกของรางวัลที่ตู้ได้เลย";
-        document.getElementById("status").className = "status pass";
-        startBtn.innerHTML = "🎁 โปรดรับรางวัลที่ตู้";
-        
-        db.ref('machine').update({ 
-            status: 'unlocked',
-            currentUser: document.getElementById("studentName").value 
-        });
-    } else {
-        document.getElementById("status").innerHTML = "❌ เสียใจด้วย คะแนนรวมไม่ถึงเกณฑ์ (ต้องได้ 5 ข้อ)";
-        document.getElementById("status").className = "status fail";
-        startBtn.innerHTML = "✅ จบการทดสอบ";
-        
-        db.ref('machine').update({ status: 'ready' });
-    }
-    saveScoreToGoogleSheet();
-}
-
-// ======================================
-// 7. UTILS & RECOGNITION START
-// ======================================
-function similarity(a,b){
-    a = a.toLowerCase().replace(/[^\w]/g,"");
-    b = b.toLowerCase().replace(/[^\w]/g,"");
-
-    let longer = a.length > b.length ? a : b;
-    let shorter = a.length > b.length ? b : a;
-    let same = 0;
-
-    if (longer.length === 0) return 0;
-
-    for(let i=0; i<shorter.length; i++){
-        if(shorter[i] === longer[i]){
-            same++;
-        }
-    }
-    return Math.floor((same / longer.length) * 100);
-}
-
-function startRecognition(){
+function startRecognition() {
     const studentName = document.getElementById("studentName").value;
-
-    if(studentName.trim() === ""){
-        alert("กรุณากรอกชื่อก่อนเริ่มทำแบบทดสอบ");
+    if (studentName.trim() === "") {
+        alert("กรุณากรอกชื่อผู้เข้าทดสอบก่อนเริ่มใช้งานครับ!");
+        document.getElementById("studentName").focus();
         return;
     }
 
-    // เริ่มจับเวลารวมหากนี่คือการกดเริ่มครั้งแรก
-    if(!isTestRunning && currentQuestion === 0) {
+    if (!isTestRunning) {
         startGlobalTimer();
     }
 
-    if(isRunning) {
-        try { recognition.stop(); } catch(e){}
-    }
+    db.ref('machine/status').set('busy');
 
     isRunning = true;
-    
-    document.getElementById("status").innerHTML = "🎤 AI กำลังฟัง...";
+    document.getElementById("startBtn").disabled = true;
+    document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง...";
+    document.getElementById("status").innerHTML = "กำลังฟังเสียงของคุณ...";
     document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "Listening...";
-
-    const startBtn = document.getElementById("startBtn");
-    startBtn.disabled = true;
-    startBtn.innerHTML = "🎙️ กำลังฟัง...";
+    document.getElementById("heardText").innerHTML = "...";
 
     try {
         recognition.start();
-    } catch(err){
-        console.log("Start Error:", err);
-        isRunning = false; 
-        document.getElementById("status").innerHTML = "เปิดไมค์ไม่ได้ ❌";
-        document.getElementById("status").className = "status fail";
-        document.getElementById("heardText").innerHTML = "กรุณารีเฟรชหน้าเว็บและอนุญาตให้ใช้ไมค์";
-        
-        if (questions.length > 0) {
-            startBtn.disabled = false;
-            startBtn.innerHTML = "🎤 ลองพูดใหม่";
-        }
-        return; 
+    } catch (e) {
+        console.error("Mic start error:", e);
     }
 }
 
-function saveScoreToGoogleSheet(){
-    const studentName = document.getElementById("studentName").value;
+function evaluateFinalResult() {
+    clearInterval(testTimerInterval);
+    isTestRunning = false;
+    
+    const name = document.getElementById("studentName").value || "Unknown User";
 
-    fetch(GOOGLE_SCRIPT_URL, {
-        method:"POST",
-        mode:"no-cors",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body: JSON.stringify({
-            name: studentName,
-            score: totalScore,
-            pass: passCount,
-            fail: failCount
-        })
-    })
-    .then(() => {
-        console.log("Saved To Google Sheet");
-    })
-    .catch(error => {
-        console.log("Google Sheet Error:", error);
-    });
+    document.getElementById("englishText").innerHTML = "Test Completed!";
+    document.getElementById("thaiText").innerHTML = "สิ้นสุดการทดสอบ";
+    document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
+    document.getElementById("startBtn").disabled = true;
+
+    if (passCount >= PASS_REQUIREMENT) {
+        document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
+        document.getElementById("status").className = "status pass";
+        document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
+        db.ref('machine/status').set('unlocked'); 
+    } else {
+        document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
+        document.getElementById("status").className = "status fail";
+        document.getElementById("startBtn").innerHTML = "จบการทดสอบ";
+        db.ref('machine/status').set('ready'); 
+    }
+
+    saveToGoogleSheet(name, totalScore, passCount, failCount);
 }
 
-function playPassSound(){
-    const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-    audio.play().catch(e => console.log("Audio Play Blocked:", e));
+function similarity(s1, s2) {
+    let longer = s1.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+    let shorter = s2.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+    
+    if (longer.length < shorter.length) {
+        let temp = longer; longer = shorter; shorter = temp;
+    }
+    if (longer.length == 0) return 100;
+    
+    let longerLength = longer.length;
+    let costs = new Array();
+    for (let i = 0; i <= longer.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= shorter.length; j++) {
+            if (i == 0) costs[j] = j;
+            else {
+                if (j > 0) {
+                    let newValue = costs[j - 1];
+                    if (longer.charAt(i - 1) != shorter.charAt(j - 1))
+                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+        }
+        if (i > 0) costs[shorter.length] = lastValue;
+    }
+    let score = Math.round(((longerLength - costs[shorter.length]) / parseFloat(longerLength)) * 100);
+    return score > 100 ? 100 : score;
 }
 
-function playFailSound(){
-    const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-    audio.play().catch(e => console.log("Audio Play Blocked:", e));
+function saveToGoogleSheet(name, score, pass, fail) {
+    const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&score=${score}&pass=${pass}&fail=${fail}`;
+    
+    fetch(url, { mode: 'no-cors' })
+        .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
+        .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
 }
 
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playPassSound() {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function playFailSound() {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime); 
+    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+}
 </script>
-
 </body>
 </html>
