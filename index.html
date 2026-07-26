@@ -269,16 +269,16 @@ input:checked + .slider:before { transform: translateX(22px); }
 
         <div id="adminControlGroup" class="admin-control-group">
             
-            <!-- ปุ่มจัดการสถานะระบบ -->
-            <div class="switch-container">
-                <span class="switch-label">🔄 สถานะระบบ</span>
-                <div style="display: flex; gap: 8px;">
-                    <!-- ปุ่ม Ready (พร้อมใช้งาน) -->
-                    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready</button>
-                    <!-- ปุ่ม Unlocked (ปลดล็อกตู้) -->
-                    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked</button>
-                    <!-- ปุ่ม Busy (กำลังปรับปรุง/ล็อกระบบ) -->
-                    <button class="stock-btn minus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy</button>
+            <!-- ปุ่มจัดการสถานะระบบ (ปรับปรุงให้แสดงผล 3 แถว) -->
+            <div class="switch-container" style="flex-direction: column; align-items: stretch; padding: 20px;">
+                <span class="switch-label" style="text-align: center; margin-bottom: 15px; display: block;">🔄 สถานะระบบ</span>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- แถวที่ 1: Ready (พร้อมใช้งาน) -->
+                    <button class="stock-btn plus" style="width: 100%; padding: 12px 15px; font-size: 16px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready (พร้อมใช้งาน)</button>
+                    <!-- แถวที่ 2: Unlocked (ปลดล็อกตู้) -->
+                    <button class="stock-btn plus" style="width: 100%; padding: 12px 15px; font-size: 16px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked (ปลดล็อกตู้)</button>
+                    <!-- แถวที่ 3: Busy (กำลังปรับปรุง/ล็อกระบบ) -->
+                    <button class="stock-btn minus" style="width: 100%; padding: 12px 15px; font-size: 16px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy (ล็อกระบบ)</button>
                 </div>
             </div>
 
