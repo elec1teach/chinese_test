@@ -277,6 +277,8 @@ input:checked + .slider:before { transform: translateX(22px); }
                     <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready</button>
                     <!-- ปุ่ม Unlocked (ปลดล็อกตู้) -->
                     <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked</button>
+                    <!-- ปุ่ม Busy (กำลังปรับปรุง/ล็อกระบบ) -->
+                    <button class="stock-btn minus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy</button>
                 </div>
             </div>
 
@@ -655,7 +657,7 @@ function verifyAdmin() {
 
 // นำฟังก์ชันชุดใหม่มาใส่แทนที่
 function setSystemStatus(status) {
-    // ส่งค่า status ('ready' หรือ 'unlocked') ไปอัปเดตใน Firebase
+    // ส่งค่า status ('ready', 'unlocked' หรือ 'busy') ไปอัปเดตใน Firebase
     db.ref('machine/status').set(status)
         .then(() => { 
             if (status === 'ready') {
@@ -663,6 +665,8 @@ function setSystemStatus(status) {
                 prepareQuestions(); 
             } else if (status === 'unlocked') {
                 alert("🔓 ระบบถูกตั้งสถานะเป็น Unlocked (ปลดล็อกตู้) เรียบร้อยแล้ว!");
+            } else if (status === 'busy') {
+                alert("🔒 ระบบถูกตั้งสถานะเป็น Busy (ล็อกการใช้งานเพื่อปรับปรุง) เรียบร้อยแล้ว!");
             }
         })
         .catch((error) => alert("❌ เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: " + error));
