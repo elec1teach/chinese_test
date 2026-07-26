@@ -365,6 +365,9 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbwXNCOVd_sTH3_aVFLWudAvMSHx6vhDKy7Fn1PeGZ2ew4WdqjqKLkFAL3zSw8qdP2QN/exec";
 
+// เพิ่มบรรทัดนี้ไว้ส่วนบนของแท็ก <script> หรือรวมกับตัวแปรอื่นๆ
+const applauseAudio = new Audio('https://actions.google.com/sounds/v1/crowds/crowd_cheer.ogg');
+
 const firebaseConfig = {
     apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
     authDomain: "engteststation.firebaseapp.com",
@@ -748,6 +751,7 @@ function startRecognition() {
     }
 }
 
+// ⬇️ ฟังก์ชันนี้ถูกแทนที่ใหม่เพื่อรับการคำนวณเปอร์เซ็นต์และเล่นเสียงปรบมือ ⬇️
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     isTestRunning = false;
@@ -759,11 +763,20 @@ function evaluateFinalResult() {
     document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
     document.getElementById("startBtn").disabled = true;
 
+    // คำนวณเปอร์เซ็นต์รวม: (จำนวนข้อที่ตอบผ่าน / จำนวนข้อทั้งหมด) * 100
+    let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
+    // นำเปอร์เซ็นต์ไปแสดงผลแทนคะแนนของข้อสุดท้าย
+    document.getElementById("score").innerHTML = finalPercent + "%";
+
     if (passCount >= adminConfig.passRequirement) {
         document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
         document.getElementById("status").className = "status pass";
         document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
         db.ref('machine/status').set('unlocked'); 
+        
+        // เล่นเสียงปรบมือยินดี
+        applauseAudio.play().catch(e => console.log("Audio play error:", e));
+        
     } else {
         document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
         document.getElementById("status").className = "status fail";
