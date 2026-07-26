@@ -403,6 +403,15 @@ input:checked + .slider:before { transform: translateX(22px); }
                 </div>
             </div>
 
+            <!-- เพิ่มสวิตช์: โหมดยกเลิกเกณฑ์ (Practice Mode) ตรงนี้ครับ -->
+            <div class="switch-container">
+                <span class="switch-label">🎯 ยกเลิกเกณฑ์ (Practice Mode)</span>
+                <label class="switch">
+                    <input type="checkbox" id="cancelReqSwitch" onchange="toggleCancelRequirement(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
             <div class="switch-container">
                 <span class="switch-label">🔧 Restock Mode</span>
                 <label class="switch">
@@ -461,7 +470,8 @@ let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
     difficulty: "ALL",
-    testDurationSeconds: 60
+    testDurationSeconds: 60,
+    cancelRequirement: false // เพิ่มสถานะโหมดฝึกฝน
 };
 
 window.onload = async () => {
@@ -529,7 +539,7 @@ window.onload = async () => {
         if(isRunning) { console.log("Recognition ended unexpectedly."); }
     };
 
-    monitorMaintenance(); // 🛠️ ฟังก์ชันใหม่สำหรับแจ้งเตือนซ่อมบำรุง
+    monitorMaintenance(); 
     monitorAdminSettings(); 
     await fetchQuestionsFromGAS();
     monitorMachine(); 
@@ -663,11 +673,13 @@ function monitorAdminSettings() {
             adminConfig.questionCount = conf.questionCount !== undefined ? conf.questionCount : 10;
             adminConfig.difficulty = conf.difficulty || "ALL";
             adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
+            adminConfig.cancelRequirement = conf.cancelRequirement || false; // อัปเดตสถานะโหมดฝึกฝน
         }
 
         document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
         document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
         document.getElementById("adminDifficulty").value = adminConfig.difficulty;
+        document.getElementById("cancelReqSwitch").checked = adminConfig.cancelRequirement; // อัปเดตสวิตช์
 
         let m = Math.floor(adminConfig.testDurationSeconds / 60);
         let s = adminConfig.testDurationSeconds % 60;
@@ -794,6 +806,7 @@ function monitorStock() {
 
 function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
 function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
+function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } // ฟังก์ชันสำหรับเปิด-ปิดโหมดฝึกฝน
 
 function monitorAdminSwitches() {
     db.ref('machine/restock').on('value', (snap) => { document.getElementById("restockSwitch").checked = snap.val() || false; });
@@ -883,13 +896,19 @@ function evaluateFinalResult() {
     document.getElementById("score").innerHTML = finalPercent + "%";
 
     if (passCount >= adminConfig.passRequirement) {
-        document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
-        document.getElementById("status").className = "status pass";
-        document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
-        db.ref('machine/status').set('unlocked'); 
-        
-        applauseAudio.play().catch(e => console.log("Audio play error:", e));
-        
+        if (adminConfig.cancelRequirement) { // หากเปิดโหมดฝึกฝน ให้แสดงข้อความและตั้งค่าสถานะเป็น ready เสมอ
+            document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
+            document.getElementById("status").className = "status pass";
+            document.getElementById("startBtn").innerHTML = "จบการฝึกฝน";
+            db.ref('machine/status').set('ready'); 
+            applauseAudio.play().catch(e => console.log("Audio play error:", e));
+        } else {
+            document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
+            document.getElementById("status").className = "status pass";
+            document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
+            db.ref('machine/status').set('unlocked'); 
+            applauseAudio.play().catch(e => console.log("Audio play error:", e));
+        }
     } else {
         document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
         document.getElementById("status").className = "status fail";
