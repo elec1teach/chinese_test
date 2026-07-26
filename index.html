@@ -465,6 +465,7 @@ let isTestRunning = false;
 let isRunning = false; 
 let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
+let currentMachineStatus = 'ready'; // เก็บสถานะตู้ในตัวแปรเพื่อใช้อัปเดต UI ร่วมกับ Practice Mode
 
 let adminConfig = {
     passRequirement: 5,
@@ -633,9 +634,15 @@ function prepareQuestions() {
     questions = shuffled.slice(0, adminConfig.questionCount);
     currentQuestion = 0;
 
+    // รีเซ็ตการทำงานของปุ่มกลับเป็นโหมดปกติ (startRecognition)
+    const startBtn = document.getElementById("startBtn");
+    startBtn.onclick = startRecognition;
+
     if(!isTestRunning) {
         loadQuestion(0);
     }
+
+    updateUIBasedOnState(); // อัปเดต UI เสมอเมื่อเตรียมข้อสอบเสร็จ
 }
 
 function loadQuestion(index){
@@ -690,6 +697,7 @@ function monitorAdminSettings() {
             updateTimerDisplay(adminConfig.testDurationSeconds);
             prepareQuestions();
         }
+        updateUIBasedOnState(); // อัปเดต UI เผื่อกรณีแอดมินสับสวิตช์โหมด
     });
 }
 
@@ -717,31 +725,67 @@ function updateTestTime() {
     }
 }
 
+// 🛠️ การรวมระบบจัดการสถานะหน้าจอแบบไดนามิก รองรับ Practice Mode
+function updateUIBasedOnState() {
+    const ui = document.getElementById("machineStatusUI");
+    const startBtn = document.getElementById("startBtn");
+
+    // ถ้าระบบกำลังรันการทดสอบให้ข้ามการปรับเปลี่ยนปุ่มไปก่อน
+    if (isRunning || isTestRunning) return;
+
+    // --- 🎯 หากเปิดโหมดยกเลิกเกณฑ์ (Practice Mode) ---
+    if (adminConfig.cancelRequirement) {
+        ui.innerHTML = "PRACTICE MODE";
+        ui.style.color = "#b56cff"; // เปลี่ยนสีเป็นม่วงแสดงโหมดฝึกซ้อม
+        ui.style.background = "rgba(181, 108, 255, 0.08)";
+        ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
+        
+        // ถ้าหน้าจอยังคงแสดงสรุปผลอยู่ ให้เปลี่ยนปุ่มเป็นเริ่มฝึกใหม่
+        if (currentQuestion >= questions.length && questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🔄 เริ่มฝึกใหม่";
+            startBtn.onclick = prepareQuestions; // ผูก event สั่งเริ่มใหม่ได้อิสระ
+        } else if (questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 เริ่มพูด";
+            startBtn.onclick = startRecognition;
+        }
+        return; // ข้ามการเช็คสถานะตู้ไปเลย (ตู้ไม่บล็อก)
+    }
+
+    // --- 🎮 หากเป็นโหมดปกติแจกรางวัล (ตู้ล็อกได้) ---
+    ui.style.background = "rgba(29,255,149,0.08)";
+    ui.style.borderColor = "rgba(29,255,149,0.25)";
+    startBtn.onclick = startRecognition; // กลับมาเป็นฟังก์ชันปกติ
+
+    if(currentMachineStatus === 'ready') {
+        ui.innerHTML = "MACHINE READY";
+        ui.style.color = "#1dff95";
+        
+        if (currentQuestion >= questions.length && questions.length > 0) {
+             startBtn.disabled = true;
+             startBtn.innerHTML = "รอรอบต่อไป";
+        } else if (questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 เริ่มพูด";
+        }
+    } else if (currentMachineStatus === 'unlocked') {
+        ui.innerHTML = "MACHINE UNLOCKED";
+        ui.style.color = "#35d8ff";
+        startBtn.disabled = true;
+        startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
+    } else { // status === 'busy'
+        ui.innerHTML = "MACHINE BUSY";
+        ui.style.color = "#ff4d6d";
+        startBtn.disabled = true;
+        startBtn.innerHTML = "🔒 รอคิวใช้งาน";
+    }
+}
+
 function monitorMachine() {
     db.ref('machine/status').on('value', (snap) => {
-        const status = snap.val();
-        const ui = document.getElementById("machineStatusUI");
-        const startBtn = document.getElementById("startBtn");
-
-        if(status === 'ready') {
-            ui.innerHTML = "MACHINE READY";
-            ui.style.color = "#1dff95";
-            
-            if (!isRunning && questions.length > 0 && currentQuestion < questions.length) {
-                startBtn.disabled = false;
-                startBtn.innerHTML = "🎤 เริ่มพูด";
-            }
-        } else if (status === 'unlocked') {
-            ui.innerHTML = "MACHINE UNLOCKED";
-            ui.style.color = "#35d8ff";
-            startBtn.disabled = true;
-            startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
-        } else {
-            ui.innerHTML = "MACHINE BUSY";
-            ui.style.color = "#ff4d6d";
-            startBtn.disabled = true;
-            startBtn.innerHTML = "🔒 รอคิวใช้งาน";
-        }
+        currentMachineStatus = snap.val() || 'ready';
+        updateUIBasedOnState(); // เปลี่ยนมาเรียกใช้ตัวจัดการกลาง
     });
 }
 
@@ -865,7 +909,10 @@ function startRecognition() {
         startGlobalTimer();
     }
 
-    db.ref('machine/status').set('busy');
+    // 🎯 โหมดปกติเท่านั้นที่จะล็อกระบบ หากเป็นโหมดฝึกฝนจะไม่ล็อกเพื่อให้ทุกคนใช้พร้อมกันได้
+    if (!adminConfig.cancelRequirement) {
+        db.ref('machine/status').set('busy');
+    }
 
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
@@ -890,30 +937,42 @@ function evaluateFinalResult() {
     document.getElementById("englishText").innerHTML = "Test Completed!";
     document.getElementById("thaiText").innerHTML = "สิ้นสุดการทดสอบ";
     document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
-    document.getElementById("startBtn").disabled = true;
 
     let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
     document.getElementById("score").innerHTML = finalPercent + "%";
 
     if (passCount >= adminConfig.passRequirement) {
-        if (adminConfig.cancelRequirement) { // หากเปิดโหมดฝึกฝน ให้แสดงข้อความและตั้งค่าสถานะเป็น ready เสมอ
+        // 🎯 กรณีเปิดโหมดฝึกฝน
+        if (adminConfig.cancelRequirement) { 
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status pass";
-            document.getElementById("startBtn").innerHTML = "จบการฝึกฝน";
-            db.ref('machine/status').set('ready'); 
+            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").onclick = prepareQuestions; // ผูกคำสั่งให้เริ่มรอบใหม่ได้เอง
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
             document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
             document.getElementById("status").className = "status pass";
             document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
+            document.getElementById("startBtn").disabled = true;
             db.ref('machine/status').set('unlocked'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         }
     } else {
-        document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
-        document.getElementById("status").className = "status fail";
-        document.getElementById("startBtn").innerHTML = "จบการทดสอบ";
-        db.ref('machine/status').set('ready'); 
+        // 🎯 กรณีเปิดโหมดฝึกฝน
+        if (adminConfig.cancelRequirement) {
+            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ (โหมดฝึกซ้อม)";
+            document.getElementById("status").className = "status fail";
+            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").onclick = prepareQuestions;
+        } else {
+            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
+            document.getElementById("status").className = "status fail";
+            document.getElementById("startBtn").innerHTML = "จบการทดสอบ";
+            document.getElementById("startBtn").disabled = true;
+            db.ref('machine/status').set('ready'); 
+        }
     }
 
     saveToGoogleSheet(name, totalScore, passCount, failCount);
