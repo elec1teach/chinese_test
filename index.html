@@ -269,10 +269,15 @@ input:checked + .slider:before { transform: translateX(22px); }
 
         <div id="adminControlGroup" class="admin-control-group">
             
-            <!-- ปุ่ม Reset Status -->
+            <!-- ปุ่มจัดการสถานะระบบ -->
             <div class="switch-container">
-                <span class="switch-label">🔄 รีเซ็ตสถานะตู้ (Clear)</span>
-                <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="forceReadyStatus()">Clear Status</button>
+                <span class="switch-label">🔄 สถานะระบบ</span>
+                <div style="display: flex; gap: 8px;">
+                    <!-- ปุ่ม Ready (พร้อมใช้งาน) -->
+                    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready</button>
+                    <!-- ปุ่ม Unlocked (ปลดล็อกตู้) -->
+                    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked</button>
+                </div>
             </div>
 
             <!-- สต๊อกของรางวัล -->
@@ -648,13 +653,19 @@ function verifyAdmin() {
     }
 }
 
-function forceReadyStatus() {
-    db.ref('machine/status').set('ready')
+// นำฟังก์ชันชุดใหม่มาใส่แทนที่
+function setSystemStatus(status) {
+    // ส่งค่า status ('ready' หรือ 'unlocked') ไปอัปเดตใน Firebase
+    db.ref('machine/status').set(status)
         .then(() => { 
-            alert("✅ ระบบถูกรีเซ็ตสถานะเป็น Ready สำหรับการทดสอบเรียบร้อยแล้ว!");
-            prepareQuestions(); 
+            if (status === 'ready') {
+                alert("✅ ระบบถูกตั้งสถานะเป็น Ready (พร้อมใช้งาน) เรียบร้อยแล้ว!");
+                prepareQuestions(); 
+            } else if (status === 'unlocked') {
+                alert("🔓 ระบบถูกตั้งสถานะเป็น Unlocked (ปลดล็อกตู้) เรียบร้อยแล้ว!");
+            }
         })
-        .catch((error) => alert("❌ เกิดข้อผิดพลาด: " + error));
+        .catch((error) => alert("❌ เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: " + error));
 }
 
 function updateStock(slot, changeAmount) {
