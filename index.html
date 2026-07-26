@@ -37,198 +37,149 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
-:root{
---bg1:#040816;
---bg2:#0a1025;
---panel:rgba(12,18,40,0.72);
---line:rgba(255,255,255,0.10);
---cyan:#35d8ff;
---blue:#6d7cff;
---violet:#b56cff;
---green:#1dff95;
---red:#ff4d6d;
---text:#edf5ff;
---muted:#9db2d9;
+:root {
+    --bg1:#040816;
+    --bg2:#0a1025;
+    --panel:rgba(12,18,40,0.72);
+    --line:rgba(255,255,255,0.10);
+    --cyan:#35d8ff;
+    --blue:#6d7cff;
+    --violet:#b56cff;
+    --green:#1dff95;
+    --red:#ff4d6d;
+    --text:#edf5ff;
+    --muted:#9db2d9;
 }
 
-*{ box-sizing:border-box; }
+* { box-sizing:border-box; }
 
-body{
-margin:0; padding:20px; font-family:'Prompt',sans-serif; color:var(--text);
-background: radial-gradient(circle at 10% 20%, rgba(53,216,255,0.18), transparent 25%),
-            radial-gradient(circle at 90% 10%, rgba(181,108,255,0.15), transparent 25%),
-            linear-gradient(to bottom,var(--bg1),var(--bg2));
-overflow-x:hidden; min-height:100vh;
+body {
+    margin:0; padding:20px; font-family:'Prompt',sans-serif; color:var(--text);
+    background: radial-gradient(circle at 10% 20%, rgba(53,216,255,0.18), transparent 25%),
+                radial-gradient(circle at 90% 10%, rgba(181,108,255,0.15), transparent 25%),
+                linear-gradient(to bottom,var(--bg1),var(--bg2));
+    overflow-x:hidden; min-height:100vh;
 }
 
-/* GRID EFFECT */
-body::before{
-content:""; position:fixed; inset:0; pointer-events:none;
-background: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-background-size:40px 40px; opacity:0.25;
+/* GRID EFFECT & FLOATING LIGHTS */
+body::before {
+    content:""; position:fixed; inset:0; pointer-events:none;
+    background: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size:40px 40px; opacity:0.25;
 }
+.orb { position:fixed; border-radius:50%; filter:blur(45px); opacity:0.25; pointer-events:none; animation:float 8s ease-in-out infinite; }
+.orb1 { width:240px; height:240px; background:var(--cyan); top:60px; left:-60px; }
+.orb2 { width:300px; height:300px; background:var(--violet); top:100px; right:-100px; animation-delay:-3s; }
+.orb3 { width:180px; height:180px; background:var(--blue); bottom:-50px; left:45%; animation-delay:-5s; }
+@keyframes float { 0%,100%{ transform:translateY(0px); } 50%{ transform:translateY(-25px); } }
 
-/* FLOATING LIGHTS */
-.orb{ position:fixed; border-radius:50%; filter:blur(45px); opacity:0.25; pointer-events:none; animation:float 8s ease-in-out infinite; }
-.orb1{ width:240px; height:240px; background:var(--cyan); top:60px; left:-60px; }
-.orb2{ width:300px; height:300px; background:var(--violet); top:100px; right:-100px; animation-delay:-3s; }
-.orb3{ width:180px; height:180px; background:var(--blue); bottom:-50px; left:45%; animation-delay:-5s; }
-@keyframes float{ 0%,100%{ transform:translateY(0px); } 50%{ transform:translateY(-25px); } }
-
-.container{ max-width:1150px; margin:auto; position:relative; z-index:1; }
-
-.glass{ background:rgba(255,255,255,0.05); border:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow: 0 15px 40px rgba(0,0,0,0.35), 0 0 20px rgba(53,216,255,0.05); }
+.container { max-width:1150px; margin:auto; position:relative; z-index:1; }
+.glass { background:rgba(255,255,255,0.05); border:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow: 0 15px 40px rgba(0,0,0,0.35), 0 0 20px rgba(53,216,255,0.05); }
 
 /* HEADER */
-.header{ padding:30px; border-radius:30px; margin-bottom:22px; position:relative; overflow:hidden; }
-.header::before{ content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(53,216,255,0.07), transparent); transform:translateX(-100%); animation:scan 7s linear infinite; }
-@keyframes scan{ 100%{ transform:translateX(100%); } }
-.top-header{ display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
-.logo-area{ display:flex; align-items:center; gap:18px; }
-.logo{ width:70px; height:70px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:30px; font-weight:900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 0 30px rgba(53,216,255,0.35); }
-h1{ margin:0; font-size:52px; font-family:'Orbitron',sans-serif; letter-spacing:1px; line-height:1.1; }
-.subtitle{ margin-top:12px; font-size:20px; color:var(--muted); line-height:1.8; }
+.header { padding:30px; border-radius:30px; margin-bottom:22px; position:relative; overflow:hidden; }
+.header::before { content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(53,216,255,0.07), transparent); transform:translateX(-100%); animation:scan 7s linear infinite; }
+@keyframes scan { 100%{ transform:translateX(100%); } }
+.top-header { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+.logo-area { display:flex; align-items:center; gap:18px; }
+.logo { width:70px; height:70px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:30px; font-weight:900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 0 30px rgba(53,216,255,0.35); }
+h1 { margin:0; font-size:52px; font-family:'Orbitron',sans-serif; letter-spacing:1px; line-height:1.1; }
+.subtitle { margin-top:12px; font-size:20px; color:var(--muted); line-height:1.8; }
 
 .status-area { display:flex; align-items:center; gap:15px; }
-.live{ padding:12px 20px; border-radius:999px; background:rgba(29,255,149,0.08); border:1px solid rgba(29,255,149,0.25); color:#87ffca; font-weight:bold; letter-spacing:2px; font-size:14px; display:flex; align-items:center; gap:10px; transition:0.3s; }
-.live::before{ content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 15px currentColor; }
+.live { padding:12px 20px; border-radius:999px; background:rgba(29,255,149,0.08); border:1px solid rgba(29,255,149,0.25); color:#87ffca; font-weight:bold; letter-spacing:2px; font-size:14px; display:flex; align-items:center; gap:10px; transition:0.3s; }
+.live::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 15px currentColor; }
 .admin-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; }
 .admin-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
 
-/* INPUT */
-.login-box{ margin-bottom:20px; }
-.login-box input{ width:100%; padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:20px; outline:none; transition:0.3s; }
-.login-box input::placeholder{ color:#8ea5cf; }
-.login-box input:focus{ border-color:rgba(53,216,255,0.45); box-shadow: 0 0 20px rgba(53,216,255,0.15); }
-
-/* STATS */
-.top-bar{ display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
-.stat{ padding:18px; border-radius:22px; position:relative; overflow:hidden; text-align:center; }
-.stat::after{ content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
-.stat-title{ font-size:15px; color:var(--muted); }
-.stat-value{ margin-top:10px; font-size:34px; font-weight:bold; font-family:'Orbitron',sans-serif; }
+/* INPUT & STATS */
+.login-box { margin-bottom:20px; }
+.login-box input { width:100%; padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:20px; outline:none; transition:0.3s; }
+.top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
+.stat { padding:18px; border-radius:22px; position:relative; overflow:hidden; text-align:center; }
+.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat-title { font-size:15px; color:var(--muted); }
+.stat-value { margin-top:10px; font-size:34px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
 /* MAIN GRID */
-.main-grid{ display:grid; grid-template-columns:1.3fr 0.8fr; gap:20px; }
+.main-grid { display:grid; grid-template-columns:1.3fr 0.8fr; gap:20px; }
+.sentence-box { padding:35px; border-radius:30px; position:relative; overflow:hidden; text-align:center; }
+.question-number { display:inline-block; padding:10px 18px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
+.english-text { margin-top:25px; font-size:58px; font-weight:900; line-height:1.15; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
+.thai-text { margin-top:14px; font-size:24px; color:#b6c6e8; line-height:1.7; }
 
-.sentence-box{ padding:35px; border-radius:30px; position:relative; overflow:hidden; text-align:center; }
-.question-number{ display:inline-block; padding:10px 18px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
-.english-text{ margin-top:25px; font-size:58px; font-weight:900; line-height:1.15; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
-.thai-text{ margin-top:14px; font-size:24px; color:#b6c6e8; line-height:1.7; }
+/* COUNTDOWN */
+.countdown-wrapper { margin:35px auto 10px; width:200px; height:200px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
+.countdown-wrapper::before { content:""; position:absolute; width:160px; height:160px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); }
+.countdown { position:relative; font-size:38px; font-family:'Orbitron',sans-serif; font-weight:900; z-index:1; text-shadow: 0 0 18px rgba(53,216,255,0.3); letter-spacing: -1px; }
+@keyframes pulse { 50%{ transform:scale(1.04); } }
 
-/* 🔴 --- ✅ ส่วนที่แก้ไข: ปรับขนาด COUNTDOWN (Desktop) ✅ --- 🔴 */
-.countdown-wrapper{ 
-    margin:35px auto 10px; 
-    width:200px; /* เพิ่มขนาดวงกลมจาก 180px */
-    height:200px; /* เพิ่มขนาดวงกลมจาก 180px */
-    border-radius:50%; 
-    display:flex; 
-    align-items:center; 
-    justify-content:center; 
-    position:relative; 
-    background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); 
-    animation:pulse 2s infinite; 
-    box-shadow: 0 0 35px rgba(53,216,255,0.2); 
-}
-.countdown-wrapper::before{ 
-    content:""; 
-    position:absolute; 
-    width:160px; /* เพิ่มขนาดพื้นที่สีดำด้านในจาก 145px */
-    height:160px; /* เพิ่มขนาดพื้นที่สีดำด้านในจาก 145px */
-    border-radius:50%; 
-    background:#07101f; 
-    border:1px solid rgba(255,255,255,0.1); 
-}
-.countdown{ 
-    position:relative; 
-    font-size:38px; /* ลดขนาดตัวเลขลงเล็กน้อยจาก 42px */
-    font-family:'Orbitron',sans-serif; 
-    font-weight:900; 
-    z-index:1; 
-    text-shadow: 0 0 18px rgba(53,216,255,0.3); 
-    letter-spacing: -1px; /* บีบช่องไฟตัวเลขเล็กน้อย */
-}
-@keyframes pulse{ 50%{ transform:scale(1.04); } }
-/* 🔴 ------------------------------------------------------------- 🔴 */
-
-.controls{ margin-top:25px; text-align:center; }
-button{ border:none; padding:18px 35px; border-radius:18px; cursor:pointer; font-size:20px; font-weight:bold; transition:0.3s; }
+/* BUTTONS & RESULT */
+.controls { margin-top:25px; text-align:center; }
+button { border:none; padding:18px 35px; border-radius:18px; cursor:pointer; font-size:20px; font-weight:bold; transition:0.3s; }
 button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
-.start-btn{ background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); }
-.start-btn:hover:not(:disabled){ transform:translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53,216,255,0.3); }
+.start-btn { background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); }
+.start-btn:hover:not(:disabled) { transform:translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53,216,255,0.3); }
 
-/* RESULT BOX */
-.result-box{ padding:35px; border-radius:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
-.score{ font-size:90px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
-.status{ margin-top:10px; font-size:36px; font-weight:bold; }
-.pass{ color:var(--green); text-shadow: 0 0 18px rgba(29,255,149,0.25); }
-.fail{ color:var(--red); text-shadow: 0 0 18px rgba(255,77,109,0.25); }
-.heard-text{ margin-top:18px; width:100%; padding:16px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#c0d0ed; font-size:18px; min-height:60px; display:flex; align-items:center; justify-content:center; }
+.result-box { padding:35px; border-radius:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+.score { font-size:90px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
+.status { margin-top:10px; font-size:36px; font-weight:bold; }
+.pass { color:var(--green); text-shadow: 0 0 18px rgba(29,255,149,0.25); }
+.fail { color:var(--red); text-shadow: 0 0 18px rgba(255,77,109,0.25); }
+.heard-text { margin-top:18px; width:100%; padding:16px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#c0d0ed; font-size:18px; min-height:60px; display:flex; align-items:center; justify-content:center; }
 
-.teacher-box{ margin-top:25px; padding:20px; border-radius:22px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.9; font-size:18px; text-align:center; }
-.teacher-title{ font-weight:bold; color:#90dfff; margin-bottom:8px; font-size:20px; }
-.footer{ margin-top:25px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; }
+.teacher-box { margin-top:25px; padding:20px; border-radius:22px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.9; font-size:18px; text-align:center; }
+.teacher-title { font-weight:bold; color:#90dfff; margin-bottom:8px; font-size:20px; }
+.footer { margin-top:25px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; }
 
 /* ADMIN MODAL */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-.modal-content { width: 90%; max-width: 400px; padding: 30px; border-radius: 25px; text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
+.modal-content { width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; position: relative; max-height: 90vh; overflow-y: auto; }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
-.modal-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); }
-.admin-login-group { display: block; }
+.modal-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
+.admin-login-group { display: block; text-align: center; }
 .admin-control-group { display: none; }
 .admin-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; font-size: 18px; margin-bottom: 15px; text-align: center; }
 .admin-btn-action { width: 100%; background: var(--blue); color: white; padding: 15px; border-radius: 12px; }
+
 .switch-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-.switch-label { font-size: 18px; font-weight: 500; }
-.switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+.switch-label { font-size: 16px; font-weight: 500; }
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
 input:checked + .slider { background-color: var(--cyan); box-shadow: 0 0 15px rgba(53,216,255,0.5); }
-input:checked + .slider:before { transform: translateX(26px); }
+input:checked + .slider:before { transform: translateX(22px); }
 
 .stock-control-container { background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
 .stock-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .stock-item:last-child { margin-bottom: 0; }
-.stock-label { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
-.stock-display-badge { background: rgba(53,216,255,0.2); color: var(--cyan); padding: 2px 10px; border-radius: 8px; font-weight: bold; min-width: 40px; display: inline-block; text-align: center; }
-.stock-btns { display: flex; gap: 8px; }
-.stock-btn { width: 36px; height: 36px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+.stock-label { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+.stock-display-badge { background: rgba(53,216,255,0.2); color: var(--cyan); padding: 4px 12px; border-radius: 8px; font-weight: bold; min-width: 45px; display: inline-block; text-align: center; font-size: 16px;}
+.stock-btns { display: flex; gap: 8px; align-items: center; }
+.stock-btn { width: 34px; height: 34px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
 .stock-btn:hover { background: var(--blue); border-color: var(--blue); }
 .stock-btn.minus { color: var(--red); }
 .stock-btn.minus:hover { background: var(--red); color: white; border-color: var(--red); }
 .stock-btn.plus { color: var(--green); }
 .stock-btn.plus:hover { background: var(--green); color: white; border-color: var(--green); }
 
+.admin-time-input { width: 55px; text-align: center; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 15px; }
+.admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; font-size: 15px; outline: none; }
+.admin-select option { background: #07101f; }
+
 /* RESPONSIVE */
-@media(max-width:900px){ .main-grid{ grid-template-columns:1fr; } h1{ font-size:38px; } .english-text{ font-size:42px; } }
-@media(max-width:600px){
-body{ padding:8px; } .header{ padding:15px; margin-bottom:12px; border-radius:20px; } .top-header{ gap:10px; } .logo-area{ gap:12px; } .logo{ width:45px; height:45px; font-size:18px; border-radius:12px; } h1{ font-size:20px; letter-spacing:0px; } .subtitle{ font-size:12px; margin-top:5px; line-height:1.4; } .live{ padding:6px 12px; font-size:10px; } .admin-btn { width: 35px; height: 35px; font-size: 16px; }
-.login-box{ margin-bottom:12px; } .login-box input{ padding:12px; font-size:16px; border-radius:12px; }
-.top-bar{ gap:8px; margin-bottom:12px; grid-template-columns:repeat(3,1fr); } .stat{ padding:10px; border-radius:15px; } .stat-title{ font-size:10px; } .stat-value{ margin-top:5px; font-size:18px; }
-.sentence-box{ padding:20px; border-radius:20px; } .question-number{ font-size:12px; padding:6px 12px; } .english-text{ font-size:26px; margin-top:15px; } .thai-text{ font-size:16px; margin-top:8px; }
-
-/* 🔴 --- ✅ ส่วนที่แก้ไข: ปรับขนาด COUNTDOWN (Mobile) ✅ --- 🔴 */
-.countdown-wrapper{ 
-    margin:20px auto 10px; 
-    width:110px; /* เพิ่มขนาดวงกลมจาก 100px */
-    height:110px; /* เพิ่มขนาดวงกลมจาก 100px */
-} 
-.countdown-wrapper::before{ 
-    width:90px; /* เพิ่มขนาดพื้นที่สีดำด้านในจาก 80px */
-    height:90px; /* เพิ่มขนาดพื้นที่สีดำด้านในจาก 80px */
-} 
-.countdown{ 
-    font-size:24px; /* ลดขนาดตัวเลขลงเล็กน้อยจาก 28px */
-    letter-spacing: -1px; /* บีบช่องไฟตัวเลขเล็กน้อย */
-}
-/* 🔴 ------------------------------------------------------------- 🔴 */
-
-.controls{ margin-top:15px; } button{ width:100%; padding:14px; font-size:18px; border-radius:14px; }
-.result-box{ padding:20px; border-radius:20px; margin-top:12px; } .score{ font-size:50px; } .status{ font-size:24px; margin-top:5px; } .heard-text{ font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
-.teacher-box{ margin-top:15px; padding:15px; border-radius:15px; font-size:14px; } .teacher-title{ font-size:16px; margin-bottom:5px; } .footer{ margin-top:15px; margin-bottom:15px; font-size:12px; }
+@media(max-width:900px) { .main-grid { grid-template-columns:1fr; } h1 { font-size:38px; } .english-text { font-size:42px; } }
+@media(max-width:600px) {
+    body { padding:8px; } .header { padding:15px; margin-bottom:12px; border-radius:20px; } .top-header { gap:10px; } .logo-area { gap:12px; } .logo { width:45px; height:45px; font-size:18px; border-radius:12px; } h1 { font-size:20px; letter-spacing:0px; } .subtitle { font-size:12px; margin-top:5px; line-height:1.4; } .live { padding:6px 12px; font-size:10px; } .admin-btn { width: 35px; height: 35px; font-size: 16px; }
+    .login-box { margin-bottom:12px; } .login-box input { padding:12px; font-size:16px; border-radius:12px; }
+    .top-bar { gap:8px; margin-bottom:12px; grid-template-columns:repeat(3,1fr); } .stat { padding:10px; border-radius:15px; } .stat-title { font-size:10px; } .stat-value { margin-top:5px; font-size:18px; }
+    .sentence-box { padding:20px; border-radius:20px; } .question-number { font-size:12px; padding:6px 12px; } .english-text { font-size:26px; margin-top:15px; } .thai-text { font-size:16px; margin-top:8px; }
+    .countdown-wrapper { margin:20px auto 10px; width:110px; height:110px; } .countdown-wrapper::before { width:90px; height:90px; } .countdown { font-size:24px; letter-spacing: -1px; }
+    .controls { margin-top:15px; } button { width:100%; padding:14px; font-size:18px; border-radius:14px; }
+    .result-box { padding:20px; border-radius:20px; margin-top:12px; } .score { font-size:50px; } .status { font-size:24px; margin-top:5px; } .heard-text { font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
 }
 </style>
 </head>
@@ -239,147 +190,178 @@ body{ padding:8px; } .header{ padding:15px; margin-bottom:12px; border-radius:20
 <div class="orb orb3"></div>
 
 <div class="container">
-<div class="header glass">
-<div class="top-header">
-<div class="logo-area">
-<div class="logo">AI</div>
-<div>
-<h1>AI Pronunciation Test Station</h1>
-<div class="subtitle">ระบบวัดการออกเสียงภาษาอังกฤษอัตโนมัติด้วย AI แบบ Real-Time</div>
-</div>
-</div>
-<div class="status-area">
-<div class="live" id="machineStatusUI">SYSTEM STARTING</div>
-<div class="admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
-</div>
-</div>
-</div>
+    <div class="header glass">
+        <div class="top-header">
+            <div class="logo-area">
+                <div class="logo">AI</div>
+                <div>
+                    <h1>AI Pronunciation Test Station</h1>
+                    <div class="subtitle">ระบบวัดการออกเสียงภาษาอังกฤษอัตโนมัติด้วย AI แบบ Real-Time</div>
+                </div>
+            </div>
+            <div class="status-area">
+                <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
+                <div class="admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
+            </div>
+        </div>
+    </div>
 
-<div class="login-box">
-<input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
-</div>
+    <div class="login-box">
+        <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
+    </div>
 
-<div class="top-bar">
-<div class="stat glass">
-<div class="stat-title">TOTAL SCORE</div>
-<div class="stat-value"><span id="totalScore">0</span></div>
-</div>
-<div class="stat glass">
-<div class="stat-title">PASS</div>
-<div class="stat-value"><span id="passCount">0</span></div>
-</div>
-<div class="stat glass">
-<div class="stat-title">FAIL</div>
-<div class="stat-value"><span id="failCount">0</span></div>
-</div>
-</div>
+    <div class="top-bar">
+        <div class="stat glass">
+            <div class="stat-title">TOTAL SCORE</div>
+            <div class="stat-value"><span id="totalScore">0</span></div>
+        </div>
+        <div class="stat glass">
+            <div class="stat-title">PASS</div>
+            <div class="stat-value"><span id="passCount">0</span></div>
+        </div>
+        <div class="stat glass">
+            <div class="stat-title">FAIL</div>
+            <div class="stat-value"><span id="failCount">0</span></div>
+        </div>
+    </div>
 
-<div class="main-grid">
-<div class="sentence-box glass">
-<div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
-<div class="english-text" id="englishText">Loading...</div>
-<div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
-<div class="countdown-wrapper">
-<div class="countdown" id="countdown">01:00</div>
-</div>
-<div class="controls">
-<button class="start-btn" id="startBtn" onclick="startRecognition()" disabled>⏳ กรุณารอสักครู่</button>
-</div>
-</div>
+    <div class="main-grid">
+        <div class="sentence-box glass">
+            <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
+            <div class="english-text" id="englishText">Loading...</div>
+            <div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
+            <div class="countdown-wrapper">
+                <div class="countdown" id="countdown">01:00</div>
+            </div>
+            <div class="controls">
+                <button class="start-btn" id="startBtn" onclick="startRecognition()" disabled>⏳ กรุณารอสักครู่</button>
+            </div>
+        </div>
 
-<div class="result-box glass">
-<div class="score" id="score">0%</div>
-<div class="status" id="status">รอเริ่มทดสอบ</div>
-<div class="heard-text" id="heardText">AI พร้อมรับเสียง...</div>
-</div>
-</div>
+        <div class="result-box glass">
+            <div class="score" id="score">0%</div>
+            <div class="status" id="status">รอเริ่มทดสอบ</div>
+            <div class="heard-text" id="heardText">AI พร้อมรับเสียง...</div>
+        </div>
+    </div>
 
-<div class="teacher-box glass">
-<div class="teacher-title">ผู้พัฒนาโครงการ</div>
-ครูวิทยากร วรรณา<br>
-แผนกอิเล็กทรอนิกส์<br>
-วิทยาลัยสารพัดช่างศรีสะเกษ
-</div>
+    <div class="teacher-box glass">
+        <div class="teacher-title">ผู้พัฒนาโครงการ</div>
+        ครูวิทยากร วรรณา<br>
+        แผนกอิเล็กทรอนิกส์<br>
+        วิทยาลัยสารพัดช่างศรีสะเกษ
+    </div>
 
-<div class="footer">AI Reward Learning Machine © 2026</div>
+    <div class="footer">AI Reward Learning Machine © 2026</div>
 </div>
 
 <!-- Admin Modal Panel -->
 <div class="modal-overlay" id="adminModal">
-<div class="modal-content glass">
-<button class="close-modal" onclick="closeAdminModal()">✕</button>
-<div class="modal-title">Admin Panel</div>
+    <div class="modal-content glass">
+        <button class="close-modal" onclick="closeAdminModal()">✕</button>
+        <div class="modal-title">Admin Panel</div>
 
-<div id="adminLoginGroup" class="admin-login-group">
-<input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
-<button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
-<p id="adminError" style="color:var(--red); font-size:14px; display:none;">รหัสผ่านไม่ถูกต้อง!</p>
-</div>
-
-<div id="adminControlGroup" class="admin-control-group">
-<div class="switch-container">
-    <span class="switch-label">🔄 Reset Status to Ready</span>
-    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="forceReadyStatus()">Clear Status</button>
-</div>
-    
-<div class="stock-control-container">
-    <div class="stock-item">
-        <div class="stock-label">
-            📦 Slot 1
-            <span class="stock-display-badge" id="slot1StockUI">0</span>
+        <div id="adminLoginGroup" class="admin-login-group">
+            <input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
+            <button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
+            <p id="adminError" style="color:var(--red); font-size:14px; display:none;">รหัสผ่านไม่ถูกต้อง!</p>
         </div>
-        <div class="stock-btns">
-            <button class="stock-btn minus" onclick="updateStock('slot1', -1)">-</button>
-            <button class="stock-btn plus" onclick="updateStock('slot1', 1)">+</button>
+
+        <div id="adminControlGroup" class="admin-control-group">
+            
+            <!-- ปุ่ม Reset Status -->
+            <div class="switch-container">
+                <span class="switch-label">🔄 รีเซ็ตสถานะตู้ (Clear)</span>
+                <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="forceReadyStatus()">Clear Status</button>
+            </div>
+
+            <!-- สต๊อกของรางวัล -->
+            <div class="stock-control-container">
+                <div class="stock-item">
+                    <div class="stock-label">📦 Slot 1 Stock</div>
+                    <div class="stock-btns">
+                        <button class="stock-btn minus" onclick="updateStock('slot1', -1)">-</button>
+                        <span class="stock-display-badge" id="slot1StockUI">0</span>
+                        <button class="stock-btn plus" onclick="updateStock('slot1', 1)">+</button>
+                    </div>
+                </div>
+                <div class="stock-item">
+                    <div class="stock-label">📦 Slot 2 Stock</div>
+                    <div class="stock-btns">
+                        <button class="stock-btn minus" onclick="updateStock('slot2', -1)">-</button>
+                        <span class="stock-display-badge" id="slot2StockUI">0</span>
+                        <button class="stock-btn plus" onclick="updateStock('slot2', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ⚙️ การตั้งค่าระบบข้อสอบ -->
+            <div class="stock-control-container">
+                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 18px; text-align: left;">⚙️ Game Settings</div>
+                
+                <!-- 1. จำนวนข้อสอบที่จะสุ่ม -->
+                <div class="stock-item">
+                    <div class="stock-label">📝 สุ่มข้อสอบจำนวน (ข้อ)</div>
+                    <div class="stock-btns">
+                        <button class="stock-btn minus" onclick="updateAdminConfig('questionCount', -1)">-</button>
+                        <span class="stock-display-badge" id="adminQuestionCountUI">10</span>
+                        <button class="stock-btn plus" onclick="updateAdminConfig('questionCount', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 2. เกณฑ์การผ่าน -->
+                <div class="stock-item">
+                    <div class="stock-label">🏆 ตอบถูกขั้นต่ำ (เพื่อผ่าน)</div>
+                    <div class="stock-btns">
+                        <button class="stock-btn minus" onclick="updateAdminConfig('passRequirement', -1)">-</button>
+                        <span class="stock-display-badge" id="adminPassReqUI">5</span>
+                        <button class="stock-btn plus" onclick="updateAdminConfig('passRequirement', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 3. เวลาทดสอบ (นาที / วินาที) -->
+                <div class="stock-item">
+                    <div class="stock-label">⏱️ เวลาทดสอบ (นาที:วินาที)</div>
+                    <div class="stock-btns" style="gap: 5px;">
+                        <input type="number" id="adminTimeMin" min="0" max="60" value="1" class="admin-time-input"> :
+                        <input type="number" id="adminTimeSec" min="0" max="59" value="00" class="admin-time-input">
+                        <button class="stock-btn plus" onclick="updateTestTime()" style="width: auto; padding: 0 10px; font-size:14px;">บันทึก</button>
+                    </div>
+                </div>
+
+                <!-- 4. ระดับความยาก -->
+                <div class="stock-item">
+                    <div class="stock-label">🌟 ระดับความยาก</div>
+                    <select id="adminDifficulty" onchange="updateDifficulty()" class="admin-select">
+                        <option value="ALL">สุ่มทั้งหมด (MIXED)</option>
+                        <option value="LOW">ง่าย (LOW)</option>
+                        <option value="MEDIUM">ปานกลาง (MEDIUM)</option>
+                        <option value="HIGH">ยาก (HIGH)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="switch-container">
+                <span class="switch-label">🔧 Restock Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="restockSwitch" onchange="toggleRestock(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="switch-container">
+                <span class="switch-label">🧪 Test Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="testSwitch" onchange="toggleTest(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
     </div>
-    <div class="stock-item">
-        <div class="stock-label">
-            📦 Slot 2
-            <span class="stock-display-badge" id="slot2StockUI">0</span>
-        </div>
-        <div class="stock-btns">
-            <button class="stock-btn minus" onclick="updateStock('slot2', -1)">-</button>
-            <button class="stock-btn plus" onclick="updateStock('slot2', 1)">+</button>
-        </div>
-    </div>
 </div>
 
-<div class="stock-control-container">
-    <div class="stock-item">
-        <div class="stock-label">
-            ⏱️ เวลาทดสอบรวม (นาที)
-        </div>
-        <div class="stock-btns" style="flex-direction: row; align-items: center;">
-            <input type="number" id="adminTimeInput" min="1" max="60" value="1" style="width: 60px; text-align: center; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 16px;">
-            <button class="stock-btn plus" onclick="updateTestTime()" style="width: auto; padding: 0 15px; margin-left: 10px; font-size: 14px;">บันทึก</button>
-        </div>
-    </div>
-</div>
-
-<div class="switch-container">
-<span class="switch-label">🔧 Restock Mode</span>
-<label class="switch">
-<input type="checkbox" id="restockSwitch" onchange="toggleRestock(this.checked)">
-<span class="slider"></span>
-</label>
-</div>
-
-<div class="switch-container">
-<span class="switch-label">⚙️ Test Mode</span>
-<label class="switch">
-<input type="checkbox" id="testSwitch" onchange="toggleTest(this.checked)">
-<span class="slider"></span>
-</label>
-</div>
-</div>
-</div>
-</div>
-
-<!-- SCRIPT ระบบการทำงานหลัก -->
 <script>
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
-const PASS_REQUIREMENT = 5;
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbwXNCOVd_sTH3_aVFLWudAvMSHx6vhDKy7Fn1PeGZ2ew4WdqjqKLkFAL3zSw8qdP2QN/exec";
 
@@ -396,25 +378,31 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let questions = [];
+let masterQuestions = []; 
+let questions = [];       
 let currentQuestion = 0;
 let totalScore = 0;
 let passCount = 0;
 let failCount = 0;
 
 let recognition;
-let totalTestTimeMinutes = 1; 
 let totalTimeLeftSeconds = 0;
 let testTimerInterval = null;
 let isTestRunning = false; 
 let isRunning = false; 
 let isAdminLoggedIn = false;
-
 let currentStock = { slot1: 0, slot2: 0 };
+
+// ⚙️ ตัวแปรเก็บค่าการตั้งค่าจาก Admin
+let adminConfig = {
+    passRequirement: 5,
+    questionCount: 10,
+    difficulty: "ALL",
+    testDurationSeconds: 60
+};
 
 window.onload = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     if (!SpeechRecognition) {
         alert("เบราว์เซอร์ของคุณไม่รองรับระบบแยกแยะเสียง กรุณาเปิดด้วย Google Chrome หรือ Safari");
         return;
@@ -431,7 +419,7 @@ window.onload = async () => {
 
         const speechResult = event.results[0][0].transcript;
         const target = questions[currentQuestion].english;
-        const score = similarity(target,speechResult);
+        const score = similarity(target, speechResult);
 
         document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
         document.getElementById("score").innerHTML = score + "%";
@@ -444,7 +432,7 @@ window.onload = async () => {
             document.getElementById("status").innerHTML = "PASS ✅";
             document.getElementById("status").className = "status pass";
             playPassSound();
-        }else{
+        } else {
             failCount++;
             document.getElementById("failCount").innerHTML = failCount;
             document.getElementById("status").innerHTML = "FAIL ❌";
@@ -478,11 +466,11 @@ window.onload = async () => {
         if(isRunning) { console.log("Recognition ended unexpectedly."); }
     };
 
+    monitorAdminSettings(); 
     await fetchQuestionsFromGAS();
     monitorMachine(); 
     monitorAdminSwitches(); 
     monitorStock(); 
-    monitorTestTime(); 
 };
 
 async function fetchQuestionsFromGAS() {
@@ -491,9 +479,8 @@ async function fetchQuestionsFromGAS() {
         const data = await response.json();
 
         if (Array.isArray(data) && data.length > 0) {
-            questions = data;
-            currentQuestion = 0;
-            loadQuestion(currentQuestion);
+            masterQuestions = data; 
+            prepareQuestions(); 
         } else {
             document.getElementById("englishText").innerHTML = "Error";
             document.getElementById("thaiText").innerHTML = "ไม่พบข้อสอบในระบบ กรุณาตรวจสอบ Google Sheet";
@@ -502,6 +489,105 @@ async function fetchQuestionsFromGAS() {
         console.error("Error fetching questions:", error);
         document.getElementById("englishText").innerHTML = "Connection Error";
         document.getElementById("thaiText").innerHTML = "ไม่สามารถเชื่อมต่อคลังข้อสอบได้";
+    }
+}
+
+function prepareQuestions() {
+    if (masterQuestions.length === 0) return;
+
+    let filtered = masterQuestions;
+
+    if (adminConfig.difficulty !== "ALL") {
+        filtered = masterQuestions.filter(q => q.difficulty && q.difficulty.toUpperCase() === adminConfig.difficulty);
+        if (filtered.length === 0) {
+            console.warn(`ไม่มีข้อสอบระดับ ${adminConfig.difficulty} ในระบบ ระบบจะดึงข้อสอบแบบผสมมาทดแทน`);
+            filtered = masterQuestions;
+        }
+    }
+
+    let shuffled = filtered.sort(() => 0.5 - Math.random());
+    questions = shuffled.slice(0, adminConfig.questionCount);
+    currentQuestion = 0;
+
+    if(!isTestRunning) {
+        loadQuestion(0);
+    }
+}
+
+function loadQuestion(index){
+    if (!questions || questions.length === 0) return;
+
+    document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
+    document.getElementById("englishText").innerHTML = questions[index].english;
+    document.getElementById("thaiText").innerHTML = questions[index].thai;
+    document.getElementById("score").innerHTML = "0%";
+    document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
+    document.getElementById("status").className = "status";
+    document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
+    
+    if(!isTestRunning) { updateTimerDisplay(adminConfig.testDurationSeconds); }
+
+    const startBtn = document.getElementById("startBtn");
+    startBtn.disabled = false;
+    startBtn.innerHTML = "🎤 เริ่มพูด";
+}
+
+function nextQuestion(){
+    currentQuestion++;
+    if(currentQuestion >= questions.length){
+        evaluateFinalResult();
+    } else {
+        loadQuestion(currentQuestion);
+    }
+}
+
+function monitorAdminSettings() {
+    db.ref('machine/config').on('value', (snap) => {
+        const conf = snap.val();
+        if (conf) {
+            adminConfig.passRequirement = conf.passRequirement !== undefined ? conf.passRequirement : 5;
+            adminConfig.questionCount = conf.questionCount !== undefined ? conf.questionCount : 10;
+            adminConfig.difficulty = conf.difficulty || "ALL";
+            adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
+        }
+
+        document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
+        document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
+        document.getElementById("adminDifficulty").value = adminConfig.difficulty;
+
+        let m = Math.floor(adminConfig.testDurationSeconds / 60);
+        let s = adminConfig.testDurationSeconds % 60;
+        document.getElementById("adminTimeMin").value = m;
+        document.getElementById("adminTimeSec").value = s;
+
+        if (!isTestRunning) {
+            updateTimerDisplay(adminConfig.testDurationSeconds);
+            prepareQuestions();
+        }
+    });
+}
+
+function updateAdminConfig(key, change) {
+    let newVal = adminConfig[key] + change;
+    if (newVal < 1) newVal = 1; 
+    db.ref(`machine/config/${key}`).set(newVal);
+}
+
+function updateDifficulty() {
+    let val = document.getElementById("adminDifficulty").value;
+    db.ref('machine/config/difficulty').set(val);
+}
+
+function updateTestTime() {
+    let m = parseInt(document.getElementById("adminTimeMin").value) || 0;
+    let s = parseInt(document.getElementById("adminTimeSec").value) || 0;
+    let totalSecs = (m * 60) + s;
+    
+    if (totalSecs >= 1) {
+        db.ref('machine/config/testDurationSeconds').set(totalSecs);
+        alert("บันทึกเวลาทดสอบเรียบร้อย: " + totalSecs + " วินาที");
+    } else {
+        alert("กรุณาใส่เวลาอย่างน้อย 1 วินาที");
     }
 }
 
@@ -529,19 +615,6 @@ function monitorMachine() {
             ui.style.color = "#ff4d6d";
             startBtn.disabled = true;
             startBtn.innerHTML = "🔒 รอคิวใช้งาน";
-        }
-    });
-}
-
-function monitorTestTime() {
-    db.ref('machine/testDurationMinutes').on('value', (snap) => {
-        let mins = snap.val();
-        if (!mins) { mins = 1; } 
-        totalTestTimeMinutes = mins;
-        document.getElementById("adminTimeInput").value = mins;
-        
-        if (!isTestRunning) {
-            updateTimerDisplay(totalTestTimeMinutes * 60);
         }
     });
 }
@@ -574,7 +647,10 @@ function verifyAdmin() {
 
 function forceReadyStatus() {
     db.ref('machine/status').set('ready')
-        .then(() => alert("✅ ระบบถูกรีเซ็ตสถานะเป็น Ready สำหรับการทดสอบเรียบร้อยแล้ว!"))
+        .then(() => { 
+            alert("✅ ระบบถูกรีเซ็ตสถานะเป็น Ready สำหรับการทดสอบเรียบร้อยแล้ว!");
+            prepareQuestions(); 
+        })
         .catch((error) => alert("❌ เกิดข้อผิดพลาด: " + error));
 }
 
@@ -604,16 +680,6 @@ function monitorAdminSwitches() {
     db.ref('machine/test').on('value', (snap) => { document.getElementById("testSwitch").checked = snap.val() || false; });
 }
 
-function updateTestTime() {
-    let newTime = parseInt(document.getElementById("adminTimeInput").value);
-    if (newTime >= 1) {
-        db.ref('machine/testDurationMinutes').set(newTime);
-        alert("บันทึกเวลาสำเร็จ: " + newTime + " นาที");
-    } else {
-        alert("กรุณาใส่เวลาอย่างน้อย 1 นาที");
-    }
-}
-
 function updateTimerDisplay(seconds) {
     let m = Math.floor(seconds / 60);
     let s = seconds % 60;
@@ -622,7 +688,7 @@ function updateTimerDisplay(seconds) {
 
 function startGlobalTimer() {
     isTestRunning = true;
-    totalTimeLeftSeconds = totalTestTimeMinutes * 60;
+    totalTimeLeftSeconds = adminConfig.testDurationSeconds;
     updateTimerDisplay(totalTimeLeftSeconds);
 
     testTimerInterval = setInterval(() => {
@@ -649,33 +715,6 @@ function forceEndTest() {
     setTimeout(() => { evaluateFinalResult(); }, 2000);
 }
 
-function loadQuestion(index){
-    if (!questions || questions.length === 0) return;
-
-    document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
-    document.getElementById("englishText").innerHTML = questions[index].english;
-    document.getElementById("thaiText").innerHTML = questions[index].thai;
-    document.getElementById("score").innerHTML = "0%";
-    document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
-    document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
-    
-    if(!isTestRunning) { updateTimerDisplay(totalTestTimeMinutes * 60); }
-
-    const startBtn = document.getElementById("startBtn");
-    startBtn.disabled = false;
-    startBtn.innerHTML = "🎤 เริ่มพูด";
-}
-
-function nextQuestion(){
-    currentQuestion++;
-    if(currentQuestion >= questions.length){
-        evaluateFinalResult();
-    } else {
-        loadQuestion(currentQuestion);
-    }
-}
-
 function startRecognition() {
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
@@ -685,6 +724,11 @@ function startRecognition() {
     }
 
     if (!isTestRunning) {
+        totalScore = 0; passCount = 0; failCount = 0;
+        document.getElementById("totalScore").innerHTML = 0;
+        document.getElementById("passCount").innerHTML = 0;
+        document.getElementById("failCount").innerHTML = 0;
+        
         startGlobalTimer();
     }
 
@@ -715,7 +759,7 @@ function evaluateFinalResult() {
     document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
     document.getElementById("startBtn").disabled = true;
 
-    if (passCount >= PASS_REQUIREMENT) {
+    if (passCount >= adminConfig.passRequirement) {
         document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
         document.getElementById("status").className = "status pass";
         document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
