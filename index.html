@@ -188,12 +188,12 @@ input:checked + .slider:before { transform: translateX(21px); }
 .admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; max-width: 140px;}
 .admin-select option { background: #07101f; }
 
-/* AUDIO CONTROLS (สำหรับโหมดฝึกฝน) */
+/* AUDIO CONTROLS (สำหรับโหมดฝึกฝนและโหมดทดสอบ) */
 .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
 .audio-btn { width: auto; padding: 8px 16px; font-size: 14px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
 .audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
 
-/* 🚀 เปลี่ยน CSS จากปุ่มหยุด เป็นปุ่มข้ามข้อ */
+/* 🚀 ปุ่มข้ามข้อ */
 .audio-btn.skip { background: rgba(181, 108, 255, 0.15); border-color: rgba(181, 108, 255, 0.3); color: var(--violet); }
 .audio-btn.skip:hover { background: rgba(181, 108, 255, 0.3); transform: scale(1.05); }
 
@@ -304,10 +304,10 @@ input:checked + .slider:before { transform: translateX(21px); }
             <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
             <div class="english-text" id="englishText">Loading...</div>
             
+            <!-- 🚀 ใช้งาน Audio Controls ทั้งสองโหมด -->
             <div class="audio-controls" id="audioControls" style="display: none;">
-                <button class="audio-btn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
-                <!-- 🚀 เปลี่ยนปุ่มหยุดเป็น ข้อต่อไป แทน -->
-                <button class="audio-btn skip" onclick="nextQuestion()" title="ข้ามไปข้อต่อไป">⏭️ ข้อต่อไป</button>
+                <button class="audio-btn" id="listenBtn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
+                <button class="audio-btn skip" id="skipBtn" onclick="nextQuestion()" title="ข้ามไปข้อต่อไป">⏭️ ข้อต่อไป</button>
             </div>
             
             <div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
@@ -705,6 +705,21 @@ function loadQuestion(index){
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
     
+    // 🚀 อัปเดต: ให้แสดงกลุ่มปุ่ม Audio Controls เสมอเมื่อมีการโหลดข้อสอบ
+    document.getElementById("audioControls").style.display = "flex";
+    
+    // 🚀 ซ่อนเฉพาะปุ่ม "ฟังการออกเสียง" หากเป็นโหมดทดสอบ แต่ให้แสดงในโหมดฝึกฝน
+    const listenBtn = document.getElementById("listenBtn");
+    if (listenBtn) {
+        listenBtn.style.display = adminConfig.cancelRequirement ? "flex" : "none";
+    }
+    
+    // 🚀 คงปุ่ม "ข้อต่อไป" ไว้เสมอให้ใช้งานได้ในกรณีที่ UI ค้าง
+    const skipBtn = document.getElementById("skipBtn");
+    if (skipBtn) {
+        skipBtn.style.display = "flex";
+    }
+
     if(!isTestRunning) { updateTimerDisplay(adminConfig.testDurationSeconds); }
 
     const startBtn = document.getElementById("startBtn");
@@ -788,6 +803,8 @@ function updateUIBasedOnState() {
     const ui = document.getElementById("machineStatusUI");
     const startBtn = document.getElementById("startBtn");
     const audioControls = document.getElementById("audioControls"); 
+    const listenBtn = document.getElementById("listenBtn");
+    const skipBtn = document.getElementById("skipBtn");
 
     if (isRunning || isTestRunning) return;
 
@@ -796,8 +813,6 @@ function updateUIBasedOnState() {
         ui.style.color = "#b56cff"; 
         ui.style.background = "rgba(181, 108, 255, 0.08)";
         ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
-        
-        if (audioControls) audioControls.style.display = "flex"; 
         
         if (currentQuestion >= questions.length && questions.length > 0) {
             startBtn.disabled = false;
@@ -808,12 +823,15 @@ function updateUIBasedOnState() {
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
             startBtn.onclick = startRecognition;
+            if (audioControls) {
+                audioControls.style.display = "flex";
+                if (listenBtn) listenBtn.style.display = "flex";
+                if (skipBtn) skipBtn.style.display = "flex";
+            }
         }
         return; 
     }
 
-    if (audioControls) audioControls.style.display = "none"; 
-    
     ui.style.background = "rgba(29,255,149,0.08)";
     ui.style.borderColor = "rgba(29,255,149,0.25)";
     startBtn.onclick = startRecognition; 
@@ -825,20 +843,30 @@ function updateUIBasedOnState() {
         if (currentQuestion >= questions.length && questions.length > 0) {
              startBtn.disabled = true;
              startBtn.innerHTML = "รอรอบต่อไป";
+             if (audioControls) audioControls.style.display = "none";
         } else if (questions.length > 0) {
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
+            if (audioControls) {
+                audioControls.style.display = "flex";
+                // ซ่อนปุ่มฟังในโหมดทดสอบ
+                if (listenBtn) listenBtn.style.display = "none";
+                // แสดงปุ่มข้ามเสมอ
+                if (skipBtn) skipBtn.style.display = "flex";
+            }
         }
     } else if (currentMachineStatus === 'unlocked') {
         ui.innerHTML = "MACHINE UNLOCKED";
         ui.style.color = "#35d8ff";
         startBtn.disabled = true;
         startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
+        if (audioControls) audioControls.style.display = "none";
     } else { 
         ui.innerHTML = "MACHINE BUSY";
         ui.style.color = "#ff4d6d";
         startBtn.disabled = true;
         startBtn.innerHTML = "🔒 รอคิวใช้งาน";
+        if (audioControls) audioControls.style.display = "none";
     }
 }
 
@@ -947,6 +975,9 @@ function forceEndTest() {
     document.getElementById("status").className = "status fail";
     document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
     
+    // 🚀 ซ่อนปุ่มเมื่อหมดเวลา
+    document.getElementById("audioControls").style.display = "none";
+    
     playFailSound();
     
     setTimeout(() => { evaluateFinalResult(); }, 2000);
@@ -992,6 +1023,9 @@ function startRecognition() {
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     isTestRunning = false;
+    
+    // 🚀 ซ่อนกลุ่มปุ่มช่วยเหลือและปุ่มข้ามเมื่อจบการทดสอบ
+    document.getElementById("audioControls").style.display = "none";
     
     const name = document.getElementById("studentName").value || "Unknown User";
 
