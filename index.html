@@ -98,7 +98,7 @@ h1 { margin:0; font-size:52px; font-family:'Orbitron',sans-serif; letter-spacing
 .login-box input { width:100%; padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:20px; outline:none; transition:0.3s; }
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
 .stat { padding:18px; border-radius:22px; position:relative; overflow:hidden; text-align:center; }
-.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat::after { content:"absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
 .stat-title { font-size:15px; color:var(--muted); }
 .stat-value { margin-top:10px; font-size:34px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
@@ -182,6 +182,13 @@ input:checked + .slider:before { transform: translateX(22px); }
 .admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; font-size: 15px; outline: none; }
 .admin-select option { background: #07101f; }
 
+/* AUDIO CONTROLS (สำหรับโหมดฝึกฝน) */
+.audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+.audio-btn { width: auto; padding: 10px 20px; font-size: 16px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+.audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
+.audio-btn.stop { background: rgba(255,77,109,0.15); border-color: rgba(255,77,109,0.3); color: var(--red); }
+.audio-btn.stop:hover { background: rgba(255,77,109,0.3); transform: scale(1.05); }
+
 /* RESPONSIVE */
 @media(max-width:900px) { .main-grid { grid-template-columns:1fr; } h1 { font-size:38px; } .english-text { font-size:42px; } }
 @media(max-width:600px) {
@@ -255,6 +262,13 @@ input:checked + .slider:before { transform: translateX(22px); }
         <div class="sentence-box glass">
             <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
             <div class="english-text" id="englishText">Loading...</div>
+            
+            <!-- 🔊 ปุ่มควบคุมเสียง (เพิ่มใหม่) -->
+            <div class="audio-controls" id="audioControls" style="display: none;">
+                <button class="audio-btn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
+                <button class="audio-btn stop" onclick="stopSentenceAudio()" title="หยุดฟัง">⏹️ หยุด</button>
+            </div>
+            
             <div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
             <div class="countdown-wrapper">
                 <div class="countdown" id="countdown">01:00</div>
@@ -664,6 +678,7 @@ function loadQuestion(index){
 }
 
 function nextQuestion(){
+    stopSentenceAudio(); // 💡 หยุดเสียง AI เมื่อเปลี่ยนข้อ
     currentQuestion++;
     if(currentQuestion >= questions.length){
         evaluateFinalResult();
@@ -729,6 +744,7 @@ function updateTestTime() {
 function updateUIBasedOnState() {
     const ui = document.getElementById("machineStatusUI");
     const startBtn = document.getElementById("startBtn");
+    const audioControls = document.getElementById("audioControls"); // อ้างอิงกลุ่มปุ่มเสียง
 
     // ถ้าระบบกำลังรันการทดสอบให้ข้ามการปรับเปลี่ยนปุ่มไปก่อน
     if (isRunning || isTestRunning) return;
@@ -740,11 +756,15 @@ function updateUIBasedOnState() {
         ui.style.background = "rgba(181, 108, 255, 0.08)";
         ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
         
+        // แสดงปุ่มฟังเสียงเฉพาะในโหมดนี้
+        if (audioControls) audioControls.style.display = "flex"; 
+        
         // ถ้าหน้าจอยังคงแสดงสรุปผลอยู่ ให้เปลี่ยนปุ่มเป็นเริ่มฝึกใหม่
         if (currentQuestion >= questions.length && questions.length > 0) {
             startBtn.disabled = false;
             startBtn.innerHTML = "🔄 เริ่มฝึกใหม่";
             startBtn.onclick = prepareQuestions; // ผูก event สั่งเริ่มใหม่ได้อิสระ
+            if (audioControls) audioControls.style.display = "none"; // ปิดปุ่มฟังเสียงตอนสรุปผล
         } else if (questions.length > 0) {
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
@@ -754,6 +774,8 @@ function updateUIBasedOnState() {
     }
 
     // --- 🎮 หากเป็นโหมดปกติแจกรางวัล (ตู้ล็อกได้) ---
+    if (audioControls) audioControls.style.display = "none"; // ปิดปุ่มฟังเสียง
+    
     ui.style.background = "rgba(29,255,149,0.08)";
     ui.style.borderColor = "rgba(29,255,149,0.25)";
     startBtn.onclick = startRecognition; // กลับมาเป็นฟังก์ชันปกติ
@@ -893,6 +915,8 @@ function forceEndTest() {
 }
 
 function startRecognition() {
+    stopSentenceAudio(); // 💡 หยุดเสียง AI ก่อนเริ่มฟังเสียงผู้ใช้
+    
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
         alert("กรุณากรอกชื่อผู้เข้าทดสอบก่อนเริ่มใช้งานครับ!");
@@ -1053,6 +1077,30 @@ function playFailSound() {
     
     osc.start();
     osc.stop(audioCtx.currentTime + 0.3);
+}
+
+// ==========================================
+// ระบบอ่านออกเสียง (Text-to-Speech)
+// ==========================================
+let currentUtterance = null;
+function playSentenceAudio() {
+    stopSentenceAudio(); // หยุดเสียงที่อาจจะเล่นค้างอยู่ก่อน
+    const textToSpeak = document.getElementById("englishText").innerText;
+    
+    // ตรวจสอบว่าถ้าหน้าจอยังโหลดอยู่จะไม่ทำงาน
+    if (!textToSpeak || textToSpeak === "Loading..." || textToSpeak === "Test Completed!") return;
+
+    currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+    currentUtterance.lang = 'en-US'; // กำหนดสำเนียงเป็น US
+    currentUtterance.rate = 0.85; // ปรับความเร็วให้ช้าลงนิดหน่อย เพื่อให้ฟังชัดเจนขึ้น
+    
+    window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopSentenceAudio() {
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel(); // สั่งหยุดเสียงทันที
+    }
 }
 </script>
 </body>
