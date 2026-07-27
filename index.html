@@ -1002,9 +1002,13 @@ function startRecognition() {
         startGlobalTimer();
     }
 
-    if (!adminConfig.cancelRequirement) {
-        db.ref('machine/status').set('busy');
-    }
+    /* 
+    🛠️ ปิดการใช้งานการตั้งสถานะ Busy ที่ฝั่งเว็บ 
+    เพื่อให้ผู้ใช้งานหลายๆ คนสามารถกดทำข้อสอบพร้อมกันได้โดยไม่ต้องรอคิว 
+    */
+    // if (!adminConfig.cancelRequirement) {
+    //     db.ref('machine/status').set('busy');
+    // }
 
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
@@ -1036,21 +1040,34 @@ function evaluateFinalResult() {
     let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
     document.getElementById("score").innerHTML = finalPercent + "%";
 
+    // 🚀 แทรกโค้ดรหัส OTP ตามความต้องการของคุณ
     if (passCount >= adminConfig.passRequirement) {
         if (adminConfig.cancelRequirement) { 
+            // โหมดฝึกซ้อม (คงไว้เหมือนเดิม)
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status pass";
             document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
             document.getElementById("startBtn").disabled = false;
             document.getElementById("startBtn").onclick = prepareQuestions; 
+            db.ref('machine/status').set('ready'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
-            document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
-            document.getElementById("status").className = "status pass";
-            document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
-            document.getElementById("startBtn").disabled = true;
-            db.ref('machine/status').set('unlocked'); 
-            applauseAudio.play().catch(e => console.log("Audio play error:", e));
+            // โหมดใช้งานจริง: สร้าง OTP แทนการปลดล็อกตู้
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
+            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที (300,000 ms)
+
+            // บันทึก OTP ลง Firebase ภายใต้ Node ใหม่ชื่อ 'otps'
+            db.ref('machine/otps/' + otpCode).set({
+                valid: true,
+                expire: expireTime
+            }).then(() => {
+                document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
+                document.getElementById("status").className = "status pass";
+                document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
+                document.getElementById("startBtn").disabled = true;
+                // หมายเหตุ: เราไม่ set('unlocked') ตรงนี้แล้ว เพื่อไม่ให้ไปบล็อกคิวของตู้
+                applauseAudio.play().catch(e => console.log("Audio play error:", e));
+            });
         }
     } else {
         if (adminConfig.cancelRequirement) {
