@@ -67,8 +67,9 @@ body::before {
     background: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
     background-size:40px 40px; opacity:0.25;
+    z-index: 0;
 }
-.orb { position:fixed; border-radius:50%; filter:blur(45px); opacity:0.25; pointer-events:none; animation:float 8s ease-in-out infinite; }
+.orb { position:fixed; border-radius:50%; filter:blur(45px); opacity:0.25; pointer-events:none; animation:float 8s ease-in-out infinite; z-index: 0;}
 .orb1 { width:240px; height:240px; background:var(--cyan); top:60px; left:-60px; }
 .orb2 { width:300px; height:300px; background:var(--violet); top:100px; right:-100px; animation-delay:-3s; }
 .orb3 { width:180px; height:180px; background:var(--blue); bottom:-50px; left:45%; animation-delay:-5s; }
@@ -78,131 +79,170 @@ body::before {
 .glass { background:rgba(255,255,255,0.05); border:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow: 0 15px 40px rgba(0,0,0,0.35), 0 0 20px rgba(53,216,255,0.05); }
 
 /* HEADER */
-.header { padding:30px; border-radius:30px; margin-bottom:22px; position:relative; overflow:hidden; }
+.header { padding:25px; border-radius:25px; margin-bottom:22px; position:relative; overflow:hidden; }
 .header::before { content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(53,216,255,0.07), transparent); transform:translateX(-100%); animation:scan 7s linear infinite; }
 @keyframes scan { 100%{ transform:translateX(100%); } }
 .top-header { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
 .logo-area { display:flex; align-items:center; gap:18px; }
-.logo { width:70px; height:70px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:30px; font-weight:900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 0 30px rgba(53,216,255,0.35); }
-h1 { margin:0; font-size:52px; font-family:'Orbitron',sans-serif; letter-spacing:1px; line-height:1.1; }
-.subtitle { margin-top:12px; font-size:20px; color:var(--muted); line-height:1.8; }
+.logo { width:65px; height:65px; border-radius:20px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:26px; font-weight:900; background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 0 30px rgba(53,216,255,0.35); }
+h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing:1px; line-height:1.1; }
+.subtitle { margin-top:8px; font-size:18px; color:var(--muted); line-height:1.6; }
 
 .status-area { display:flex; align-items:center; gap:15px; }
-.live { padding:12px 20px; border-radius:999px; background:rgba(29,255,149,0.08); border:1px solid rgba(29,255,149,0.25); color:#87ffca; font-weight:bold; letter-spacing:2px; font-size:14px; display:flex; align-items:center; gap:10px; transition:0.3s; }
+.live { padding:10px 18px; border-radius:999px; background:rgba(29,255,149,0.08); border:1px solid rgba(29,255,149,0.25); color:#87ffca; font-weight:bold; letter-spacing:2px; font-size:14px; display:flex; align-items:center; gap:10px; transition:0.3s; }
 .live::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 15px currentColor; }
-.admin-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; }
-.admin-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
 
 /* INPUT & STATS */
 .login-box { margin-bottom:20px; }
-.login-box input { width:100%; padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:20px; outline:none; transition:0.3s; }
+.login-box input { width:100%; padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:18px; outline:none; transition:0.3s; }
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
-.stat { padding:18px; border-radius:22px; position:relative; overflow:hidden; text-align:center; }
-.stat::after { content:"absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
-.stat-title { font-size:15px; color:var(--muted); }
-.stat-value { margin-top:10px; font-size:34px; font-weight:bold; font-family:'Orbitron',sans-serif; }
+.stat { padding:15px; border-radius:20px; position:relative; overflow:hidden; text-align:center; }
+.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat-title { font-size:14px; color:var(--muted); letter-spacing: 1px;}
+.stat-value { margin-top:8px; font-size:28px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
 /* MAIN GRID */
 .main-grid { display:grid; grid-template-columns:1.3fr 0.8fr; gap:20px; }
-.sentence-box { padding:35px; border-radius:30px; position:relative; overflow:hidden; text-align:center; }
-.question-number { display:inline-block; padding:10px 18px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
-.english-text { margin-top:25px; font-size:58px; font-weight:900; line-height:1.15; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
-.thai-text { margin-top:14px; font-size:24px; color:#b6c6e8; line-height:1.7; }
+.sentence-box { padding:30px; border-radius:25px; position:relative; overflow:hidden; text-align:center; }
+.question-number { display:inline-block; padding:8px 16px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
+.english-text { margin-top:20px; font-size:48px; font-weight:900; line-height:1.2; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
+.thai-text { margin-top:12px; font-size:22px; color:#b6c6e8; line-height:1.6; }
 
 /* COUNTDOWN */
-.countdown-wrapper { margin:35px auto 10px; width:200px; height:200px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
-.countdown-wrapper::before { content:""; position:absolute; width:160px; height:160px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); }
-.countdown { position:relative; font-size:38px; font-family:'Orbitron',sans-serif; font-weight:900; z-index:1; text-shadow: 0 0 18px rgba(53,216,255,0.3); letter-spacing: -1px; }
+.countdown-wrapper { margin:30px auto 10px; width:160px; height:160px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
+.countdown-wrapper::before { content:""; position:absolute; width:130px; height:130px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); }
+.countdown { position:relative; font-size:32px; font-family:'Orbitron',sans-serif; font-weight:900; z-index:1; text-shadow: 0 0 18px rgba(53,216,255,0.3); letter-spacing: -1px; }
 @keyframes pulse { 50%{ transform:scale(1.04); } }
 
 /* BUTTONS & RESULT */
-.controls { margin-top:25px; text-align:center; }
-button { border:none; padding:18px 35px; border-radius:18px; cursor:pointer; font-size:20px; font-weight:bold; transition:0.3s; }
+.controls { margin-top:20px; text-align:center; }
+button { border:none; padding:16px 30px; border-radius:16px; cursor:pointer; font-size:18px; font-weight:bold; transition:0.3s; }
 button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
-.start-btn { background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); }
+.start-btn { background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); width: 100%; max-width: 300px;}
 .start-btn:hover:not(:disabled) { transform:translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53,216,255,0.3); }
 
-.result-box { padding:35px; border-radius:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
-.score { font-size:90px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
-.status { margin-top:10px; font-size:36px; font-weight:bold; }
+.result-box { padding:30px; border-radius:25px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+.score { font-size:75px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
+.status { margin-top:5px; font-size:28px; font-weight:bold; }
 .pass { color:var(--green); text-shadow: 0 0 18px rgba(29,255,149,0.25); }
 .fail { color:var(--red); text-shadow: 0 0 18px rgba(255,77,109,0.25); }
-.heard-text { margin-top:18px; width:100%; padding:16px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#c0d0ed; font-size:18px; min-height:60px; display:flex; align-items:center; justify-content:center; }
+.heard-text { margin-top:15px; width:100%; padding:14px; border-radius:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#c0d0ed; font-size:16px; min-height:60px; display:flex; align-items:center; justify-content:center; }
 
-.teacher-box { margin-top:25px; padding:20px; border-radius:22px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.9; font-size:18px; text-align:center; }
-.teacher-title { font-weight:bold; color:#90dfff; margin-bottom:8px; font-size:20px; }
-.footer { margin-top:25px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; }
+.teacher-box { margin-top:20px; padding:15px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.7; font-size:16px; text-align:center; }
+.teacher-title { font-weight:bold; color:#90dfff; margin-bottom:5px; font-size:18px; }
+
+/* 🔒 HIDDEN ADMIN TRIGGER */
+.footer { margin-top:20px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; padding: 10px; cursor: pointer; user-select: none; transition: 0.3s; }
+.footer:hover { color: var(--cyan); }
 
 /* 🛠️ MAINTENANCE OVERLAY */
 .maintenance-overlay {
     display: none; position: fixed; inset: 0; background: rgba(4, 8, 22, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-    z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text); padding: 20px;
+    z-index: 9000; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text); padding: 20px;
 }
-.maintenance-overlay h1 { color: var(--red); font-size: 50px; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 25px rgba(255, 77, 109, 0.5); }
-.maintenance-info { font-size: 26px; color: var(--cyan); margin-bottom: 30px; background: rgba(53,216,255,0.1); padding: 15px 30px; border-radius: 20px; border: 1px solid rgba(53,216,255,0.2); }
-.maintenance-msg { background: rgba(255,255,255,0.05); border: 1px solid var(--line); padding: 25px; border-radius: 20px; max-width: 700px; font-size: 20px; line-height: 1.8; color: #b6c6e8; }
+.maintenance-overlay h1 { color: var(--red); font-size: 40px; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 25px rgba(255, 77, 109, 0.5); }
+.maintenance-info { font-size: 22px; color: var(--cyan); margin-bottom: 20px; background: rgba(53,216,255,0.1); padding: 15px 30px; border-radius: 20px; border: 1px solid rgba(53,216,255,0.2); }
+.maintenance-msg { background: rgba(255,255,255,0.05); border: 1px solid var(--line); padding: 20px; border-radius: 20px; max-width: 600px; font-size: 18px; line-height: 1.8; color: #b6c6e8; }
 .maintenance-admin-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; z-index: 10000; }
 .maintenance-admin-btn:hover { background: rgba(255,255,255,0.3); }
 
-/* ADMIN MODAL */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-.modal-content { width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; position: relative; max-height: 90vh; overflow-y: auto; }
+/* ADMIN MODAL - STRICTLY CENTERED & HIDDEN */
+.modal-overlay { 
+    display: none; /* ถูกซ่อนเป็นค่าเริ่มต้น */
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
+    align-items: center; justify-content: center; backdrop-filter: blur(8px); 
+}
+.modal-content { width: 90%; max-width: 450px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
-.modal-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
+.modal-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
 .admin-login-group { display: block; text-align: center; }
 .admin-control-group { display: none; }
-.admin-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; font-size: 18px; margin-bottom: 15px; text-align: center; font-family:'Prompt',sans-serif; }
-.admin-btn-action { width: 100%; background: var(--blue); color: white; padding: 15px; border-radius: 12px; border: none; font-family:'Prompt',sans-serif; font-size: 18px; cursor: pointer; font-weight: bold; transition: 0.3s;}
+.admin-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; font-size: 16px; margin-bottom: 15px; text-align: center; font-family:'Prompt',sans-serif; }
+.admin-btn-action { width: 100%; background: var(--blue); color: white; padding: 12px; border-radius: 12px; border: none; font-family:'Prompt',sans-serif; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s;}
 .admin-btn-action:hover { filter: brightness(1.1); }
 
-.switch-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-.switch-label { font-size: 16px; font-weight: 500; }
-.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+.switch-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.switch-label { font-size: 15px; font-weight: 500; }
+.switch { position: relative; display: inline-block; width: 45px; height: 24px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--cyan); box-shadow: 0 0 15px rgba(53,216,255,0.5); }
-input:checked + .slider:before { transform: translateX(22px); }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--cyan); box-shadow: 0 0 10px rgba(53,216,255,0.5); }
+input:checked + .slider:before { transform: translateX(21px); }
 
-.stock-control-container { background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
-.stock-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.stock-control-container { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
+.stock-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .stock-item:last-child { margin-bottom: 0; }
-.stock-label { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
-.stock-display-badge { background: rgba(53,216,255,0.2); color: var(--cyan); padding: 4px 12px; border-radius: 8px; font-weight: bold; min-width: 45px; display: inline-block; text-align: center; font-size: 16px;}
+.stock-label { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.stock-display-badge { background: rgba(53,216,255,0.2); color: var(--cyan); padding: 4px 12px; border-radius: 8px; font-weight: bold; min-width: 40px; display: inline-block; text-align: center; font-size: 14px;}
 .stock-btns { display: flex; gap: 8px; align-items: center; }
-.stock-btn { width: 34px; height: 34px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+.stock-btn { width: 30px; height: 30px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
 .stock-btn:hover { background: var(--blue); border-color: var(--blue); }
 .stock-btn.minus { color: var(--red); }
 .stock-btn.minus:hover { background: var(--red); color: white; border-color: var(--red); }
 .stock-btn.plus { color: var(--green); }
 .stock-btn.plus:hover { background: var(--green); color: white; border-color: var(--green); }
 
-.admin-time-input { width: 55px; text-align: center; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 15px; outline: none; }
-.admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; font-size: 15px; outline: none; }
+.admin-time-input { width: 50px; text-align: center; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 14px; outline: none; }
+.admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; max-width: 140px;}
 .admin-select option { background: #07101f; }
 
 /* AUDIO CONTROLS (สำหรับโหมดฝึกฝน) */
 .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
-.audio-btn { width: auto; padding: 10px 20px; font-size: 16px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+.audio-btn { width: auto; padding: 8px 16px; font-size: 14px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
 .audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
 .audio-btn.stop { background: rgba(255,77,109,0.15); border-color: rgba(255,77,109,0.3); color: var(--red); }
 .audio-btn.stop:hover { background: rgba(255,77,109,0.3); transform: scale(1.05); }
 
-/* RESPONSIVE */
-@media(max-width:900px) { .main-grid { grid-template-columns:1fr; } h1 { font-size:38px; } .english-text { font-size:42px; } }
+/* RESPONSIVE CLEANUP */
+@media(max-width:900px) { 
+    .main-grid { grid-template-columns:1fr; } 
+    h1 { font-size:32px; } 
+    .english-text { font-size:38px; } 
+}
 @media(max-width:600px) {
-    body { padding:8px; } .header { padding:15px; margin-bottom:12px; border-radius:20px; } .top-header { gap:10px; } .logo-area { gap:12px; } .logo { width:45px; height:45px; font-size:18px; border-radius:12px; } h1 { font-size:20px; letter-spacing:0px; } .subtitle { font-size:12px; margin-top:5px; line-height:1.4; } .live { padding:6px 12px; font-size:10px; } .admin-btn { width: 35px; height: 35px; font-size: 16px; }
-    .login-box { margin-bottom:12px; } .login-box input { padding:12px; font-size:16px; border-radius:12px; }
-    .top-bar { gap:8px; margin-bottom:12px; grid-template-columns:repeat(3,1fr); } .stat { padding:10px; border-radius:15px; } .stat-title { font-size:10px; } .stat-value { margin-top:5px; font-size:18px; }
-    .sentence-box { padding:20px; border-radius:20px; } .question-number { font-size:12px; padding:6px 12px; } .english-text { font-size:26px; margin-top:15px; } .thai-text { font-size:16px; margin-top:8px; }
-    .countdown-wrapper { margin:20px auto 10px; width:110px; height:110px; } .countdown-wrapper::before { width:90px; height:90px; } .countdown { font-size:24px; letter-spacing: -1px; }
-    .controls { margin-top:15px; } button { width:100%; padding:14px; font-size:18px; border-radius:14px; }
-    .result-box { padding:20px; border-radius:20px; margin-top:12px; } .score { font-size:50px; } .status { font-size:24px; margin-top:5px; } .heard-text { font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
+    body { padding:10px; } 
+    .header { padding:15px; margin-bottom:15px; border-radius:20px; } 
+    .top-header { gap:10px; flex-direction: column; text-align: center; } 
+    .logo-area { gap:10px; flex-direction: column; } 
+    .logo { width:55px; height:55px; font-size:20px; border-radius:15px; } 
+    h1 { font-size:24px; line-height: 1.3; } 
+    .subtitle { font-size:14px; margin-top:5px; } 
+    .status-area { width: 100%; justify-content: center; }
+    .live { padding:8px 16px; font-size:12px; width: 100%; justify-content: center;} 
     
-    .maintenance-overlay h1 { font-size: 32px; }
-    .maintenance-info { font-size: 18px; padding: 12px 20px; }
-    .maintenance-msg { font-size: 16px; padding: 15px; }
+    .login-box { margin-bottom:15px; } 
+    .login-box input { padding:14px; font-size:16px; border-radius:15px; }
+    
+    .top-bar { gap:10px; margin-bottom:15px; } 
+    .stat { padding:12px 8px; border-radius:15px; } 
+    .stat-title { font-size:10px; } 
+    .stat-value { margin-top:5px; font-size:20px; }
+    
+    .sentence-box { padding:20px 15px; border-radius:20px; } 
+    .question-number { font-size:12px; padding:6px 12px; } 
+    .english-text { font-size:32px; margin-top:15px; } 
+    .thai-text { font-size:16px; margin-top:8px; }
+    
+    .countdown-wrapper { margin:20px auto 10px; width:120px; height:120px; } 
+    .countdown-wrapper::before { width:95px; height:95px; } 
+    .countdown { font-size:24px; }
+    
+    .controls { margin-top:15px; } 
+    button { width:100%; padding:14px; font-size:16px; border-radius:14px; max-width: 100%;}
+    
+    .result-box { padding:20px 15px; border-radius:20px; margin-top:15px; } 
+    .score { font-size:55px; } 
+    .status { font-size:22px; margin-top:5px; } 
+    .heard-text { font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
+    
+    .teacher-box { font-size: 14px; padding: 12px; }
+    .teacher-title { font-size: 16px; }
+
+    .maintenance-overlay h1 { font-size: 28px; }
+    .maintenance-info { font-size: 16px; padding: 12px 15px; }
+    .maintenance-msg { font-size: 14px; padding: 15px; }
 }
 </style>
 </head>
@@ -214,6 +254,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 <!-- 🛠️ หน้าจอแจังเตือนปรับปรุงระบบ -->
 <div class="maintenance-overlay" id="maintenanceOverlay">
+    <!-- ปุ่มนี้แอดมินยังมองเห็นได้บนหน้า Maintenance เผื่อปลดล็อก -->
     <div class="maintenance-admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
     <h1>🛠️ SYSTEM MAINTENANCE</h1>
     <div class="maintenance-info">
@@ -234,7 +275,7 @@ input:checked + .slider:before { transform: translateX(22px); }
             </div>
             <div class="status-area">
                 <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
-                <div class="admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
+                <!-- 🚀 ลบปุ่มเฟืองแอดมินออกจากตรงนี้แล้ว -->
             </div>
         </div>
     </div>
@@ -263,7 +304,6 @@ input:checked + .slider:before { transform: translateX(22px); }
             <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
             <div class="english-text" id="englishText">Loading...</div>
             
-            <!-- 🔊 ปุ่มควบคุมเสียง (เพิ่มใหม่) -->
             <div class="audio-controls" id="audioControls" style="display: none;">
                 <button class="audio-btn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
                 <button class="audio-btn stop" onclick="stopSentenceAudio()" title="หยุดฟัง">⏹️ หยุด</button>
@@ -292,26 +332,27 @@ input:checked + .slider:before { transform: translateX(22px); }
         วิทยาลัยสารพัดช่างศรีสะเกษ
     </div>
 
-    <div class="footer">AI Reward Learning Machine © 2026</div>
+    <!-- 🚀 ย้าย Trigger ของ Admin มาไว้ที่นี่ (ใช้การ Double Click) -->
+    <div class="footer" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
 </div>
 
 <!-- Admin Modal Panel -->
 <div class="modal-overlay" id="adminModal">
-    <div class="modal-content glass">
+    <div class="modal-content">
         <button class="close-modal" onclick="closeAdminModal()">✕</button>
         <div class="modal-title">Admin Panel</div>
 
         <div id="adminLoginGroup" class="admin-login-group">
             <input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
             <button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
-            <p id="adminError" style="color:var(--red); font-size:14px; display:none;">รหัสผ่านไม่ถูกต้อง!</p>
+            <p id="adminError" style="color:var(--red); font-size:14px; display:none; margin-top:10px;">รหัสผ่านไม่ถูกต้อง!</p>
         </div>
 
         <div id="adminControlGroup" class="admin-control-group">
 
             <!-- 🛠️ ระบบแจ้งเตือน Maintenance -->
             <div class="stock-control-container" style="border-color: rgba(255, 77, 109, 0.4);">
-                <div style="color: var(--red); font-weight: bold; margin-bottom: 15px; font-size: 18px; text-align: left;">🛠️ ประกาศปิดปรับปรุง (Maintenance)</div>
+                <div style="color: var(--red); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">🛠️ ประกาศปิดปรับปรุง (Maintenance)</div>
                 
                 <div class="switch-container" style="background:none; border:none; padding:0; margin-bottom: 15px;">
                     <span class="switch-label">เปิดโหมดปรับปรุงระบบ</span>
@@ -333,21 +374,18 @@ input:checked + .slider:before { transform: translateX(22px); }
                 </div>
                 
                 <div style="font-size: 12px; color: var(--muted); margin-bottom: 5px; text-align: left;">ข้อความประกาศเพิ่มเติม</div>
-                <textarea id="adminMaintMsg" class="admin-input" style="min-height:80px; resize:vertical; text-align:left;" placeholder="เช่น จะกลับมาให้บริการอีกครั้งเร็วๆ นี้..."></textarea>
+                <textarea id="adminMaintMsg" class="admin-input" style="min-height:70px; resize:vertical; text-align:left;" placeholder="เช่น จะกลับมาให้บริการอีกครั้งเร็วๆ นี้..."></textarea>
                 
-                <button class="admin-btn-action" style="background:var(--red);" onclick="saveMaintenanceInfo()">บันทึกข้อมูลปรับปรุง</button>
+                <button class="admin-btn-action" style="background:var(--red);" onclick="saveMaintenanceInfo()">บันทึกข้อมูล</button>
             </div>
             
             <!-- ปุ่มจัดการสถานะระบบ -->
-            <div class="switch-container" style="flex-direction: column; align-items: stretch; padding: 20px;">
-                <span class="switch-label" style="text-align: center; margin-bottom: 15px; display: block;">🔄 สถานะตู้ (Machine State)</span>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- แถวที่ 1: Ready (พร้อมใช้งาน) -->
-                    <button class="stock-btn plus" style="width: 100%; padding: 12px 15px; font-size: 16px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready (พร้อมใช้งาน)</button>
-                    <!-- แถวที่ 2: Unlocked (ปลดล็อกตู้) -->
-                    <button class="stock-btn plus" style="width: 100%; padding: 12px 15px; font-size: 16px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked (ปลดล็อกตู้)</button>
-                    <!-- แถวที่ 3: Busy (กำลังปรับปรุง/ล็อกระบบ) -->
-                    <button class="stock-btn minus" style="width: 100%; padding: 12px 15px; font-size: 16px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy (ล็อกระบบ)</button>
+            <div class="switch-container" style="flex-direction: column; align-items: stretch; padding: 15px;">
+                <span class="switch-label" style="text-align: center; margin-bottom: 12px; display: block;">🔄 สถานะตู้ (Machine State)</span>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready (พร้อมใช้งาน)</button>
+                    <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked (ปลดล็อกตู้)</button>
+                    <button class="stock-btn minus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy (ล็อกระบบ)</button>
                 </div>
             </div>
 
@@ -373,9 +411,8 @@ input:checked + .slider:before { transform: translateX(22px); }
 
             <!-- ⚙️ การตั้งค่าระบบข้อสอบ -->
             <div class="stock-control-container">
-                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 18px; text-align: left;">⚙️ Game Settings</div>
+                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">⚙️ Game Settings</div>
                 
-                <!-- 1. จำนวนข้อสอบที่จะสุ่ม -->
                 <div class="stock-item">
                     <div class="stock-label">📝 สุ่มข้อสอบจำนวน (ข้อ)</div>
                     <div class="stock-btns">
@@ -385,9 +422,8 @@ input:checked + .slider:before { transform: translateX(22px); }
                     </div>
                 </div>
 
-                <!-- 2. เกณฑ์การผ่าน -->
                 <div class="stock-item">
-                    <div class="stock-label">🏆 ตอบถูกขั้นต่ำ (เพื่อผ่าน)</div>
+                    <div class="stock-label">🏆 ตอบถูกขั้นต่ำ (ผ่าน)</div>
                     <div class="stock-btns">
                         <button class="stock-btn minus" onclick="updateAdminConfig('passRequirement', -1)">-</button>
                         <span class="stock-display-badge" id="adminPassReqUI">5</span>
@@ -395,17 +431,15 @@ input:checked + .slider:before { transform: translateX(22px); }
                     </div>
                 </div>
 
-                <!-- 3. เวลาทดสอบ (นาที / วินาที) -->
                 <div class="stock-item">
                     <div class="stock-label">⏱️ เวลาทดสอบ (นาที:วินาที)</div>
                     <div class="stock-btns" style="gap: 5px;">
                         <input type="number" id="adminTimeMin" min="0" max="60" value="1" class="admin-time-input"> :
                         <input type="number" id="adminTimeSec" min="0" max="59" value="00" class="admin-time-input">
-                        <button class="stock-btn plus" onclick="updateTestTime()" style="width: auto; padding: 0 10px; font-size:14px;">บันทึก</button>
+                        <button class="stock-btn plus" onclick="updateTestTime()" style="width: auto; padding: 0 10px; font-size:12px;">บันทึก</button>
                     </div>
                 </div>
 
-                <!-- 4. ระดับความยาก -->
                 <div class="stock-item">
                     <div class="stock-label">🌟 ระดับความยาก</div>
                     <select id="adminDifficulty" onchange="updateDifficulty()" class="admin-select">
@@ -417,9 +451,8 @@ input:checked + .slider:before { transform: translateX(22px); }
                 </div>
             </div>
 
-            <!-- เพิ่มสวิตช์: โหมดยกเลิกเกณฑ์ (Practice Mode) ตรงนี้ครับ -->
             <div class="switch-container">
-                <span class="switch-label">🎯 ยกเลิกเกณฑ์ (Practice Mode)</span>
+                <span class="switch-label">🎯 ยกเลิกเกณฑ์ (Practice)</span>
                 <label class="switch">
                     <input type="checkbox" id="cancelReqSwitch" onchange="toggleCancelRequirement(this.checked)">
                     <span class="slider"></span>
@@ -446,6 +479,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 </div>
 
 <script>
+// ---------- สคริปต์ JavaScript เดิมทั้งหมดอยู่ตรงนี้ ----------
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbwXNCOVd_sTH3_aVFLWudAvMSHx6vhDKy7Fn1PeGZ2ew4WdqjqKLkFAL3zSw8qdP2QN/exec";
@@ -479,14 +513,14 @@ let isTestRunning = false;
 let isRunning = false; 
 let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
-let currentMachineStatus = 'ready'; // เก็บสถานะตู้ในตัวแปรเพื่อใช้อัปเดต UI ร่วมกับ Practice Mode
+let currentMachineStatus = 'ready'; 
 
 let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
     difficulty: "ALL",
     testDurationSeconds: 60,
-    cancelRequirement: false // เพิ่มสถานะโหมดฝึกฝน
+    cancelRequirement: false 
 };
 
 window.onload = async () => {
@@ -562,29 +596,23 @@ window.onload = async () => {
     monitorStock(); 
 };
 
-// 🛠️ ---------------- ส่วนระบบแจ้งเตือน Maintenance ---------------- 🛠️
 function monitorMaintenance() {
     db.ref('machine/maintenance').on('value', (snap) => {
         const data = snap.val() || { isActive: false, date: '', time: '', message: '' };
         
-        // แอดมิน UI
         document.getElementById("maintSwitch").checked = data.isActive;
         document.getElementById("adminMaintDate").value = data.date || "";
         document.getElementById("adminMaintTime").value = data.time || "";
         document.getElementById("adminMaintMsg").value = data.message || "";
 
-        // หน้าจอผู้ใช้ UI
         const overlay = document.getElementById("maintenanceOverlay");
         if(data.isActive) {
             overlay.style.display = "flex";
-            
-            // Format วันที่ให้สวยงาม (ถ้ามีข้อมูล)
             let dateStr = data.date;
             if(dateStr) {
                 const d = new Date(dateStr);
                 dateStr = d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
             }
-            
             document.getElementById("maintDateUI").innerText = dateStr || "เร็วๆ นี้";
             document.getElementById("maintTimeUI").innerText = data.time || "-";
             document.getElementById("maintMsgUI").innerText = data.message || "กำลังดำเนินการปรับปรุงระบบ ขออภัยในความไม่สะดวกครับ";
@@ -594,9 +622,7 @@ function monitorMaintenance() {
     });
 }
 
-function toggleMaintenance(isActive) {
-    db.ref('machine/maintenance/isActive').set(isActive);
-}
+function toggleMaintenance(isActive) { db.ref('machine/maintenance/isActive').set(isActive); }
 
 function saveMaintenanceInfo() {
     const date = document.getElementById("adminMaintDate").value;
@@ -609,8 +635,6 @@ function saveMaintenanceInfo() {
     
     alert("บันทึกข้อมูลแจ้งเตือน Maintenance สำเร็จเรียบร้อยแล้ว!");
 }
-// 🛠️ ----------------------------------------------------------------- 🛠️
-
 
 async function fetchQuestionsFromGAS() {
     try {
@@ -639,7 +663,6 @@ function prepareQuestions() {
     if (adminConfig.difficulty !== "ALL") {
         filtered = masterQuestions.filter(q => q.difficulty && q.difficulty.toUpperCase() === adminConfig.difficulty);
         if (filtered.length === 0) {
-            console.warn(`ไม่มีข้อสอบระดับ ${adminConfig.difficulty} ในระบบ ระบบจะดึงข้อสอบแบบผสมมาทดแทน`);
             filtered = masterQuestions;
         }
     }
@@ -648,15 +671,13 @@ function prepareQuestions() {
     questions = shuffled.slice(0, adminConfig.questionCount);
     currentQuestion = 0;
 
-    // รีเซ็ตการทำงานของปุ่มกลับเป็นโหมดปกติ (startRecognition)
     const startBtn = document.getElementById("startBtn");
     startBtn.onclick = startRecognition;
 
     if(!isTestRunning) {
         loadQuestion(0);
     }
-
-    updateUIBasedOnState(); // อัปเดต UI เสมอเมื่อเตรียมข้อสอบเสร็จ
+    updateUIBasedOnState(); 
 }
 
 function loadQuestion(index){
@@ -678,7 +699,7 @@ function loadQuestion(index){
 }
 
 function nextQuestion(){
-    stopSentenceAudio(); // 💡 หยุดเสียง AI เมื่อเปลี่ยนข้อ
+    stopSentenceAudio();
     currentQuestion++;
     if(currentQuestion >= questions.length){
         evaluateFinalResult();
@@ -695,13 +716,13 @@ function monitorAdminSettings() {
             adminConfig.questionCount = conf.questionCount !== undefined ? conf.questionCount : 10;
             adminConfig.difficulty = conf.difficulty || "ALL";
             adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
-            adminConfig.cancelRequirement = conf.cancelRequirement || false; // อัปเดตสถานะโหมดฝึกฝน
+            adminConfig.cancelRequirement = conf.cancelRequirement || false; 
         }
 
         document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
         document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
         document.getElementById("adminDifficulty").value = adminConfig.difficulty;
-        document.getElementById("cancelReqSwitch").checked = adminConfig.cancelRequirement; // อัปเดตสวิตช์
+        document.getElementById("cancelReqSwitch").checked = adminConfig.cancelRequirement; 
 
         let m = Math.floor(adminConfig.testDurationSeconds / 60);
         let s = adminConfig.testDurationSeconds % 60;
@@ -712,7 +733,7 @@ function monitorAdminSettings() {
             updateTimerDisplay(adminConfig.testDurationSeconds);
             prepareQuestions();
         }
-        updateUIBasedOnState(); // อัปเดต UI เผื่อกรณีแอดมินสับสวิตช์โหมด
+        updateUIBasedOnState(); 
     });
 }
 
@@ -740,45 +761,39 @@ function updateTestTime() {
     }
 }
 
-// 🛠️ การรวมระบบจัดการสถานะหน้าจอแบบไดนามิก รองรับ Practice Mode
 function updateUIBasedOnState() {
     const ui = document.getElementById("machineStatusUI");
     const startBtn = document.getElementById("startBtn");
-    const audioControls = document.getElementById("audioControls"); // อ้างอิงกลุ่มปุ่มเสียง
+    const audioControls = document.getElementById("audioControls"); 
 
-    // ถ้าระบบกำลังรันการทดสอบให้ข้ามการปรับเปลี่ยนปุ่มไปก่อน
     if (isRunning || isTestRunning) return;
 
-    // --- 🎯 หากเปิดโหมดยกเลิกเกณฑ์ (Practice Mode) ---
     if (adminConfig.cancelRequirement) {
         ui.innerHTML = "PRACTICE MODE";
-        ui.style.color = "#b56cff"; // เปลี่ยนสีเป็นม่วงแสดงโหมดฝึกซ้อม
+        ui.style.color = "#b56cff"; 
         ui.style.background = "rgba(181, 108, 255, 0.08)";
         ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
         
-        // แสดงปุ่มฟังเสียงเฉพาะในโหมดนี้
         if (audioControls) audioControls.style.display = "flex"; 
         
-        // ถ้าหน้าจอยังคงแสดงสรุปผลอยู่ ให้เปลี่ยนปุ่มเป็นเริ่มฝึกใหม่
         if (currentQuestion >= questions.length && questions.length > 0) {
             startBtn.disabled = false;
             startBtn.innerHTML = "🔄 เริ่มฝึกใหม่";
-            startBtn.onclick = prepareQuestions; // ผูก event สั่งเริ่มใหม่ได้อิสระ
-            if (audioControls) audioControls.style.display = "none"; // ปิดปุ่มฟังเสียงตอนสรุปผล
+            startBtn.onclick = prepareQuestions; 
+            if (audioControls) audioControls.style.display = "none"; 
         } else if (questions.length > 0) {
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
             startBtn.onclick = startRecognition;
         }
-        return; // ข้ามการเช็คสถานะตู้ไปเลย (ตู้ไม่บล็อก)
+        return; 
     }
 
-    // --- 🎮 หากเป็นโหมดปกติแจกรางวัล (ตู้ล็อกได้) ---
-    if (audioControls) audioControls.style.display = "none"; // ปิดปุ่มฟังเสียง
+    if (audioControls) audioControls.style.display = "none"; 
     
     ui.style.background = "rgba(29,255,149,0.08)";
     ui.style.borderColor = "rgba(29,255,149,0.25)";
-    startBtn.onclick = startRecognition; // กลับมาเป็นฟังก์ชันปกติ
+    startBtn.onclick = startRecognition; 
 
     if(currentMachineStatus === 'ready') {
         ui.innerHTML = "MACHINE READY";
@@ -796,7 +811,7 @@ function updateUIBasedOnState() {
         ui.style.color = "#35d8ff";
         startBtn.disabled = true;
         startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
-    } else { // status === 'busy'
+    } else { 
         ui.innerHTML = "MACHINE BUSY";
         ui.style.color = "#ff4d6d";
         startBtn.disabled = true;
@@ -807,7 +822,7 @@ function updateUIBasedOnState() {
 function monitorMachine() {
     db.ref('machine/status').on('value', (snap) => {
         currentMachineStatus = snap.val() || 'ready';
-        updateUIBasedOnState(); // เปลี่ยนมาเรียกใช้ตัวจัดการกลาง
+        updateUIBasedOnState(); 
     });
 }
 
@@ -872,7 +887,7 @@ function monitorStock() {
 
 function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
 function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
-function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } // ฟังก์ชันสำหรับเปิด-ปิดโหมดฝึกฝน
+function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } 
 
 function monitorAdminSwitches() {
     db.ref('machine/restock').on('value', (snap) => { document.getElementById("restockSwitch").checked = snap.val() || false; });
@@ -915,7 +930,7 @@ function forceEndTest() {
 }
 
 function startRecognition() {
-    stopSentenceAudio(); // 💡 หยุดเสียง AI ก่อนเริ่มฟังเสียงผู้ใช้
+    stopSentenceAudio(); 
     
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
@@ -933,7 +948,6 @@ function startRecognition() {
         startGlobalTimer();
     }
 
-    // 🎯 โหมดปกติเท่านั้นที่จะล็อกระบบ หากเป็นโหมดฝึกฝนจะไม่ล็อกเพื่อให้ทุกคนใช้พร้อมกันได้
     if (!adminConfig.cancelRequirement) {
         db.ref('machine/status').set('busy');
     }
@@ -966,13 +980,12 @@ function evaluateFinalResult() {
     document.getElementById("score").innerHTML = finalPercent + "%";
 
     if (passCount >= adminConfig.passRequirement) {
-        // 🎯 กรณีเปิดโหมดฝึกฝน
         if (adminConfig.cancelRequirement) { 
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status pass";
             document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
             document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").onclick = prepareQuestions; // ผูกคำสั่งให้เริ่มรอบใหม่ได้เอง
+            document.getElementById("startBtn").onclick = prepareQuestions; 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
             document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
@@ -983,7 +996,6 @@ function evaluateFinalResult() {
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         }
     } else {
-        // 🎯 กรณีเปิดโหมดฝึกฝน
         if (adminConfig.cancelRequirement) {
             document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status fail";
@@ -1079,27 +1091,23 @@ function playFailSound() {
     osc.stop(audioCtx.currentTime + 0.3);
 }
 
-// ==========================================
-// ระบบอ่านออกเสียง (Text-to-Speech)
-// ==========================================
 let currentUtterance = null;
 function playSentenceAudio() {
-    stopSentenceAudio(); // หยุดเสียงที่อาจจะเล่นค้างอยู่ก่อน
+    stopSentenceAudio(); 
     const textToSpeak = document.getElementById("englishText").innerText;
     
-    // ตรวจสอบว่าถ้าหน้าจอยังโหลดอยู่จะไม่ทำงาน
     if (!textToSpeak || textToSpeak === "Loading..." || textToSpeak === "Test Completed!") return;
 
     currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
-    currentUtterance.lang = 'en-US'; // กำหนดสำเนียงเป็น US
-    currentUtterance.rate = 0.85; // ปรับความเร็วให้ช้าลงนิดหน่อย เพื่อให้ฟังชัดเจนขึ้น
+    currentUtterance.lang = 'en-US'; 
+    currentUtterance.rate = 0.85; 
     
     window.speechSynthesis.speak(currentUtterance);
 }
 
 function stopSentenceAudio() {
     if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel(); // สั่งหยุดเสียงทันที
+        window.speechSynthesis.cancel(); 
     }
 }
 </script>
