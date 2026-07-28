@@ -849,7 +849,9 @@ function updateUIBasedOnState() {
             startBtn.innerHTML = "🎤 เริ่มพูด";
             if (audioControls) {
                 audioControls.style.display = "flex";
+                // ซ่อนปุ่มฟังในโหมดทดสอบ
                 if (listenBtn) listenBtn.style.display = "none";
+                // แสดงปุ่มข้ามเสมอ
                 if (skipBtn) skipBtn.style.display = "flex";
             }
         }
@@ -934,43 +936,8 @@ function monitorStock() {
     });
 }
 
-/* 
-====================================================================
-🛠️ จุดแก้ปัญหา RESTOCK & TEST BUTTON
-====================================================================
-*/
-
-function toggleRestock(isChecked) { 
-    db.ref('machine/restock').set(isChecked);
-    
-    if (isChecked) {
-        // บังคับเปลี่ยนค่า Stock ให้กลับมาเป็น 18 ทันทีจากฝั่งเว็บ
-        db.ref('machine/stock/slot1').set(18);
-        db.ref('machine/stock/slot2').set(18);
-        
-        // สั่งเปลี่ยนกลับเป็น false อัตโนมัติหลังผ่านไป 2 วินาที 
-        // (เพื่อให้ ESP32 รับรู้ถึงการเปลี่ยนแปลง "false -> true" ในการกดครั้งหน้า)
-        setTimeout(() => {
-            db.ref('machine/restock').set(false);
-            // ถ้าอยากให้ปุ่ม Switch ปิดตามด้วย (ปกติ monitorAdminSwitches จัดการให้อยู่แล้ว แต่เผื่อ UI ค้าง)
-            document.getElementById("restockSwitch").checked = false;
-        }, 2000);
-    }
-}
-
-function toggleTest(isChecked) { 
-    db.ref('machine/test').set(isChecked); 
-    
-    if (isChecked) {
-        // สั่งเปลี่ยนกลับเป็น false อัตโนมัติหลังผ่านไป 2 วินาที 
-        // (เพื่อให้ ESP32 รับรู้ถึงการเปลี่ยนแปลง "false -> true" ในการกดครั้งหน้า)
-        setTimeout(() => {
-            db.ref('machine/test').set(false);
-            document.getElementById("testSwitch").checked = false;
-        }, 2000);
-    }
-}
-
+function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
+function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
 function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } 
 
 function monitorAdminSwitches() {
@@ -1008,6 +975,7 @@ function forceEndTest() {
     document.getElementById("status").className = "status fail";
     document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
     
+    // 🚀 ซ่อนปุ่มเมื่อหมดเวลา
     document.getElementById("audioControls").style.display = "none";
     
     playFailSound();
@@ -1034,6 +1002,14 @@ function startRecognition() {
         startGlobalTimer();
     }
 
+    /* 
+    🛠️ ปิดการใช้งานการตั้งสถานะ Busy ที่ฝั่งเว็บ 
+    เพื่อให้ผู้ใช้งานหลายๆ คนสามารถกดทำข้อสอบพร้อมกันได้โดยไม่ต้องรอคิว 
+    */
+    // if (!adminConfig.cancelRequirement) {
+    //     db.ref('machine/status').set('busy');
+    // }
+
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
     document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง...";
@@ -1048,18 +1024,13 @@ function startRecognition() {
     }
 }
 
-/* 
-====================================================================
-🛠️ จุดเพิ่มการเก็บชื่อผู้รับรางวัลลง Firebase (ดึงจากโค้ด 2 ของคุณ)
-====================================================================
-*/
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     isTestRunning = false;
     
+    // 🚀 ซ่อนกลุ่มปุ่มช่วยเหลือและปุ่มข้ามเมื่อจบการทดสอบ
     document.getElementById("audioControls").style.display = "none";
     
-    // ดึงชื่อผู้ทดสอบ
     const name = document.getElementById("studentName").value || "Unknown User";
 
     document.getElementById("englishText").innerHTML = "Test Completed!";
@@ -1069,9 +1040,10 @@ function evaluateFinalResult() {
     let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
     document.getElementById("score").innerHTML = finalPercent + "%";
 
+    // 🚀 แทรกโค้ดรหัส OTP ตามความต้องการของคุณ
     if (passCount >= adminConfig.passRequirement) {
         if (adminConfig.cancelRequirement) { 
-            // โหมดฝึกซ้อม
+            // โหมดฝึกซ้อม (คงไว้เหมือนเดิม)
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status pass";
             document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
@@ -1080,20 +1052,20 @@ function evaluateFinalResult() {
             db.ref('machine/status').set('ready'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
-            // โหมดใช้งานจริง: สร้าง OTP พร้อมเก็บบันทึกชื่อผู้รับรางวัลลง Firebase 📝
-            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
-            let expireTime = Date.now() + (5 * 60 * 1000); 
+            // โหมดใช้งานจริง: สร้าง OTP แทนการปลดล็อกตู้
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
+            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที (300,000 ms)
 
-            // บันทึกข้อมูลลง Firebase รวมถึงเพิ่ม winnerName ไว้ตรวจสอบ
+            // บันทึก OTP ลง Firebase ภายใต้ Node ใหม่ชื่อ 'otps'
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
-                expire: expireTime,
-                winnerName: name 
+                expire: expireTime
             }).then(() => {
                 document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
                 document.getElementById("status").className = "status pass";
                 document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
                 document.getElementById("startBtn").disabled = true;
+                // หมายเหตุ: เราไม่ set('unlocked') ตรงนี้แล้ว เพื่อไม่ให้ไปบล็อกคิวของตู้
                 applauseAudio.play().catch(e => console.log("Audio play error:", e));
             });
         }
