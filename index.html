@@ -1031,7 +1031,8 @@ function evaluateFinalResult() {
     // 🚀 ซ่อนกลุ่มปุ่มช่วยเหลือและปุ่มข้ามเมื่อจบการทดสอบ
     document.getElementById("audioControls").style.display = "none";
     
-    const name = document.getElementById("studentName").value || "Unknown User";
+    // 💡 เปลี่ยนค่า default เป็น "ไม่ระบุชื่อ (จาก Web)" เพื่อให้ชัดเจนเวลาเข้า Telegram
+    const name = document.getElementById("studentName").value || "ไม่ระบุชื่อ (จาก Web)";
 
     document.getElementById("englishText").innerHTML = "Test Completed!";
     document.getElementById("thaiText").innerHTML = "สิ้นสุดการทดสอบ";
@@ -1042,6 +1043,10 @@ function evaluateFinalResult() {
 
     // 🚀 แทรกโค้ดรหัส OTP ตามความต้องการของคุณ
     if (passCount >= adminConfig.passRequirement) {
+
+        // 💡 [ส่วนที่เพิ่มใหม่] อัปเดตชื่อผู้ใช้ลงใน Firebase /machine/currentUser ทันทีที่สอบผ่าน
+        db.ref('machine/currentUser').set(name).catch(e => console.error(e));
+
         if (adminConfig.cancelRequirement) { 
             // โหมดฝึกซ้อม (คงไว้เหมือนเดิม)
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
