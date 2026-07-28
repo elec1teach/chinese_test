@@ -958,17 +958,17 @@ function toggleRestock(isChecked) {
     }
 }
 
-// 💡 แก้ไขฟังก์ชัน toggleTest ตรงนี้เพื่อไม่ให้กระทบค่า Stock จริง
+// 💡 แก้ไขฟังก์ชัน toggleTest ตรงนี้เพื่อให้ทำงานได้สมบูรณ์และเสถียรขึ้น
 function toggleTest(isChecked) { 
+    // ส่งสัญญาณสถานะไปยัง Firebase ทันทีแบบเดียวกับโหมด Restock
+    db.ref('machine/test').set(isChecked); 
+
     if (isChecked) {
         // 1. สำรองค่า Stock จริงในปัจจุบันไว้ก่อนเริ่มทดสอบ
         const originalSlot1 = currentStock.slot1;
         const originalSlot2 = currentStock.slot2;
-
-        // 2. ส่งสัญญาณให้ตู้ทำงานในโหมด Test
-        db.ref('machine/test').set(true); 
         
-        // 3. หลังจากให้ตู้ทำงานไปแล้ว (หน่วงเวลา 3 วินาทีเพื่อให้ฮาร์ดแวร์ตัดสต๊อกให้เสร็จ)
+        // 2. หน่วงเวลา 5 วินาทีเพื่อให้ตู้และมอเตอร์ฮาร์ดแวร์มีเวลาประมวลผลจนเสร็จ
         setTimeout(() => {
             // ปิดโหมด Test
             db.ref('machine/test').set(false);
@@ -977,9 +977,7 @@ function toggleTest(isChecked) {
             // คืนค่า Stock ให้กลับมาเป็นจำนวนเดิมก่อนกดทดสอบ (เขียนทับค่าที่ถูกลดไป)
             db.ref('machine/stock/slot1').set(originalSlot1);
             db.ref('machine/stock/slot2').set(originalSlot2);
-        }, 3000); 
-    } else {
-        db.ref('machine/test').set(false);
+        }, 5000); 
     }
 }
 
