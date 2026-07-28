@@ -162,26 +162,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .admin-btn-action { width: 100%; background: var(--blue); color: white; padding: 12px; border-radius: 12px; border: none; font-family:'Prompt',sans-serif; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s;}
 .admin-btn-action:hover { filter: brightness(1.1); }
 
-/* สไตล์สำหรับปุ่ม Momentary Push Button */
-.admin-btn-momentary { 
-    width: auto; 
-    background: rgba(255,255,255,0.1); 
-    color: white; 
-    padding: 8px 16px; 
-    border-radius: 12px; 
-    border: 1px solid rgba(255,255,255,0.3); 
-    font-family:'Prompt',sans-serif; 
-    font-size: 14px; 
-    cursor: pointer; 
-    font-weight: bold; 
-    transition: 0.1s; /* ตอบสนองไวขึ้นเวลากด */
-    user-select: none; /* ป้องกันการคลุมดำเวลากด */
-    -webkit-user-select: none;
-}
-.admin-btn-momentary.restock { border-color: var(--cyan); color: var(--cyan); }
-.admin-btn-momentary.test { border-color: var(--violet); color: var(--violet); }
-.admin-btn-momentary:active { transform: scale(0.95); filter: brightness(1.3); }
-
 .switch-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
 .switch-label { font-size: 15px; font-weight: 500; }
 .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
@@ -479,31 +459,20 @@ input:checked + .slider:before { transform: translateX(21px); }
                 </label>
             </div>
 
-            <!-- 🚀 ปรับแต่งเป็นปุ่มกดติด-ปล่อยดับ สำหรับ Hardware Commands -->
             <div class="switch-container">
-                <span class="switch-label">🔧 สั่งงานตู้ (Restock Mode)</span>
-                <button class="admin-btn-momentary restock" 
-                    oncontextmenu="return false;"
-                    onmousedown="setMomentaryState('machine/restock', true, this)"
-                    onmouseup="setMomentaryState('machine/restock', false, this)"
-                    onmouseleave="setMomentaryState('machine/restock', false, this)"
-                    ontouchstart="setMomentaryState('machine/restock', true, this)"
-                    ontouchend="setMomentaryState('machine/restock', false, this)">
-                    กดค้างเพื่อส่งคำสั่ง
-                </button>
+                <span class="switch-label">🔧 Restock Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="restockSwitch" onchange="toggleRestock(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
 
             <div class="switch-container">
-                <span class="switch-label">🧪 ทดสอบระบบ (Test Mode)</span>
-                <button class="admin-btn-momentary test"
-                    oncontextmenu="return false;"
-                    onmousedown="setMomentaryState('machine/test', true, this)"
-                    onmouseup="setMomentaryState('machine/test', false, this)"
-                    onmouseleave="setMomentaryState('machine/test', false, this)"
-                    ontouchstart="setMomentaryState('machine/test', true, this)"
-                    ontouchend="setMomentaryState('machine/test', false, this)">
-                    กดค้างเพื่อส่งคำสั่ง
-                </button>
+                <span class="switch-label">🧪 Test Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="testSwitch" onchange="toggleTest(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
     </div>
@@ -637,6 +606,7 @@ window.onload = async () => {
     monitorAdminSettings(); 
     await fetchQuestionsFromGAS();
     monitorMachine(); 
+    monitorAdminSwitches(); 
     monitorStock(); 
 };
 
@@ -966,21 +936,13 @@ function monitorStock() {
     });
 }
 
+function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
+function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
 function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } 
 
-// 🚀 ฟังก์ชันใหม่สำหรับจัดการปุ่มแบบ Momentary (กดติด-ปล่อยดับ)
-function setMomentaryState(path, state, btnElement) {
-    // 1. สั่งงานตรงไปยัง Firebase
-    db.ref(path).set(state);
-    
-    // 2. ปรับเอฟเฟกต์ภาพของปุ่มเพื่อให้ทราบว่ากำลังส่งคำสั่งอยู่
-    if(state) {
-        btnElement.style.transform = "scale(0.95)";
-        btnElement.style.filter = "brightness(1.5)";
-    } else {
-        btnElement.style.transform = "scale(1)";
-        btnElement.style.filter = "brightness(1)";
-    }
+function monitorAdminSwitches() {
+    db.ref('machine/restock').on('value', (snap) => { document.getElementById("restockSwitch").checked = snap.val() || false; });
+    db.ref('machine/test').on('value', (snap) => { document.getElementById("testSwitch").checked = snap.val() || false; });
 }
 
 function updateTimerDisplay(seconds) {
@@ -1039,6 +1001,14 @@ function startRecognition() {
         
         startGlobalTimer();
     }
+
+    /* 
+    🛠️ ปิดการใช้งานการตั้งสถานะ Busy ที่ฝั่งเว็บ 
+    เพื่อให้ผู้ใช้งานหลายๆ คนสามารถกดทำข้อสอบพร้อมกันได้โดยไม่ต้องรอคิว 
+    */
+    // if (!adminConfig.cancelRequirement) {
+    //     db.ref('machine/status').set('busy');
+    // }
 
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
