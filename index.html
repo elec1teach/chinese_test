@@ -188,12 +188,14 @@ input:checked + .slider:before { transform: translateX(21px); }
 .admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; max-width: 140px;}
 .admin-select option { background: #07101f; }
 
-/* AUDIO CONTROLS (สำหรับโหมดฝึกฝน) */
+/* AUDIO CONTROLS (สำหรับโหมดฝึกฝนและโหมดทดสอบ) */
 .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
 .audio-btn { width: auto; padding: 8px 16px; font-size: 14px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
 .audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
-.audio-btn.stop { background: rgba(255,77,109,0.15); border-color: rgba(255,77,109,0.3); color: var(--red); }
-.audio-btn.stop:hover { background: rgba(255,77,109,0.3); transform: scale(1.05); }
+
+/* 🚀 ปุ่มข้ามข้อ */
+.audio-btn.skip { background: rgba(181, 108, 255, 0.15); border-color: rgba(181, 108, 255, 0.3); color: var(--violet); }
+.audio-btn.skip:hover { background: rgba(181, 108, 255, 0.3); transform: scale(1.05); }
 
 /* RESPONSIVE CLEANUP */
 @media(max-width:900px) { 
@@ -254,7 +256,6 @@ input:checked + .slider:before { transform: translateX(21px); }
 
 <!-- 🛠️ หน้าจอแจังเตือนปรับปรุงระบบ -->
 <div class="maintenance-overlay" id="maintenanceOverlay">
-    <!-- ปุ่มนี้แอดมินยังมองเห็นได้บนหน้า Maintenance เผื่อปลดล็อก -->
     <div class="maintenance-admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
     <h1>🛠️ SYSTEM MAINTENANCE</h1>
     <div class="maintenance-info">
@@ -275,7 +276,6 @@ input:checked + .slider:before { transform: translateX(21px); }
             </div>
             <div class="status-area">
                 <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
-                <!-- 🚀 ลบปุ่มเฟืองแอดมินออกจากตรงนี้แล้ว -->
             </div>
         </div>
     </div>
@@ -304,9 +304,10 @@ input:checked + .slider:before { transform: translateX(21px); }
             <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
             <div class="english-text" id="englishText">Loading...</div>
             
+            <!-- 🚀 ใช้งาน Audio Controls ทั้งสองโหมด -->
             <div class="audio-controls" id="audioControls" style="display: none;">
-                <button class="audio-btn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
-                <button class="audio-btn stop" onclick="stopSentenceAudio()" title="หยุดฟัง">⏹️ หยุด</button>
+                <button class="audio-btn" id="listenBtn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
+                <button class="audio-btn skip" id="skipBtn" onclick="nextQuestion()" title="ข้ามไปข้อต่อไป">⏭️ ข้อต่อไป</button>
             </div>
             
             <div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
@@ -332,7 +333,6 @@ input:checked + .slider:before { transform: translateX(21px); }
         วิทยาลัยสารพัดช่างศรีสะเกษ
     </div>
 
-    <!-- 🚀 ย้าย Trigger ของ Admin มาไว้ที่นี่ (ใช้การ Double Click) -->
     <div class="footer" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
 </div>
 
@@ -479,7 +479,6 @@ input:checked + .slider:before { transform: translateX(21px); }
 </div>
 
 <script>
-// ---------- สคริปต์ JavaScript เดิมทั้งหมดอยู่ตรงนี้ ----------
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbwXNCOVd_sTH3_aVFLWudAvMSHx6vhDKy7Fn1PeGZ2ew4WdqjqKLkFAL3zSw8qdP2QN/exec";
@@ -514,6 +513,9 @@ let isRunning = false;
 let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
+
+// 🚀 เพิ่มตัวแปรหน่วงเวลาป้องกันการกดข้ามเบิ้ล
+let nextQuestionTimer = null;
 
 let adminConfig = {
     passRequirement: 5,
@@ -564,7 +566,7 @@ window.onload = async () => {
 
         document.getElementById("startBtn").disabled = true;
 
-        setTimeout(() => {
+        nextQuestionTimer = setTimeout(() => {
             if (totalTimeLeftSeconds > 0) {
                 nextQuestion();
             }
@@ -584,8 +586,20 @@ window.onload = async () => {
         }
     };
 
+    // 🚀 เพิ่มการตรวจสอบเวลาไมค์เงียบ (ตัดการทำงานอัตโนมัติแล้ว UI ค้าง) ให้ปลดล็อกปุ่ม Start ได้
     recognition.onend = function() {
-        if(isRunning) { console.log("Recognition ended unexpectedly."); }
+        if(isRunning) { 
+            console.log("Recognition ended unexpectedly."); 
+            isRunning = false;
+            document.getElementById("status").innerHTML = "หมดเวลาพูด/เสียงเงียบเกินไป ⚠️";
+            document.getElementById("status").className = "status fail";
+            document.getElementById("heardText").innerHTML = "ไมค์ถูกตัดการทำงานอัตโนมัติ กรุณากดพูดใหม่ หรือข้ามข้อ";
+            
+            if(questions.length > 0) {
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
+            }
+        }
     };
 
     monitorMaintenance(); 
@@ -691,6 +705,21 @@ function loadQuestion(index){
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
     
+    // 🚀 อัปเดต: ให้แสดงกลุ่มปุ่ม Audio Controls เสมอเมื่อมีการโหลดข้อสอบ
+    document.getElementById("audioControls").style.display = "flex";
+    
+    // 🚀 ซ่อนเฉพาะปุ่ม "ฟังการออกเสียง" หากเป็นโหมดทดสอบ แต่ให้แสดงในโหมดฝึกฝน
+    const listenBtn = document.getElementById("listenBtn");
+    if (listenBtn) {
+        listenBtn.style.display = adminConfig.cancelRequirement ? "flex" : "none";
+    }
+    
+    // 🚀 คงปุ่ม "ข้อต่อไป" ไว้เสมอให้ใช้งานได้ในกรณีที่ UI ค้าง
+    const skipBtn = document.getElementById("skipBtn");
+    if (skipBtn) {
+        skipBtn.style.display = "flex";
+    }
+
     if(!isTestRunning) { updateTimerDisplay(adminConfig.testDurationSeconds); }
 
     const startBtn = document.getElementById("startBtn");
@@ -698,8 +727,17 @@ function loadQuestion(index){
     startBtn.innerHTML = "🎤 เริ่มพูด";
 }
 
+// 🚀 อัปเดตฟังก์ชันเปลี่ยนข้อเพื่อเคลียร์สถานะไมค์ค้าง
 function nextQuestion(){
+    clearTimeout(nextQuestionTimer);
     stopSentenceAudio();
+    
+    // หากไมค์ทำงานค้างอยู่ ให้บังคับปิดเพื่อคลายการล็อก UI
+    if (isRunning) {
+        isRunning = false;
+        try { recognition.stop(); } catch(e) {}
+    }
+    
     currentQuestion++;
     if(currentQuestion >= questions.length){
         evaluateFinalResult();
@@ -765,6 +803,8 @@ function updateUIBasedOnState() {
     const ui = document.getElementById("machineStatusUI");
     const startBtn = document.getElementById("startBtn");
     const audioControls = document.getElementById("audioControls"); 
+    const listenBtn = document.getElementById("listenBtn");
+    const skipBtn = document.getElementById("skipBtn");
 
     if (isRunning || isTestRunning) return;
 
@@ -773,8 +813,6 @@ function updateUIBasedOnState() {
         ui.style.color = "#b56cff"; 
         ui.style.background = "rgba(181, 108, 255, 0.08)";
         ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
-        
-        if (audioControls) audioControls.style.display = "flex"; 
         
         if (currentQuestion >= questions.length && questions.length > 0) {
             startBtn.disabled = false;
@@ -785,12 +823,15 @@ function updateUIBasedOnState() {
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
             startBtn.onclick = startRecognition;
+            if (audioControls) {
+                audioControls.style.display = "flex";
+                if (listenBtn) listenBtn.style.display = "flex";
+                if (skipBtn) skipBtn.style.display = "flex";
+            }
         }
         return; 
     }
 
-    if (audioControls) audioControls.style.display = "none"; 
-    
     ui.style.background = "rgba(29,255,149,0.08)";
     ui.style.borderColor = "rgba(29,255,149,0.25)";
     startBtn.onclick = startRecognition; 
@@ -802,20 +843,28 @@ function updateUIBasedOnState() {
         if (currentQuestion >= questions.length && questions.length > 0) {
              startBtn.disabled = true;
              startBtn.innerHTML = "รอรอบต่อไป";
+             if (audioControls) audioControls.style.display = "none";
         } else if (questions.length > 0) {
             startBtn.disabled = false;
             startBtn.innerHTML = "🎤 เริ่มพูด";
+            if (audioControls) {
+                audioControls.style.display = "flex";
+                if (listenBtn) listenBtn.style.display = "none";
+                if (skipBtn) skipBtn.style.display = "flex";
+            }
         }
     } else if (currentMachineStatus === 'unlocked') {
         ui.innerHTML = "MACHINE UNLOCKED";
         ui.style.color = "#35d8ff";
         startBtn.disabled = true;
         startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
+        if (audioControls) audioControls.style.display = "none";
     } else { 
         ui.innerHTML = "MACHINE BUSY";
         ui.style.color = "#ff4d6d";
         startBtn.disabled = true;
         startBtn.innerHTML = "🔒 รอคิวใช้งาน";
+        if (audioControls) audioControls.style.display = "none";
     }
 }
 
@@ -885,8 +934,43 @@ function monitorStock() {
     });
 }
 
-function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
-function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
+/* 
+====================================================================
+🛠️ จุดแก้ปัญหา RESTOCK & TEST BUTTON
+====================================================================
+*/
+
+function toggleRestock(isChecked) { 
+    db.ref('machine/restock').set(isChecked);
+    
+    if (isChecked) {
+        // บังคับเปลี่ยนค่า Stock ให้กลับมาเป็น 18 ทันทีจากฝั่งเว็บ
+        db.ref('machine/stock/slot1').set(18);
+        db.ref('machine/stock/slot2').set(18);
+        
+        // สั่งเปลี่ยนกลับเป็น false อัตโนมัติหลังผ่านไป 2 วินาที 
+        // (เพื่อให้ ESP32 รับรู้ถึงการเปลี่ยนแปลง "false -> true" ในการกดครั้งหน้า)
+        setTimeout(() => {
+            db.ref('machine/restock').set(false);
+            // ถ้าอยากให้ปุ่ม Switch ปิดตามด้วย (ปกติ monitorAdminSwitches จัดการให้อยู่แล้ว แต่เผื่อ UI ค้าง)
+            document.getElementById("restockSwitch").checked = false;
+        }, 2000);
+    }
+}
+
+function toggleTest(isChecked) { 
+    db.ref('machine/test').set(isChecked); 
+    
+    if (isChecked) {
+        // สั่งเปลี่ยนกลับเป็น false อัตโนมัติหลังผ่านไป 2 วินาที 
+        // (เพื่อให้ ESP32 รับรู้ถึงการเปลี่ยนแปลง "false -> true" ในการกดครั้งหน้า)
+        setTimeout(() => {
+            db.ref('machine/test').set(false);
+            document.getElementById("testSwitch").checked = false;
+        }, 2000);
+    }
+}
+
 function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } 
 
 function monitorAdminSwitches() {
@@ -924,6 +1008,8 @@ function forceEndTest() {
     document.getElementById("status").className = "status fail";
     document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
     
+    document.getElementById("audioControls").style.display = "none";
+    
     playFailSound();
     
     setTimeout(() => { evaluateFinalResult(); }, 2000);
@@ -948,10 +1034,6 @@ function startRecognition() {
         startGlobalTimer();
     }
 
-    if (!adminConfig.cancelRequirement) {
-        db.ref('machine/status').set('busy');
-    }
-
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
     document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง...";
@@ -966,10 +1048,18 @@ function startRecognition() {
     }
 }
 
+/* 
+====================================================================
+🛠️ จุดเพิ่มการเก็บชื่อผู้รับรางวัลลง Firebase (ดึงจากโค้ด 2 ของคุณ)
+====================================================================
+*/
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     isTestRunning = false;
     
+    document.getElementById("audioControls").style.display = "none";
+    
+    // ดึงชื่อผู้ทดสอบ
     const name = document.getElementById("studentName").value || "Unknown User";
 
     document.getElementById("englishText").innerHTML = "Test Completed!";
@@ -981,19 +1071,31 @@ function evaluateFinalResult() {
 
     if (passCount >= adminConfig.passRequirement) {
         if (adminConfig.cancelRequirement) { 
+            // โหมดฝึกซ้อม
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status pass";
             document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
             document.getElementById("startBtn").disabled = false;
             document.getElementById("startBtn").onclick = prepareQuestions; 
+            db.ref('machine/status').set('ready'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
-            document.getElementById("status").innerHTML = "🎉 ผ่านการทดสอบ! รับรางวัลเลย";
-            document.getElementById("status").className = "status pass";
-            document.getElementById("startBtn").innerHTML = "🎁 กรุณาเลือกของรางวัลที่ตู้";
-            document.getElementById("startBtn").disabled = true;
-            db.ref('machine/status').set('unlocked'); 
-            applauseAudio.play().catch(e => console.log("Audio play error:", e));
+            // โหมดใช้งานจริง: สร้าง OTP พร้อมเก็บบันทึกชื่อผู้รับรางวัลลง Firebase 📝
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            let expireTime = Date.now() + (5 * 60 * 1000); 
+
+            // บันทึกข้อมูลลง Firebase รวมถึงเพิ่ม winnerName ไว้ตรวจสอบ
+            db.ref('machine/otps/' + otpCode).set({
+                valid: true,
+                expire: expireTime,
+                winnerName: name 
+            }).then(() => {
+                document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
+                document.getElementById("status").className = "status pass";
+                document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
+                document.getElementById("startBtn").disabled = true;
+                applauseAudio.play().catch(e => console.log("Audio play error:", e));
+            });
         }
     } else {
         if (adminConfig.cancelRequirement) {
