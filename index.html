@@ -958,16 +958,28 @@ function toggleRestock(isChecked) {
     }
 }
 
+// 💡 แก้ไขฟังก์ชัน toggleTest ตรงนี้เพื่อไม่ให้กระทบค่า Stock จริง
 function toggleTest(isChecked) { 
-    db.ref('machine/test').set(isChecked); 
-    
     if (isChecked) {
-        // สั่งเปลี่ยนกลับเป็น false อัตโนมัติหลังผ่านไป 2 วินาที 
-        // (เพื่อให้ ESP32 รับรู้ถึงการเปลี่ยนแปลง "false -> true" ในการกดครั้งหน้า)
+        // 1. สำรองค่า Stock จริงในปัจจุบันไว้ก่อนเริ่มทดสอบ
+        const originalSlot1 = currentStock.slot1;
+        const originalSlot2 = currentStock.slot2;
+
+        // 2. ส่งสัญญาณให้ตู้ทำงานในโหมด Test
+        db.ref('machine/test').set(true); 
+        
+        // 3. หลังจากให้ตู้ทำงานไปแล้ว (หน่วงเวลา 3 วินาทีเพื่อให้ฮาร์ดแวร์ตัดสต๊อกให้เสร็จ)
         setTimeout(() => {
+            // ปิดโหมด Test
             db.ref('machine/test').set(false);
             document.getElementById("testSwitch").checked = false;
-        }, 2000);
+
+            // คืนค่า Stock ให้กลับมาเป็นจำนวนเดิมก่อนกดทดสอบ (เขียนทับค่าที่ถูกลดไป)
+            db.ref('machine/stock/slot1').set(originalSlot1);
+            db.ref('machine/stock/slot2').set(originalSlot2);
+        }, 3000); 
+    } else {
+        db.ref('machine/test').set(false);
     }
 }
 
