@@ -148,7 +148,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 
 /* ADMIN MODAL - STRICTLY CENTERED & HIDDEN */
 .modal-overlay { 
-    display: none; 
+    display: none; /* ถูกซ่อนเป็นค่าเริ่มต้น */
     position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
     align-items: center; justify-content: center; backdrop-filter: blur(8px); 
 }
@@ -188,11 +188,12 @@ input:checked + .slider:before { transform: translateX(21px); }
 .admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; max-width: 140px;}
 .admin-select option { background: #07101f; }
 
-/* AUDIO CONTROLS */
+/* AUDIO CONTROLS (สำหรับโหมดฝึกฝนและโหมดทดสอบ) */
 .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
 .audio-btn { width: auto; padding: 8px 16px; font-size: 14px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
 .audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
 
+/* 🚀 ปุ่มข้ามข้อ */
 .audio-btn.skip { background: rgba(181, 108, 255, 0.15); border-color: rgba(181, 108, 255, 0.3); color: var(--violet); }
 .audio-btn.skip:hover { background: rgba(181, 108, 255, 0.3); transform: scale(1.05); }
 
@@ -253,7 +254,7 @@ input:checked + .slider:before { transform: translateX(21px); }
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
-<!-- 🛠️ หน้าจอแจ้งเตือนปรับปรุงระบบ -->
+<!-- 🛠️ หน้าจอแจังเตือนปรับปรุงระบบ -->
 <div class="maintenance-overlay" id="maintenanceOverlay">
     <div class="maintenance-admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
     <h1>🛠️ SYSTEM MAINTENANCE</h1>
@@ -303,6 +304,7 @@ input:checked + .slider:before { transform: translateX(21px); }
             <div class="question-number" id="questionNumber">ระบบกำลังเชื่อมต่อ...</div>
             <div class="english-text" id="englishText">Loading...</div>
             
+            <!-- 🚀 ใช้งาน Audio Controls ทั้งสองโหมด -->
             <div class="audio-controls" id="audioControls" style="display: none;">
                 <button class="audio-btn" id="listenBtn" onclick="playSentenceAudio()" title="ฟังการออกเสียง">🔊 ฟัง / เล่นซ้ำ</button>
                 <button class="audio-btn skip" id="skipBtn" onclick="nextQuestion()" title="ข้ามไปข้อต่อไป">⏭️ ข้อต่อไป</button>
@@ -457,25 +459,21 @@ input:checked + .slider:before { transform: translateX(21px); }
                 </label>
             </div>
 
-            <!-- 🤖 Hardware & Motor Control Panel -->
-            <div class="stock-control-container">
-                <div style="color: var(--violet); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">🤖 Hardware Control</div>
-                
-                <div class="stock-item">
-                    <div class="stock-label">🧪 ทดสอบมอเตอร์ (Test)</div>
-                    <div class="stock-btns">
-                        <button class="stock-btn plus" style="width: auto; padding: 5px 12px; font-size: 14px;" onclick="triggerMotor('slot1')">Slot 1</button>
-                        <button class="stock-btn plus" style="width: auto; padding: 5px 12px; font-size: 14px;" onclick="triggerMotor('slot2')">Slot 2</button>
-                        <button class="stock-btn plus" style="width: auto; padding: 5px 12px; font-size: 14px; background: var(--violet); border-color: var(--violet);" onclick="triggerMotor('both')">Both</button>
-                    </div>
-                </div>
-
-                <div class="stock-item">
-                    <div class="stock-label">🔧 เติมสินค้า (Restock)</div>
-                    <button class="stock-btn plus" style="width: auto; padding: 5px 15px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="executeRestock()">รีเซ็ตสต๊อก</button>
-                </div>
+            <div class="switch-container">
+                <span class="switch-label">🔧 Restock Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="restockSwitch" onchange="toggleRestock(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
-            
+
+            <div class="switch-container">
+                <span class="switch-label">🧪 Test Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="testSwitch" onchange="toggleTest(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
     </div>
 </div>
@@ -516,6 +514,7 @@ let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
 
+// 🚀 เพิ่มตัวแปรหน่วงเวลาป้องกันการกดข้ามเบิ้ล
 let nextQuestionTimer = null;
 
 let adminConfig = {
@@ -587,6 +586,7 @@ window.onload = async () => {
         }
     };
 
+    // 🚀 เพิ่มการตรวจสอบเวลาไมค์เงียบ (ตัดการทำงานอัตโนมัติแล้ว UI ค้าง) ให้ปลดล็อกปุ่ม Start ได้
     recognition.onend = function() {
         if(isRunning) { 
             console.log("Recognition ended unexpectedly."); 
@@ -606,6 +606,7 @@ window.onload = async () => {
     monitorAdminSettings(); 
     await fetchQuestionsFromGAS();
     monitorMachine(); 
+    monitorAdminSwitches(); 
     monitorStock(); 
 };
 
@@ -704,13 +705,16 @@ function loadQuestion(index){
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
     
+    // 🚀 อัปเดต: ให้แสดงกลุ่มปุ่ม Audio Controls เสมอเมื่อมีการโหลดข้อสอบ
     document.getElementById("audioControls").style.display = "flex";
     
+    // 🚀 ซ่อนเฉพาะปุ่ม "ฟังการออกเสียง" หากเป็นโหมดทดสอบ แต่ให้แสดงในโหมดฝึกฝน
     const listenBtn = document.getElementById("listenBtn");
     if (listenBtn) {
         listenBtn.style.display = adminConfig.cancelRequirement ? "flex" : "none";
     }
     
+    // 🚀 คงปุ่ม "ข้อต่อไป" ไว้เสมอให้ใช้งานได้ในกรณีที่ UI ค้าง
     const skipBtn = document.getElementById("skipBtn");
     if (skipBtn) {
         skipBtn.style.display = "flex";
@@ -723,10 +727,12 @@ function loadQuestion(index){
     startBtn.innerHTML = "🎤 เริ่มพูด";
 }
 
+// 🚀 อัปเดตฟังก์ชันเปลี่ยนข้อเพื่อเคลียร์สถานะไมค์ค้าง
 function nextQuestion(){
     clearTimeout(nextQuestionTimer);
     stopSentenceAudio();
     
+    // หากไมค์ทำงานค้างอยู่ ให้บังคับปิดเพื่อคลายการล็อก UI
     if (isRunning) {
         isRunning = false;
         try { recognition.stop(); } catch(e) {}
@@ -843,7 +849,9 @@ function updateUIBasedOnState() {
             startBtn.innerHTML = "🎤 เริ่มพูด";
             if (audioControls) {
                 audioControls.style.display = "flex";
+                // ซ่อนปุ่มฟังในโหมดทดสอบ
                 if (listenBtn) listenBtn.style.display = "none";
+                // แสดงปุ่มข้ามเสมอ
                 if (skipBtn) skipBtn.style.display = "flex";
             }
         }
@@ -928,30 +936,13 @@ function monitorStock() {
     });
 }
 
+function toggleRestock(isChecked) { db.ref('machine/restock').set(isChecked); }
+function toggleTest(isChecked) { db.ref('machine/test').set(isChecked); }
 function toggleCancelRequirement(isChecked) { db.ref('machine/config/cancelRequirement').set(isChecked); } 
 
-// --- ฟังก์ชันสั่งการ Hardware (Test & Restock) ---
-function triggerMotor(targetSlot) {
-    db.ref('machine/command').set({
-        action: 'test_motor',
-        target: targetSlot,
-        timestamp: Date.now()
-    }).then(() => {
-        alert(`✅ ส่งคำสั่งทดสอบมอเตอร์: ${targetSlot} ไปยังตู้เรียบร้อยแล้ว!`);
-    }).catch(err => alert("❌ เกิดข้อผิดพลาด: " + err));
-}
-
-function executeRestock() {
-    if(confirm("ยืนยันการเติมสต๊อก (รีเซ็ต Slot 1 และ 2 เป็น 10 ชิ้น)?")) {
-        db.ref('machine/stock/slot1').set(10);
-        db.ref('machine/stock/slot2').set(10);
-        db.ref('machine/command').set({
-            action: 'restock',
-            timestamp: Date.now()
-        }).then(() => {
-            alert("📦 เติมสต๊อกและแจ้งเตือนระบบเรียบร้อยแล้ว!");
-        });
-    }
+function monitorAdminSwitches() {
+    db.ref('machine/restock').on('value', (snap) => { document.getElementById("restockSwitch").checked = snap.val() || false; });
+    db.ref('machine/test').on('value', (snap) => { document.getElementById("testSwitch").checked = snap.val() || false; });
 }
 
 function updateTimerDisplay(seconds) {
@@ -984,6 +975,7 @@ function forceEndTest() {
     document.getElementById("status").className = "status fail";
     document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
     
+    // 🚀 ซ่อนปุ่มเมื่อหมดเวลา
     document.getElementById("audioControls").style.display = "none";
     
     playFailSound();
@@ -1010,6 +1002,14 @@ function startRecognition() {
         startGlobalTimer();
     }
 
+    /* 
+    🛠️ ปิดการใช้งานการตั้งสถานะ Busy ที่ฝั่งเว็บ 
+    เพื่อให้ผู้ใช้งานหลายๆ คนสามารถกดทำข้อสอบพร้อมกันได้โดยไม่ต้องรอคิว 
+    */
+    // if (!adminConfig.cancelRequirement) {
+    //     db.ref('machine/status').set('busy');
+    // }
+
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
     document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง...";
@@ -1028,6 +1028,7 @@ function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     isTestRunning = false;
     
+    // 🚀 ซ่อนกลุ่มปุ่มช่วยเหลือและปุ่มข้ามเมื่อจบการทดสอบ
     document.getElementById("audioControls").style.display = "none";
     
     const name = document.getElementById("studentName").value || "Unknown User";
@@ -1039,8 +1040,10 @@ function evaluateFinalResult() {
     let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
     document.getElementById("score").innerHTML = finalPercent + "%";
 
+    // 🚀 แทรกโค้ดรหัส OTP ตามความต้องการของคุณ
     if (passCount >= adminConfig.passRequirement) {
         if (adminConfig.cancelRequirement) { 
+            // โหมดฝึกซ้อม (คงไว้เหมือนเดิม)
             document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
             document.getElementById("status").className = "status pass";
             document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
@@ -1051,18 +1054,18 @@ function evaluateFinalResult() {
         } else {
             // โหมดใช้งานจริง: สร้าง OTP แทนการปลดล็อกตู้
             let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
-            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที
+            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที (300,000 ms)
 
-            // 🚀 บันทึก OTP และชื่อผู้ทดสอบลง Firebase Realtime Database
+            // บันทึก OTP ลง Firebase ภายใต้ Node ใหม่ชื่อ 'otps'
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
-                expire: expireTime,
-                userName: name // 👈 เพิ่มการแนบชื่อผู้เข้าทดสอบลงใน Node OTP
+                expire: expireTime
             }).then(() => {
                 document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
                 document.getElementById("status").className = "status pass";
                 document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
                 document.getElementById("startBtn").disabled = true;
+                // หมายเหตุ: เราไม่ set('unlocked') ตรงนี้แล้ว เพื่อไม่ให้ไปบล็อกคิวของตู้
                 applauseAudio.play().catch(e => console.log("Audio play error:", e));
             });
         }
