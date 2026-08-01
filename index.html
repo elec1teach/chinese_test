@@ -384,6 +384,11 @@ input:checked + .slider:before { transform: translateX(21px); }
                     <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready (พร้อมใช้งาน)</button>
                     <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked (ปลดล็อกตู้)</button>
                     <button class="stock-btn minus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy (ล็อกระบบ)</button>
+                    
+                    <!-- 🌟 [เพิ่มปุ่มนี้] สำหรับสั่ง Reboot ฮาร์ดแวร์ระยะไกล -->
+                    <button class="stock-btn" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(255, 165, 0, 0.2); color: #ffb703; border-color: #ffb703; margin-top: 5px; font-weight: bold;" onclick="rebootESP32()">
+                        🔄 Reboot บอร์ด ESP32 (รีสตาร์ทฮาร์ดแวร์)
+                    </button>
                 </div>
             </div>
 
@@ -905,6 +910,19 @@ function setSystemStatus(status) {
             }
         })
         .catch((error) => alert("❌ เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: " + error));
+}
+
+// 🌟 ฟังก์ชันส่งคำสั่ง รีบูตบอร์ด ESP32 ระยะไกลผ่าน Firebase
+function rebootESP32() {
+    if (confirm("⚠️ คุณต้องการสั่งรีสตาร์ท (Reboot) บอร์ด ESP32 ใช่หรือไม่?\n\nการดำเนินการนี้จะเหมือนกับการกดปุ่ม RESET ที่บอร์ด และระบบจะใช้เวลาเชื่อมต่อ Wi-Fi ใหม่ประมาณ 5-10 วินาทีครับ")) {
+        db.ref('machine/reboot').set(true)
+            .then(() => {
+                alert("📡 ส่งคำสั่ง Reboot ไปยังบอร์ด ESP32 เรียบร้อยแล้ว!\nระบบตู้กำลังรีบูตตัวเองครับ");
+            })
+            .catch((error) => {
+                alert("❌ เกิดข้อผิดพลาดในการส่งคำสั่ง: " + error);
+            });
+    }
 }
 
 function updateStock(slot, changeAmount) {
