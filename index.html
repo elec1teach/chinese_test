@@ -186,9 +186,9 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
 
-/* RANK MODAL SPECIFIC */
+/* RANK MODAL SPECIFIC (อัปเดตใหม่ตามคำขอ) */
 .rank-modal-content {
-    background: #0d1326; /* สีน้ำเงินเข้มตามภาพ */
+    background: #0d1326; 
     border: 1px solid rgba(255, 255, 255, 0.1);
     width: 95%;
     max-width: 500px;
@@ -200,61 +200,83 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     font-size: 16px;
     margin-bottom: 20px;
 }
-.rank-table-header {
-    display: grid;
-    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
-    background: rgba(255,255,255,0.05);
-    padding: 12px 10px;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-    font-weight: bold;
-    color: var(--gold);
-    font-size: 14px;
-}
 .rank-table-body {
     background: rgba(255,255,255,0.02);
     border-radius: 0 0 12px 12px;
     overflow-y: auto;
     max-height: 50vh;
 }
+.loading-rank {
+    text-align: center;
+    padding: 30px;
+    color: var(--cyan);
+}
+
+/* ส่วนของหัวตาราง (คำว่า อันดับ, ชื่อผู้ทดสอบ, รอบสอบ, คะแนนรวมสะสม) */
+.rank-table-header {
+    display: grid;
+    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
+    background: rgba(255,255,255,0.05);
+    padding: 18px 10px;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+    font-weight: 700;
+    color: var(--gold); /* ใช้สีเหลืองตามภาพต้นแบบ */
+    font-size: 16px;
+}
+
+/* ส่วนของข้อมูลผู้เล่นในแต่ละแถว */
 .rank-row {
     display: grid;
     grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
-    padding: 15px 10px;
+    padding: 16px 10px;
     align-items: center;
     text-align: center;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     color: white;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 18px; /* ปรับฟอนต์ให้ใหญ่และอ่านง่ายขึ้น */
 }
 .rank-row:last-child { border-bottom: none; }
+
+/* วงกลมตัวเลขบอกอันดับ */
 .rank-badge {
-    width: 35px;
-    height: 35px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
     background: rgba(255,255,255,0.1);
-    font-weight: bold;
+    font-weight: 900;
     color: white;
     font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
 }
-/* สไตล์เฉพาะสำหรับอันดับ 1, 2, 3 */
-.rank-1 .rank-badge { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
-.rank-2 .rank-badge { background: var(--silver); color: #000; box-shadow: 0 0 10px rgba(160, 165, 177, 0.4); }
-.rank-3 .rank-badge { background: var(--bronze); color: #000; box-shadow: 0 0 10px rgba(205, 127, 50, 0.4); }
+
+/* เอฟเฟกต์แสงของเหรียญ ทอง เงิน ทองแดง */
+.rank-1 .rank-badge { 
+    background: var(--gold); 
+    color: #000; 
+    box-shadow: 0 0 25px rgba(255, 204, 0, 0.6); /* เพิ่มแสงเงาให้เด่นขึ้นเหมือนภาพที่ 1 */
+}
+.rank-2 .rank-badge { 
+    background: var(--silver); 
+    color: #000; 
+    box-shadow: 0 0 15px rgba(160, 165, 177, 0.4); 
+}
+.rank-3 .rank-badge { 
+    background: var(--bronze); 
+    color: #000; 
+    box-shadow: 0 0 15px rgba(205, 127, 50, 0.4); 
+}
+
+/* ตัวเลขคะแนนสีฟ้า */
 .rank-score {
     color: var(--cyan);
     font-family: 'Orbitron', sans-serif;
     font-weight: bold;
-}
-.loading-rank {
-    text-align: center;
-    padding: 30px;
-    color: var(--cyan);
+    font-size: 22px; /* ขยายฟอนต์คะแนนให้เด่นชัด */
 }
 
 /* ADMIN MODAL */
@@ -737,7 +759,7 @@ window.onload = async () => {
 };
 
 // ==========================================
-// 🏆 ระบบตารางอันดับคะแนน (Rank System)
+// 🏆 ระบบตารางอันดับคะแนน (Rank System) อัปเดตใหม่
 // ==========================================
 function openRankModal() {
     document.getElementById("rankModal").style.display = "flex";
@@ -753,18 +775,14 @@ async function fetchRankData() {
     tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
 
     try {
-        // ส่งพารามิเตอร์ ?action=getRank เพื่อบอก GAS ว่าต้องการข้อมูลตารางจัดอันดับ
         const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getRank");
         const data = await response.json();
         
-        // จำลองข้อมูล (Mockup) กรณีที่ Backend ยังไม่รองรับการส่งข้อมูล Rank กลับมา
-        // (ให้คุณไปเพิ่มโค้ดที่ GAS ให้รองรับ ?action=getRank ในอนาคต)
         let rankData = [];
         
         if(Array.isArray(data) && data.length > 0 && data[0].name) {
-             rankData = data; // ใช้ข้อมูลจริงถ้าดึงมาได้
+             rankData = data; 
         } else {
-             // ข้อมูลจำลองเพื่อให้เห็น UI สวยงามตามรูปอ้างอิง
              rankData = [
                  { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
                  { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
@@ -783,6 +801,7 @@ async function fetchRankData() {
     }
 }
 
+// โค้ด JavaScript จัดอันดับตัวใหม่ ตัดปัญหาข้อมูลวันที่/เวลา
 function renderRankTable(data) {
     const tableBody = document.getElementById("rankTableBody");
     tableBody.innerHTML = "";
@@ -793,7 +812,9 @@ function renderRankTable(data) {
     }
 
     data.forEach((user, index) => {
-        const actualRank = user.rank || (index + 1);
+        // บังคับใช้อันดับจากการนับแถว (index + 1)
+        const actualRank = index + 1; 
+        
         let rankClass = "";
         
         // เพิ่มคลาสพิเศษสำหรับอันดับ 1, 2, 3 เพื่อทำสีเหรียญ
@@ -804,7 +825,7 @@ function renderRankTable(data) {
         const rowHTML = `
             <div class="rank-row ${rankClass}">
                 <div class="rank-badge">${actualRank}</div>
-                <div style="text-align: left; padding-left: 10px;">${user.name}</div>
+                <div style="text-align: left; padding-left: 10px; font-weight: 500;">${user.name}</div>
                 <div>${user.attempts}</div>
                 <div class="rank-score">${user.score}</div>
             </div>
