@@ -135,7 +135,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 .main-grid { display:grid; grid-template-columns:1.3fr 0.8fr; gap:20px; }
 .sentence-box { padding:30px; border-radius:25px; position:relative; overflow:hidden; text-align:center; }
 .question-number { display:inline-block; padding:8px 16px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
-.english-text { margin-top:20px; font-size:48px; font-weight:900; line-height:1.2; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
+.english-text { margin-top:20px; font-size:48px; font-weight:900; line-height:1.2; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); min-height: 115px;}
 .thai-text { margin-top:12px; font-size:22px; color:#b6c6e8; line-height:1.6; }
 
 /* COUNTDOWN */
@@ -660,7 +660,8 @@ let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
 
 let nextQuestionTimer = null;
-let displayInterval = null; // 🛡️ ตัวแปรสำหรับเก็บเวลาการแสดงผลทีละคำ (ป้องกันกล้อง AI)
+let displayInterval = null; 
+let questionTimeout = null; // 🛡️ ตัวแปรใหม่สำหรับจับเวลา 5 วินาทีของแต่ละข้อ
 
 let adminConfig = {
     passRequirement: 5,
@@ -685,6 +686,7 @@ window.onload = async () => {
     recognition.onresult = function(event){
         if(!isRunning) return;
         isRunning = false;
+        clearTimeout(questionTimeout); // หยุดเวลา 5 วินาทีเมื่อผู้ใช้พูดเสร็จทันเวลา
 
         const speechResult = event.results[0][0].transcript;
         const target = questions[currentQuestion].english;
@@ -710,7 +712,7 @@ window.onload = async () => {
         }
 
         document.getElementById("startBtn").disabled = true;
-        clearInterval(displayInterval); // เคลียร์ Interval เมื่อตอบคำถาม
+        clearInterval(displayInterval); 
 
         nextQuestionTimer = setTimeout(() => {
             if (totalTimeLeftSeconds > 0) {
@@ -722,10 +724,11 @@ window.onload = async () => {
     recognition.onerror = function(event){
         console.log("Recognition Error:", event.error);
         isRunning = false; 
+        clearTimeout(questionTimeout); // หยุดจับเวลา 5 วินาที
         document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
         document.getElementById("status").className = "status fail";
         document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
-        clearInterval(displayInterval); // เคลียร์ Interval ถ้ามีปัญหา
+        clearInterval(displayInterval); 
         
         if(questions.length > 0) {
             document.getElementById("startBtn").disabled = false;
@@ -737,10 +740,11 @@ window.onload = async () => {
         if(isRunning) { 
             console.log("Recognition ended unexpectedly."); 
             isRunning = false;
+            clearTimeout(questionTimeout); // หยุดจับเวลา 5 วินาที
             document.getElementById("status").innerHTML = "หมดเวลาพูด/เสียงเงียบเกินไป ⚠️";
             document.getElementById("status").className = "status fail";
             document.getElementById("heardText").innerHTML = "ไมค์ถูกตัดการทำงานอัตโนมัติ กรุณากดพูดใหม่ หรือข้ามข้อ";
-            clearInterval(displayInterval); // เคลียร์ Interval ถ้าหมดเวลาพูด
+            clearInterval(displayInterval); 
             
             if(questions.length > 0) {
                 document.getElementById("startBtn").disabled = false;
@@ -758,7 +762,7 @@ window.onload = async () => {
 };
 
 // ==========================================
-// 🏆 ระบบตารางอันดับคะแนน (Rank System) อัปเดตใหม่
+// 🏆 ระบบตารางอันดับคะแนน (Rank System)
 // ==========================================
 function openRankModal() {
     document.getElementById("rankModal").style.display = "flex";
@@ -778,7 +782,6 @@ async function fetchRankData() {
         const data = await response.json();
         
         let rankData = [];
-        
         if(Array.isArray(data) && data.length > 0 && data[0].name) {
              rankData = data; 
         } else {
@@ -811,9 +814,7 @@ function renderRankTable(data) {
 
     data.forEach((user, index) => {
         const actualRank = index + 1; 
-        
         let rankClass = "";
-        
         if (actualRank === 1) rankClass = "rank-1";
         else if (actualRank === 2) rankClass = "rank-2";
         else if (actualRank === 3) rankClass = "rank-3";
@@ -829,7 +830,6 @@ function renderRankTable(data) {
         tableBody.innerHTML += rowHTML;
     });
 }
-// ==========================================
 
 function monitorMaintenance() {
     db.ref('machine/maintenance').on('value', (snap) => {
@@ -916,57 +916,52 @@ function prepareQuestions() {
 }
 
 // ==========================================
-// 🛡️ ระบบป้องกันกล้อง AI (Sequential Text Display)
+// 🛡️ ระบบแสดงผลทีละคำ ภายใน 5 วินาที
 // ==========================================
 function renderSequentialText(sentence) {
     const container = document.getElementById("englishText");
-    container.innerHTML = ""; // ล้างข้อความเดิมออกก่อน
+    container.innerHTML = ""; 
     
-    // แยกประโยคออกเป็นคำๆ โดยใช้ช่องว่าง
     const words = sentence.split(" ");
+    if(words.length === 0) return;
+
     let wordIndex = 0;
     
-    // วนลูปสร้าง <span> ให้แต่ละคำ และซ่อนไว้ก่อน (opacity: 0)
     words.forEach(word => {
         const span = document.createElement("span");
         span.innerText = word + " ";
         span.style.opacity = "0"; 
-        span.style.transition = "opacity 0.2s ease-in"; // เพิ่มลูกเล่นให้ข้อความค่อยๆ เฟดมา
+        span.style.transition = "opacity 0.2s ease-in"; 
         container.appendChild(span);
     });
 
     const spans = container.querySelectorAll("span");
     
-    // เคลียร์ Interval เก่าเพื่อป้องกันการซ้อนทับ
     clearInterval(displayInterval);
     
-    // ค่อยๆ แสดงทีละคำทุกๆ 400 มิลลิวินาที (ปรับความเร็วได้ที่ตัวเลขนี้)
+    // คัดสรรเวลาหารเพื่อให้แสดงจบครบพอดีใน 5 วินาที (5000 มิลลิวินาที)
+    const intervalTime = Math.floor(5000 / words.length);
+    
     displayInterval = setInterval(() => {
         if (wordIndex < spans.length) {
             spans[wordIndex].style.opacity = "1";
             wordIndex++;
         } else {
-            // เมื่อแสดงครบทุกคำแล้ว ให้หยุดทำงาน
             clearInterval(displayInterval);
         }
-    }, 400); 
+    }, intervalTime); 
 }
 
 // ==========================================
-// 🔄 ปรับปรุงฟังก์ชัน loadQuestion ใหม่
+// 🔄 ปรับปรุงฟังก์ชันโหลดข้อสอบ
 // ==========================================
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
-    // เคลียร์เวลารายข้อเดิม (หากคุณนำระบบนับเวลารายข้อจากครั้งก่อนมาใช้)
-    if (typeof perQuestionTimer !== 'undefined') {
-        clearInterval(perQuestionTimer);
-    }
-
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
     
-    // 💡 เรียกใช้ฟังก์ชันป้องกัน AI แทนการใส่ innerHTML ตรงๆ
-    renderSequentialText(questions[index].english);
+    // ⚠️ เปลี่ยนให้แสดงข้อความเตือน แทนที่จะโชว์ประโยคทันที
+    document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); text-shadow: none;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (มีเวลา 5 วินาที)</span>';
     
     document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
@@ -994,8 +989,9 @@ function loadQuestion(index){
 }
 
 function nextQuestion(){
-    clearInterval(displayInterval); // ⚠️ เคลียร์ Interval เพื่อป้องกันการบั๊กเวลาข้ามข้อ
+    clearInterval(displayInterval); 
     clearTimeout(nextQuestionTimer);
+    clearTimeout(questionTimeout); // เคลียร์เวลาของข้อเดิมทิ้ง
     stopSentenceAudio();
     
     if (isRunning) {
@@ -1239,16 +1235,21 @@ function forceEndTest() {
     document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
     
     document.getElementById("audioControls").style.display = "none";
-    clearInterval(displayInterval); // เคลียร์ Interval ถ้าหมดเวลาการทดสอบรวม
+    clearInterval(displayInterval); 
+    clearTimeout(questionTimeout); 
     
     playFailSound();
     
     setTimeout(() => { evaluateFinalResult(); }, 2000);
 }
 
+// ==========================================
+// 🎙️ เมื่อผู้ใช้กดเริ่มพูด
+// ==========================================
 function startRecognition() {
     stopSentenceAudio(); 
-    clearInterval(displayInterval); // เคลียร์ Interval ก่อนเริ่มฟังเสียงรอบใหม่
+    clearInterval(displayInterval); 
+    clearTimeout(questionTimeout); // ป้องกันบัคตั้งเวลาซ้อนกัน
     
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
@@ -1268,10 +1269,39 @@ function startRecognition() {
 
     isRunning = true;
     document.getElementById("startBtn").disabled = true;
-    document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง...";
+    document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (5 วินาที)";
     document.getElementById("status").innerHTML = "กำลังฟังเสียงของคุณ...";
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "...";
+
+    // 🌟 1. เริ่มรันการแสดงผลทีละคำ ภายใน 5 วินาที
+    renderSequentialText(questions[currentQuestion].english);
+
+    // 🌟 2. เริ่มนับเวลาถอยหลัง 5 วินาที ถ้าไม่พูดคือผิดทันที
+    questionTimeout = setTimeout(() => {
+        if (isRunning) {
+            isRunning = false;
+            try { recognition.stop(); } catch(e) {}
+            
+            document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
+            document.getElementById("status").className = "status fail";
+            document.getElementById("heardText").innerHTML = "หมดเวลา 5 วินาที คุณพูดไม่ทันเวลาที่กำหนด";
+            clearInterval(displayInterval);
+            
+            failCount++;
+            document.getElementById("failCount").innerHTML = failCount;
+            playFailSound();
+            
+            document.getElementById("startBtn").disabled = true;
+            
+            // ข้ามไปข้อต่อไปหลังจากขึ้นเตือน 1.5 วินาที
+            nextQuestionTimer = setTimeout(() => {
+                if (totalTimeLeftSeconds > 0) {
+                    nextQuestion();
+                }
+            }, 1500);
+        }
+    }, 5000);
 
     try {
         recognition.start();
@@ -1282,7 +1312,8 @@ function startRecognition() {
 
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
-    clearInterval(displayInterval); // เคลียร์ Interval เมื่อทดสอบเสร็จ
+    clearInterval(displayInterval); 
+    clearTimeout(questionTimeout);
     isTestRunning = false;
     
     document.getElementById("audioControls").style.display = "none";
@@ -1314,7 +1345,7 @@ function evaluateFinalResult() {
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
                 expire: expireTime,
-                userName: name // 👈 เพิ่มการแนบชื่อผู้เข้าทดสอบลงใน Node OTP
+                userName: name 
             }).then(() => {
                 document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
                 document.getElementById("status").className = "status pass";
@@ -1422,10 +1453,10 @@ function playFailSound() {
 let currentUtterance = null;
 function playSentenceAudio() {
     stopSentenceAudio(); 
-    const textToSpeak = document.getElementById("englishText").innerText;
+    // ⚠️ อัปเดตให้ดึงข้อความจาก array แทนหน้าจอ (เพราะหน้าจอซ่อนไว้)
+    if (questions.length === 0 || currentQuestion >= questions.length) return;
+    const textToSpeak = questions[currentQuestion].english;
     
-    if (!textToSpeak || textToSpeak === "Loading..." || textToSpeak === "Test Completed!") return;
-
     currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
     currentUtterance.lang = 'en-US'; 
     currentUtterance.rate = 0.85; 
