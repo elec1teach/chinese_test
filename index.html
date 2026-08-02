@@ -62,20 +62,6 @@ body {
                 radial-gradient(circle at 90% 10%, rgba(181,108,255,0.15), transparent 25%),
                 linear-gradient(to bottom,var(--bg1),var(--bg2));
     overflow-x:hidden; min-height:100vh;
-    
-    /* 🛑 Anti-Cheat Level 1: ป้องกันการคลุมดำข้อความ (CSS) */
-    -webkit-user-select: none; 
-    -moz-user-select: none; 
-    -ms-user-select: none; 
-    user-select: none; 
-}
-
-/* ยกเว้นให้สามารถกรอกข้อมูลในช่อง Input และ Textarea ได้ */
-input, textarea {
-    -webkit-user-select: auto;
-    -moz-user-select: auto;
-    -ms-user-select: auto;
-    user-select: auto;
 }
 
 /* GRID EFFECT & FLOATING LIGHTS */
@@ -154,7 +140,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 
 /* COUNTDOWN */
 .countdown-wrapper { margin:30px auto 10px; width:160px; height:160px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
-.countdown-wrapper::before { content:""; position:absolute; width:130px; height:130px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); }
+.countdown-wrapper::before { content:"absolute"; position:absolute; width:130px; height:130px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); content:"";}
 .countdown { position:relative; font-size:32px; font-family:'Orbitron',sans-serif; font-weight:900; z-index:1; text-shadow: 0 0 18px rgba(53,216,255,0.3); letter-spacing: -1px; }
 @keyframes pulse { 50%{ transform:scale(1.04); } }
 
@@ -234,7 +220,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     border-radius: 12px 12px 0 0;
     text-align: center;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--gold); 
     font-size: 16px;
 }
 
@@ -265,9 +251,21 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     font-size: 18px;
 }
 
-.rank-1 .rank-badge { background: var(--gold); color: #000; box-shadow: 0 0 25px rgba(255, 204, 0, 0.6); }
-.rank-2 .rank-badge { background: var(--silver); color: #000; box-shadow: 0 0 15px rgba(160, 165, 177, 0.4); }
-.rank-3 .rank-badge { background: var(--bronze); color: #000; box-shadow: 0 0 15px rgba(205, 127, 50, 0.4); }
+.rank-1 .rank-badge { 
+    background: var(--gold); 
+    color: #000; 
+    box-shadow: 0 0 25px rgba(255, 204, 0, 0.6); 
+}
+.rank-2 .rank-badge { 
+    background: var(--silver); 
+    color: #000; 
+    box-shadow: 0 0 15px rgba(160, 165, 177, 0.4); 
+}
+.rank-3 .rank-badge { 
+    background: var(--bronze); 
+    color: #000; 
+    box-shadow: 0 0 15px rgba(205, 127, 50, 0.4); 
+}
 
 .rank-score {
     color: var(--cyan);
@@ -662,6 +660,7 @@ let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
 
 let nextQuestionTimer = null;
+let displayInterval = null; // 🛡️ ตัวแปรสำหรับเก็บเวลาการแสดงผลทีละคำ (ป้องกันกล้อง AI)
 
 let adminConfig = {
     passRequirement: 5,
@@ -670,61 +669,6 @@ let adminConfig = {
     testDurationSeconds: 60,
     cancelRequirement: false 
 };
-
-// ==========================================
-// 🛑 Anti-Cheat Level 2 & 3: ป้องกันการคลิกขวา, คัดลอก, และสลับแท็บ
-// ==========================================
-
-// ป้องกันคลิกขวา (Right-Click)
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    alert('⚠️ ไม่อนุญาตให้คลิกขวาในหน้าระบบทดสอบครับ!');
-});
-
-// ป้องกันการกด Copy (คัดลอก)
-document.addEventListener('copy', function(e) {
-    e.preventDefault();
-    alert('⚠️ ไม่อนุญาตให้คัดลอกข้อความครับ!');
-});
-
-// ป้องกันคีย์ลัดสำหรับการคัดลอก (Ctrl+C, Cmd+C)
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V' || e.key === 'x' || e.key === 'X' || e.key === 'a' || e.key === 'A')) {
-        e.preventDefault();
-        alert('⚠️ ไม่อนุญาตให้ใช้คีย์ลัดสำหรับการคัดลอกครับ!');
-    }
-});
-
-// ป้องกันการสลับหน้าต่าง (Window Blur) ขณะกำลังจับเสียง
-window.addEventListener('blur', function() {
-    if (isRunning) {
-        isRunning = false;
-        try { recognition.stop(); } catch(e){} // ปิดการรับเสียงทันที
-        
-        // หักคะแนนปรับเป็น Fail
-        failCount++;
-        document.getElementById("failCount").innerHTML = failCount;
-        document.getElementById("score").innerHTML = "0%";
-        document.getElementById("status").innerHTML = "ทุจริต! (เปลี่ยนหน้า) ❌";
-        document.getElementById("status").className = "status fail";
-        document.getElementById("heardText").innerHTML = "ตรวจพบการสลับหน้าต่าง ปรับตกทันที!";
-        
-        document.getElementById("startBtn").disabled = true;
-        
-        playFailSound(); // เล่นเสียง Fail
-        
-        // เด้งเตือนผู้ใช้
-        alert("🚨 แจ้งเตือนการทุจริต!\nระบบตรวจพบการเปลี่ยนหน้าต่างหรือแท็บขณะทำการทดสอบ ข้อนี้จะถูกปรับเป็น 0 คะแนนทันทีครับ");
-        
-        // สั่งเปลี่ยนไปข้อต่อไป
-        nextQuestionTimer = setTimeout(() => {
-            if (totalTimeLeftSeconds > 0) {
-                nextQuestion();
-            }
-        }, 2000);
-    }
-});
-// ==========================================
 
 window.onload = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -766,6 +710,7 @@ window.onload = async () => {
         }
 
         document.getElementById("startBtn").disabled = true;
+        clearInterval(displayInterval); // เคลียร์ Interval เมื่อตอบคำถาม
 
         nextQuestionTimer = setTimeout(() => {
             if (totalTimeLeftSeconds > 0) {
@@ -780,6 +725,7 @@ window.onload = async () => {
         document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
         document.getElementById("status").className = "status fail";
         document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
+        clearInterval(displayInterval); // เคลียร์ Interval ถ้ามีปัญหา
         
         if(questions.length > 0) {
             document.getElementById("startBtn").disabled = false;
@@ -794,6 +740,7 @@ window.onload = async () => {
             document.getElementById("status").innerHTML = "หมดเวลาพูด/เสียงเงียบเกินไป ⚠️";
             document.getElementById("status").className = "status fail";
             document.getElementById("heardText").innerHTML = "ไมค์ถูกตัดการทำงานอัตโนมัติ กรุณากดพูดใหม่ หรือข้ามข้อ";
+            clearInterval(displayInterval); // เคลียร์ Interval ถ้าหมดเวลาพูด
             
             if(questions.length > 0) {
                 document.getElementById("startBtn").disabled = false;
@@ -853,7 +800,6 @@ async function fetchRankData() {
     }
 }
 
-// โค้ด JavaScript จัดอันดับตัวใหม่ ตัดปัญหาข้อมูลวันที่/เวลา
 function renderRankTable(data) {
     const tableBody = document.getElementById("rankTableBody");
     tableBody.innerHTML = "";
@@ -969,11 +915,59 @@ function prepareQuestions() {
     updateUIBasedOnState(); 
 }
 
+// ==========================================
+// 🛡️ ระบบป้องกันกล้อง AI (Sequential Text Display)
+// ==========================================
+function renderSequentialText(sentence) {
+    const container = document.getElementById("englishText");
+    container.innerHTML = ""; // ล้างข้อความเดิมออกก่อน
+    
+    // แยกประโยคออกเป็นคำๆ โดยใช้ช่องว่าง
+    const words = sentence.split(" ");
+    let wordIndex = 0;
+    
+    // วนลูปสร้าง <span> ให้แต่ละคำ และซ่อนไว้ก่อน (opacity: 0)
+    words.forEach(word => {
+        const span = document.createElement("span");
+        span.innerText = word + " ";
+        span.style.opacity = "0"; 
+        span.style.transition = "opacity 0.2s ease-in"; // เพิ่มลูกเล่นให้ข้อความค่อยๆ เฟดมา
+        container.appendChild(span);
+    });
+
+    const spans = container.querySelectorAll("span");
+    
+    // เคลียร์ Interval เก่าเพื่อป้องกันการซ้อนทับ
+    clearInterval(displayInterval);
+    
+    // ค่อยๆ แสดงทีละคำทุกๆ 400 มิลลิวินาที (ปรับความเร็วได้ที่ตัวเลขนี้)
+    displayInterval = setInterval(() => {
+        if (wordIndex < spans.length) {
+            spans[wordIndex].style.opacity = "1";
+            wordIndex++;
+        } else {
+            // เมื่อแสดงครบทุกคำแล้ว ให้หยุดทำงาน
+            clearInterval(displayInterval);
+        }
+    }, 400); 
+}
+
+// ==========================================
+// 🔄 ปรับปรุงฟังก์ชัน loadQuestion ใหม่
+// ==========================================
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
+    // เคลียร์เวลารายข้อเดิม (หากคุณนำระบบนับเวลารายข้อจากครั้งก่อนมาใช้)
+    if (typeof perQuestionTimer !== 'undefined') {
+        clearInterval(perQuestionTimer);
+    }
+
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
-    document.getElementById("englishText").innerHTML = questions[index].english;
+    
+    // 💡 เรียกใช้ฟังก์ชันป้องกัน AI แทนการใส่ innerHTML ตรงๆ
+    renderSequentialText(questions[index].english);
+    
     document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
     document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
@@ -1000,6 +994,7 @@ function loadQuestion(index){
 }
 
 function nextQuestion(){
+    clearInterval(displayInterval); // ⚠️ เคลียร์ Interval เพื่อป้องกันการบั๊กเวลาข้ามข้อ
     clearTimeout(nextQuestionTimer);
     stopSentenceAudio();
     
@@ -1244,6 +1239,7 @@ function forceEndTest() {
     document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
     
     document.getElementById("audioControls").style.display = "none";
+    clearInterval(displayInterval); // เคลียร์ Interval ถ้าหมดเวลาการทดสอบรวม
     
     playFailSound();
     
@@ -1252,6 +1248,7 @@ function forceEndTest() {
 
 function startRecognition() {
     stopSentenceAudio(); 
+    clearInterval(displayInterval); // เคลียร์ Interval ก่อนเริ่มฟังเสียงรอบใหม่
     
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
@@ -1285,6 +1282,7 @@ function startRecognition() {
 
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
+    clearInterval(displayInterval); // เคลียร์ Interval เมื่อทดสอบเสร็จ
     isTestRunning = false;
     
     document.getElementById("audioControls").style.display = "none";
@@ -1312,10 +1310,11 @@ function evaluateFinalResult() {
             let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
             let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที
 
+            // 🚀 บันทึก OTP และชื่อผู้ทดสอบลง Firebase Realtime Database
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
                 expire: expireTime,
-                userName: name
+                userName: name // 👈 เพิ่มการแนบชื่อผู้เข้าทดสอบลงใน Node OTP
             }).then(() => {
                 document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
                 document.getElementById("status").className = "status pass";
