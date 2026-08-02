@@ -49,6 +49,9 @@
     --red:#ff4d6d;
     --text:#edf5ff;
     --muted:#9db2d9;
+    --gold: #ffcc00;
+    --silver: #a0a5b1;
+    --bronze: #cd7f32;
 }
 
 * { box-sizing:border-box; }
@@ -93,8 +96,35 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 .live::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 15px currentColor; }
 
 /* INPUT & STATS */
-.login-box { margin-bottom:20px; }
+.login-box { margin-bottom:10px; }
 .login-box input { width:100%; padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:18px; outline:none; transition:0.3s; }
+.login-box input:focus { border-color: var(--cyan); box-shadow: 0 0 15px rgba(53,216,255,0.3); }
+
+/* RANK BUTTON */
+.rank-btn-main {
+    background: linear-gradient(135deg, #ffb347, #ffcc33);
+    color: #07101f;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 16px;
+    border-radius: 18px;
+    width: 100%;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 25px rgba(255, 179, 71, 0.4);
+    border: none;
+    cursor: pointer;
+    font-family: 'Prompt', sans-serif;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.rank-btn-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 179, 71, 0.6);
+}
+
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
 .stat { padding:15px; border-radius:20px; position:relative; overflow:hidden; text-align:center; }
 .stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
@@ -116,7 +146,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 
 /* BUTTONS & RESULT */
 .controls { margin-top:20px; text-align:center; }
-button { border:none; padding:16px 30px; border-radius:16px; cursor:pointer; font-size:18px; font-weight:bold; transition:0.3s; }
+button { border:none; padding:16px 30px; border-radius:16px; cursor:pointer; font-size:18px; font-weight:bold; transition:0.3s; font-family:'Prompt',sans-serif; }
 button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .start-btn { background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); width: 100%; max-width: 300px;}
 .start-btn:hover:not(:disabled) { transform:translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53,216,255,0.3); }
@@ -146,7 +176,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .maintenance-admin-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; z-index: 10000; }
 .maintenance-admin-btn:hover { background: rgba(255,255,255,0.3); }
 
-/* ADMIN MODAL - STRICTLY CENTERED & HIDDEN */
+/* MODAL OVERLAY GENERAL */
 .modal-overlay { 
     display: none; 
     position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
@@ -155,6 +185,79 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .modal-content { width: 90%; max-width: 450px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
+
+/* RANK MODAL SPECIFIC */
+.rank-modal-content {
+    background: #0d1326; /* สีน้ำเงินเข้มตามภาพ */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 95%;
+    max-width: 500px;
+    padding: 30px 20px;
+}
+.rank-header-text {
+    text-align: center;
+    color: #92a4c9;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+.rank-table-header {
+    display: grid;
+    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
+    background: rgba(255,255,255,0.05);
+    padding: 12px 10px;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+    font-weight: bold;
+    color: var(--gold);
+    font-size: 14px;
+}
+.rank-table-body {
+    background: rgba(255,255,255,0.02);
+    border-radius: 0 0 12px 12px;
+    overflow-y: auto;
+    max-height: 50vh;
+}
+.rank-row {
+    display: grid;
+    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
+    padding: 15px 10px;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+}
+.rank-row:last-child { border-bottom: none; }
+.rank-badge {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.1);
+    font-weight: bold;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+}
+/* สไตล์เฉพาะสำหรับอันดับ 1, 2, 3 */
+.rank-1 .rank-badge { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
+.rank-2 .rank-badge { background: var(--silver); color: #000; box-shadow: 0 0 10px rgba(160, 165, 177, 0.4); }
+.rank-3 .rank-badge { background: var(--bronze); color: #000; box-shadow: 0 0 10px rgba(205, 127, 50, 0.4); }
+.rank-score {
+    color: var(--cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+}
+.loading-rank {
+    text-align: center;
+    padding: 30px;
+    color: var(--cyan);
+}
+
+/* ADMIN MODAL */
 .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
 .admin-login-group { display: block; text-align: center; }
 .admin-control-group { display: none; }
@@ -213,9 +316,11 @@ input:checked + .slider:before { transform: translateX(21px); }
     .status-area { width: 100%; justify-content: center; }
     .live { padding:8px 16px; font-size:12px; width: 100%; justify-content: center;} 
     
-    .login-box { margin-bottom:15px; } 
+    .login-box { margin-bottom:10px; } 
     .login-box input { padding:14px; font-size:16px; border-radius:15px; }
     
+    .rank-btn-main { padding: 14px; font-size: 16px; border-radius: 15px; margin-bottom: 15px; }
+
     .top-bar { gap:10px; margin-bottom:15px; } 
     .stat { padding:12px 8px; border-radius:15px; } 
     .stat-title { font-size:10px; } 
@@ -241,9 +346,9 @@ input:checked + .slider:before { transform: translateX(21px); }
     .teacher-box { font-size: 14px; padding: 12px; }
     .teacher-title { font-size: 16px; }
 
-    .maintenance-overlay h1 { font-size: 28px; }
-    .maintenance-info { font-size: 16px; padding: 12px 15px; }
-    .maintenance-msg { font-size: 14px; padding: 15px; }
+    .rank-table-header { font-size: 12px; grid-template-columns: 0.8fr 1.2fr 1fr 1.2fr; }
+    .rank-row { font-size: 14px; grid-template-columns: 0.8fr 1.2fr 1fr 1.2fr; padding: 10px 5px; }
+    .rank-badge { width: 30px; height: 30px; }
 }
 </style>
 </head>
@@ -282,6 +387,11 @@ input:checked + .slider:before { transform: translateX(21px); }
     <div class="login-box">
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
     </div>
+
+    <!-- 🏆 ปุ่มเปิดตารางอันดับคะแนน -->
+    <button class="rank-btn-main" onclick="openRankModal()">
+        🏆 ตารางอันดับคะแนน (Rank)
+    </button>
 
     <div class="top-bar">
         <div class="stat glass">
@@ -332,6 +442,25 @@ input:checked + .slider:before { transform: translateX(21px); }
     </div>
 
     <div class="footer" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
+</div>
+
+<!-- 🏆 Rank Modal Panel -->
+<div class="modal-overlay" id="rankModal">
+    <div class="modal-content rank-modal-content">
+        <button class="close-modal" onclick="closeRankModal()">✕</button>
+        <div class="rank-header-text">ยิ่งขยันทำแบบทดสอบบ่อย ยิ่งสะสม<br>คะแนนรวมได้เยอะ!</div>
+        
+        <div class="rank-table-header">
+            <div>อันดับ</div>
+            <div>ชื่อผู้ทดสอบ</div>
+            <div>รอบสอบ</div>
+            <div>คะแนนรวม<br>สะสม</div>
+        </div>
+        
+        <div class="rank-table-body" id="rankTableBody">
+            <div class="loading-rank">กำลังโหลดข้อมูลอันดับ...</div>
+        </div>
+    </div>
 </div>
 
 <!-- Admin Modal Panel -->
@@ -477,6 +606,7 @@ input:checked + .slider:before { transform: translateX(21px); }
 </div>
 
 <script>
+// 🚀 เปลี่ยนแปลง URL ไปยังโปรเจ็กต์ GAS ใหม่ตามที่ระบุ
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
@@ -605,6 +735,85 @@ window.onload = async () => {
     monitorAdminSwitches(); 
     monitorStock(); 
 };
+
+// ==========================================
+// 🏆 ระบบตารางอันดับคะแนน (Rank System)
+// ==========================================
+function openRankModal() {
+    document.getElementById("rankModal").style.display = "flex";
+    fetchRankData();
+}
+
+function closeRankModal() {
+    document.getElementById("rankModal").style.display = "none";
+}
+
+async function fetchRankData() {
+    const tableBody = document.getElementById("rankTableBody");
+    tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
+
+    try {
+        // ส่งพารามิเตอร์ ?action=getRank เพื่อบอก GAS ว่าต้องการข้อมูลตารางจัดอันดับ
+        const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getRank");
+        const data = await response.json();
+        
+        // จำลองข้อมูล (Mockup) กรณีที่ Backend ยังไม่รองรับการส่งข้อมูล Rank กลับมา
+        // (ให้คุณไปเพิ่มโค้ดที่ GAS ให้รองรับ ?action=getRank ในอนาคต)
+        let rankData = [];
+        
+        if(Array.isArray(data) && data.length > 0 && data[0].name) {
+             rankData = data; // ใช้ข้อมูลจริงถ้าดึงมาได้
+        } else {
+             // ข้อมูลจำลองเพื่อให้เห็น UI สวยงามตามรูปอ้างอิง
+             rankData = [
+                 { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
+                 { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
+                 { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
+                 { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
+                 { rank: 5, name: "นะโม", attempts: 1, score: 0 },
+                 { rank: 6, name: "กา", attempts: 1, score: 0 }
+             ];
+        }
+
+        renderRankTable(rankData);
+
+    } catch (error) {
+        console.error("Error fetching rank:", error);
+        tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
+    }
+}
+
+function renderRankTable(data) {
+    const tableBody = document.getElementById("rankTableBody");
+    tableBody.innerHTML = "";
+
+    if (data.length === 0) {
+        tableBody.innerHTML = '<div class="loading-rank">ยังไม่มีข้อมูลผู้ทดสอบ 🌟</div>';
+        return;
+    }
+
+    data.forEach((user, index) => {
+        const actualRank = user.rank || (index + 1);
+        let rankClass = "";
+        
+        // เพิ่มคลาสพิเศษสำหรับอันดับ 1, 2, 3 เพื่อทำสีเหรียญ
+        if (actualRank === 1) rankClass = "rank-1";
+        else if (actualRank === 2) rankClass = "rank-2";
+        else if (actualRank === 3) rankClass = "rank-3";
+
+        const rowHTML = `
+            <div class="rank-row ${rankClass}">
+                <div class="rank-badge">${actualRank}</div>
+                <div style="text-align: left; padding-left: 10px;">${user.name}</div>
+                <div>${user.attempts}</div>
+                <div class="rank-score">${user.score}</div>
+            </div>
+        `;
+        tableBody.innerHTML += rowHTML;
+    });
+}
+// ==========================================
+
 
 function monitorMaintenance() {
     db.ref('machine/maintenance').on('value', (snap) => {
