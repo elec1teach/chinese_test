@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI Pronunciation Test Station</title>
 
-<!-- 🚀 สคริปต์บังคับเปิดใน Google Chrome / External Browser อัตโนมัติ -->
+<!-- 🚀 สคริปต์บังคับเปิดใน Google Chrome / External Browser อัตโนมัติ[cite: 1] -->
 <script>
 (function forceExternalBrowser() {
     var userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -32,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-<!-- นำเข้า Firebase SDK -->
+<!-- นำเข้า Firebase SDK[cite: 1] -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -61,7 +61,6 @@ body {
     overflow-x:hidden; min-height:100vh;
 }
 
-/* GRID EFFECT & FLOATING LIGHTS */
 body::before {
     content:""; position:fixed; inset:0; pointer-events:none;
     background: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
@@ -88,9 +87,13 @@ body::before {
 h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing:1px; line-height:1.1; }
 .subtitle { margin-top:8px; font-size:18px; color:var(--muted); line-height:1.6; }
 
-.status-area { display:flex; align-items:center; gap:15px; }
+.status-area { display:flex; align-items:center; gap:15px; flex-wrap:wrap; }
 .live { padding:10px 18px; border-radius:999px; background:rgba(29,255,149,0.08); border:1px solid rgba(29,255,149,0.25); color:#87ffca; font-weight:bold; letter-spacing:2px; font-size:14px; display:flex; align-items:center; gap:10px; transition:0.3s; }
 .live::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 15px currentColor; }
+
+/* LEADERBOARD BUTTON */
+.rank-btn { padding:10px 18px; border-radius:999px; background:rgba(53,216,255,0.15); border:1px solid rgba(53,216,255,0.4); color:var(--cyan); font-weight:bold; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:0.3s; }
+.rank-btn:hover { background:rgba(53,216,255,0.3); transform:scale(1.05); }
 
 /* INPUT & STATS */
 .login-box { margin-bottom:20px; }
@@ -146,16 +149,28 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .maintenance-admin-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; z-index: 10000; }
 .maintenance-admin-btn:hover { background: rgba(255,255,255,0.3); }
 
-/* ADMIN MODAL - STRICTLY CENTERED & HIDDEN */
+/* MODALS - STRICTLY CENTERED */
 .modal-overlay { 
     display: none; 
     position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
     align-items: center; justify-content: center; backdrop-filter: blur(8px); 
 }
-.modal-content { width: 90%; max-width: 450px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.modal-content { width: 90%; max-width: 480px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
 .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
+
+/* RANK TABLE STYLES */
+.rank-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:15px; }
+.rank-table th { background:rgba(53,216,255,0.2); color:var(--cyan); padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:600; }
+.rank-table td { padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.rank-table tr:hover { background:rgba(255,255,255,0.05); }
+.rank-badge { display:inline-block; width:28px; height:28px; border-radius:50%; text-align:center; line-height:28px; font-weight:bold; }
+.rank-1 { background:#ffd700; color:#000; box-shadow:0 0 10px rgba(255,215,0,0.5); }
+.rank-2 { background:#c0c0c0; color:#000; }
+.rank-3 { background:#cd7f32; color:#000; }
+
+/* ADMIN UI */
 .admin-login-group { display: block; text-align: center; }
 .admin-control-group { display: none; }
 .admin-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; font-size: 16px; margin-bottom: 15px; text-align: center; font-family:'Prompt',sans-serif; }
@@ -192,11 +207,10 @@ input:checked + .slider:before { transform: translateX(21px); }
 .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
 .audio-btn { width: auto; padding: 8px 16px; font-size: 14px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
 .audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
-
 .audio-btn.skip { background: rgba(181, 108, 255, 0.15); border-color: rgba(181, 108, 255, 0.3); color: var(--violet); }
 .audio-btn.skip:hover { background: rgba(181, 108, 255, 0.3); transform: scale(1.05); }
 
-/* RESPONSIVE CLEANUP */
+/* RESPONSIVE CLEANUP[cite: 1] */
 @media(max-width:900px) { 
     .main-grid { grid-template-columns:1fr; } 
     h1 { font-size:32px; } 
@@ -253,7 +267,7 @@ input:checked + .slider:before { transform: translateX(21px); }
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
-<!-- 🛠️ หน้าจอแจ้งเตือนปรับปรุงระบบ -->
+<!-- 🛠️ หน้าจอแจ้งเตือนปรับปรุงระบบ[cite: 1] -->
 <div class="maintenance-overlay" id="maintenanceOverlay">
     <div class="maintenance-admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
     <h1>🛠️ SYSTEM MAINTENANCE</h1>
@@ -274,6 +288,8 @@ input:checked + .slider:before { transform: translateX(21px); }
                 </div>
             </div>
             <div class="status-area">
+                <!-- ปุ่มเปิดตารางอันดับสะสมคะแนน -->
+                <button class="rank-btn" onclick="openRankModal()">🏆 ตารางอันดับ (Rank)</button>
                 <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
             </div>
         </div>
@@ -334,7 +350,33 @@ input:checked + .slider:before { transform: translateX(21px); }
     <div class="footer" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
 </div>
 
-<!-- Admin Modal Panel -->
+<!-- 🏆 Leaderboard Modal Panel -->
+<div class="modal-overlay" id="rankModal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeRankModal()">✕</button>
+        <div class="modal-title">🏆 อันดับคะแนนรวมสะสม (Leaderboard)</div>
+        <div id="rankLoading" style="text-align:center; padding:20px; color:var(--muted);">
+            ⏳ กำลังโหลดข้อมูลตารางอันดับ...
+        </div>
+        <div id="rankTableContainer" style="display:none; overflow-x:auto;">
+            <table class="rank-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>ชื่อผู้ทดสอบ</th>
+                        <th style="text-align:center;">คะแนนรวม</th>
+                        <th style="text-align:center;">รอบที่ทำ</th>
+                    </tr>
+                </thead>
+                <tbody id="rankTableBody">
+                    <!-- ข้อมูล Rank จะถูกใส่ที่นี่อัตโนมัติ -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Modal Panel[cite: 1] -->
 <div class="modal-overlay" id="adminModal">
     <div class="modal-content">
         <button class="close-modal" onclick="closeAdminModal()">✕</button>
@@ -348,7 +390,7 @@ input:checked + .slider:before { transform: translateX(21px); }
 
         <div id="adminControlGroup" class="admin-control-group">
 
-            <!-- 🛠️ ระบบแจ้งเตือน Maintenance -->
+            <!-- 🛠️ ระบบแจ้งเตือน Maintenance[cite: 1] -->
             <div class="stock-control-container" style="border-color: rgba(255, 77, 109, 0.4);">
                 <div style="color: var(--red); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">🛠️ ประกาศปิดปรับปรุง (Maintenance)</div>
                 
@@ -377,22 +419,17 @@ input:checked + .slider:before { transform: translateX(21px); }
                 <button class="admin-btn-action" style="background:var(--red);" onclick="saveMaintenanceInfo()">บันทึกข้อมูล</button>
             </div>
             
-            <!-- ปุ่มจัดการสถานะระบบ -->
+            <!-- ปุ่มจัดการสถานะระบบ[cite: 1] -->
             <div class="switch-container" style="flex-direction: column; align-items: stretch; padding: 15px;">
                 <span class="switch-label" style="text-align: center; margin-bottom: 12px; display: block;">🔄 สถานะตู้ (Machine State)</span>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready (พร้อมใช้งาน)</button>
                     <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked (ปลดล็อกตู้)</button>
                     <button class="stock-btn minus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy (ล็อกระบบ)</button>
-                    
-                    <!-- 🌟 [เพิ่มปุ่มนี้] สำหรับสั่ง Reboot ฮาร์ดแวร์ระยะไกล -->
-                    <button class="stock-btn" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(255, 165, 0, 0.2); color: #ffb703; border-color: #ffb703; margin-top: 5px; font-weight: bold;" onclick="rebootESP32()">
-                        🔄 Reboot บอร์ด ESP32 (รีสตาร์ทฮาร์ดแวร์)
-                    </button>
                 </div>
             </div>
 
-            <!-- สต๊อกของรางวัล -->
+            <!-- สต๊อกของรางวัล[cite: 1] -->
             <div class="stock-control-container">
                 <div class="stock-item">
                     <div class="stock-label">📦 Slot 1 Stock</div>
@@ -412,7 +449,7 @@ input:checked + .slider:before { transform: translateX(21px); }
                 </div>
             </div>
 
-            <!-- ⚙️ การตั้งค่าระบบข้อสอบ -->
+            <!-- ⚙️ การตั้งค่าระบบข้อสอบ[cite: 1] -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">⚙️ Game Settings</div>
                 
@@ -482,6 +519,9 @@ input:checked + .slider:before { transform: translateX(21px); }
 </div>
 
 <script>
+// ==========================================
+// การตั้งค่า URL ของ Apps Script และรหัสผ่าน[cite: 1]
+// ==========================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyb14pArEH-dG51DFuH6I5mCsxK9RZUTx_aRd7F2wseQH-o4347vo8h3QlOUFtoho5hYA/exec";
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbwXNCOVd_sTH3_aVFLWudAvMSHx6vhDKy7Fn1PeGZ2ew4WdqjqKLkFAL3zSw8qdP2QN/exec";
@@ -871,6 +911,56 @@ function monitorMachine() {
     });
 }
 
+// ==========================================
+// การควบคุม Modal ตารางอันดับ (Rank Leaderboard)
+// ==========================================
+function openRankModal() {
+    document.getElementById("rankModal").style.display = "flex";
+    document.getElementById("rankLoading").style.display = "block";
+    document.getElementById("rankTableContainer").style.display = "none";
+    
+    // ดึงตารางอันดับจาก Apps Script (action=rank)[cite: 1]
+    const rankUrl = GAS_QUESTION_URL + "?action=rank";
+    fetch(rankUrl)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("rankTableBody");
+            tbody.innerHTML = "";
+            
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(item => {
+                    let badgeClass = "";
+                    if (item.rank === 1) badgeClass = "rank-1";
+                    else if (item.rank === 2) badgeClass = "rank-2";
+                    else if (item.rank === 3) badgeClass = "rank-3";
+                    
+                    const row = `
+                        <tr>
+                            <td><span class="rank-badge ${badgeClass}">${item.rank}</span></td>
+                            <td style="font-weight:600;">${item.name}</td>
+                            <td style="text-align:center; color:var(--cyan); font-weight:bold;">${item.totalScore}</td>
+                            <td style="text-align:center; color:var(--muted);">${item.attempts}</td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px;">ยังไม่มีข้อมูลอันดับคะแนน</td></tr>`;
+            }
+            
+            document.getElementById("rankLoading").style.display = "none";
+            document.getElementById("rankTableContainer").style.display = "block";
+        })
+        .catch(err => {
+            console.error("Error loading rank:", err);
+            document.getElementById("rankLoading").innerHTML = "❌ ไม่สามารถโหลดข้อมูลอันดับได้";
+        });
+}
+
+function closeRankModal() {
+    document.getElementById("rankModal").style.display = "none";
+}
+
 function openAdminModal() {
     document.getElementById("adminModal").style.display = "flex";
     if(isAdminLoggedIn) {
@@ -910,19 +1000,6 @@ function setSystemStatus(status) {
             }
         })
         .catch((error) => alert("❌ เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: " + error));
-}
-
-// 🌟 ฟังก์ชันส่งคำสั่ง รีบูตบอร์ด ESP32 ระยะไกลผ่าน Firebase
-function rebootESP32() {
-    if (confirm("⚠️ คุณต้องการสั่งรีสตาร์ท (Reboot) บอร์ด ESP32 ใช่หรือไม่?\n\nการดำเนินการนี้จะเหมือนกับการกดปุ่ม RESET ที่บอร์ด และระบบจะใช้เวลาเชื่อมต่อ Wi-Fi ใหม่ประมาณ 5-10 วินาทีครับ")) {
-        db.ref('machine/reboot').set(true)
-            .then(() => {
-                alert("📡 ส่งคำสั่ง Reboot ไปยังบอร์ด ESP32 เรียบร้อยแล้ว!\nระบบตู้กำลังรีบูตตัวเองครับ");
-            })
-            .catch((error) => {
-                alert("❌ เกิดข้อผิดพลาดในการส่งคำสั่ง: " + error);
-            });
-    }
 }
 
 function updateStock(slot, changeAmount) {
@@ -1047,15 +1124,13 @@ function evaluateFinalResult() {
             db.ref('machine/status').set('ready'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
-            // โหมดใช้งานจริง: สร้าง OTP แทนการปลดล็อกตู้
-            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
-            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            let expireTime = Date.now() + (5 * 60 * 1000); 
 
-            // 🚀 บันทึก OTP และชื่อผู้ทดสอบลง Firebase Realtime Database
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
                 expire: expireTime,
-                userName: name // 👈 เพิ่มการแนบชื่อผู้เข้าทดสอบลงใน Node OTP
+                userName: name 
             }).then(() => {
                 document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
                 document.getElementById("status").className = "status pass";
@@ -1080,6 +1155,7 @@ function evaluateFinalResult() {
         }
     }
 
+    // บันทึกสถิติและอัปเดต Rank บน Google Sheet อัตโนมัติ[cite: 1, 2]
     saveToGoogleSheet(name, totalScore, passCount, failCount);
 }
 
@@ -1118,7 +1194,7 @@ function saveToGoogleSheet(name, score, pass, fail) {
     const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&score=${score}&pass=${pass}&fail=${fail}`;
     
     fetch(url, { mode: 'no-cors' })
-        .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
+        .then(() => console.log("บันทึกสถิติและอัปเดต Rank ลง Google Sheet สำเร็จ[cite: 1]"))
         .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
 }
 
