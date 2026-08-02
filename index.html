@@ -623,7 +623,6 @@ input:checked + .slider:before { transform: translateX(21px); }
 </div>
 
 <script>
-// 🚀 เปลี่ยนแปลง URL ไปยังโปรเจ็กต์ GAS ใหม่ตามที่ระบุ
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
 const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
@@ -661,7 +660,8 @@ let currentMachineStatus = 'ready';
 
 let nextQuestionTimer = null;
 let displayInterval = null; 
-let questionTimeout = null; // 🛡️ ตัวแปรใหม่สำหรับจับเวลา 5 วินาทีของแต่ละข้อ
+let startMicDelayTimeout = null; // 🛡️ หน่วงเวลาเปิดไมค์ 5 วินาที
+let questionTimeout = null;     // 🛡️ จับเวลาพูดของผู้เรียน 5 วินาที
 
 let adminConfig = {
     passRequirement: 5,
@@ -686,7 +686,7 @@ window.onload = async () => {
     recognition.onresult = function(event){
         if(!isRunning) return;
         isRunning = false;
-        clearTimeout(questionTimeout); // หยุดเวลา 5 วินาทีเมื่อผู้ใช้พูดเสร็จทันเวลา
+        clearTimeout(questionTimeout); // หยุดนับเวลาเมื่อผู้เรียนตอบสำเร็จ
 
         const speechResult = event.results[0][0].transcript;
         const target = questions[currentQuestion].english;
@@ -712,8 +712,27 @@ window.onload = async () => {
         }
 
         document.getElementById("startBtn").disabled = true;
-        clearInterval(displayInterval); 
 
+        nextQuestionTimer = setTimeout(() => {
+            if (totalTimeLeftSeconds > 0) {
+                nextQuestion();
+            }
+        }, 1200);
+    };
+
+    recognition.onerror = function(event){
+        console.log("Recognition Error:", event.error);
+        if(!isRunning) return;
+        isRunning = false; 
+        clearTimeout(questionTimeout);
+        document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
+        document.getElementById("status").className = "status fail";
+        document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ข้ามไปข้อถัดไป...";
+        
+        failCount++;
+        document.getElementById("failCount").innerHTML = failCount;
+        playFailSound();
+        
         nextQuestionTimer = setTimeout(() => {
             if (totalTimeLeftSeconds > 0) {
                 nextQuestion();
@@ -721,35 +740,24 @@ window.onload = async () => {
         }, 1500);
     };
 
-    recognition.onerror = function(event){
-        console.log("Recognition Error:", event.error);
-        isRunning = false; 
-        clearTimeout(questionTimeout); // หยุดจับเวลา 5 วินาที
-        document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
-        document.getElementById("status").className = "status fail";
-        document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ลองกดเริ่มพูดใหม่";
-        clearInterval(displayInterval); 
-        
-        if(questions.length > 0) {
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
-        }
-    };
-
     recognition.onend = function() {
         if(isRunning) { 
             console.log("Recognition ended unexpectedly."); 
             isRunning = false;
-            clearTimeout(questionTimeout); // หยุดจับเวลา 5 วินาที
-            document.getElementById("status").innerHTML = "หมดเวลาพูด/เสียงเงียบเกินไป ⚠️";
+            clearTimeout(questionTimeout);
+            document.getElementById("status").innerHTML = "เสียงเงียบเกินไป ⚠️";
             document.getElementById("status").className = "status fail";
-            document.getElementById("heardText").innerHTML = "ไมค์ถูกตัดการทำงานอัตโนมัติ กรุณากดพูดใหม่ หรือข้ามข้อ";
-            clearInterval(displayInterval); 
+            document.getElementById("heardText").innerHTML = "ไม่พบเสียงพูดข้ามไปข้อถัดไป...";
             
-            if(questions.length > 0) {
-                document.getElementById("startBtn").disabled = false;
-                document.getElementById("startBtn").innerHTML = "🎤 ลองพูดใหม่";
-            }
+            failCount++;
+            document.getElementById("failCount").innerHTML = failCount;
+            playFailSound();
+
+            nextQuestionTimer = setTimeout(() => {
+                if (totalTimeLeftSeconds > 0) {
+                    nextQuestion();
+                }
+            }, 1500);
         }
     };
 
@@ -916,7 +924,7 @@ function prepareQuestions() {
 }
 
 // ==========================================
-// 🛡️ ระบบแสดงผลทีละคำ ภายใน 5 วินาที
+// 🛡️ ระบบแสดงผลทีละคำให้ครบภายใน 5 วินาที
 // ==========================================
 function renderSequentialText(sentence) {
     const container = document.getElementById("englishText");
@@ -939,7 +947,7 @@ function renderSequentialText(sentence) {
     
     clearInterval(displayInterval);
     
-    // คัดสรรเวลาหารเพื่อให้แสดงจบครบพอดีใน 5 วินาที (5000 มิลลิวินาที)
+    // คำนวณเวลาแสดงผลทีละคำ ให้ครบประโยคที่ 5 วินาที (5000 มิลลิวินาที) พอดี
     const intervalTime = Math.floor(5000 / words.length);
     
     displayInterval = setInterval(() => {
@@ -953,15 +961,15 @@ function renderSequentialText(sentence) {
 }
 
 // ==========================================
-// 🔄 ปรับปรุงฟังก์ชันโหลดข้อสอบ
+// 🔄 โหลดข้อสอบ
 // ==========================================
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
     
-    // ⚠️ เปลี่ยนให้แสดงข้อความเตือน แทนที่จะโชว์ประโยคทันที
-    document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); text-shadow: none;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (มีเวลา 5 วินาที)</span>';
+    // ซ่อนข้อความภาษาอังกฤษไว้ก่อนเปิดตัว
+    document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลา 10 วินาที)</span>';
     
     document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
@@ -991,7 +999,8 @@ function loadQuestion(index){
 function nextQuestion(){
     clearInterval(displayInterval); 
     clearTimeout(nextQuestionTimer);
-    clearTimeout(questionTimeout); // เคลียร์เวลาของข้อเดิมทิ้ง
+    clearTimeout(startMicDelayTimeout);
+    clearTimeout(questionTimeout); 
     stopSentenceAudio();
     
     if (isRunning) {
@@ -1228,6 +1237,8 @@ function startGlobalTimer() {
 
 function forceEndTest() {
     isRunning = false;
+    clearTimeout(startMicDelayTimeout);
+    clearTimeout(questionTimeout);
     try { recognition.stop(); } catch(e){}
     
     document.getElementById("status").innerHTML = "หมดเวลาทดสอบรวม ⏰";
@@ -1236,7 +1247,6 @@ function forceEndTest() {
     
     document.getElementById("audioControls").style.display = "none";
     clearInterval(displayInterval); 
-    clearTimeout(questionTimeout); 
     
     playFailSound();
     
@@ -1244,12 +1254,13 @@ function forceEndTest() {
 }
 
 // ==========================================
-// 🎙️ เมื่อผู้ใช้กดเริ่มพูด
+// 🎙️ การทำงานเมื่อกด "เริ่มพูด" (10 วินาที / ข้อ)
 // ==========================================
 function startRecognition() {
     stopSentenceAudio(); 
     clearInterval(displayInterval); 
-    clearTimeout(questionTimeout); // ป้องกันบัคตั้งเวลาซ้อนกัน
+    clearTimeout(questionTimeout); 
+    clearTimeout(startMicDelayTimeout);
     
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
@@ -1267,52 +1278,68 @@ function startRecognition() {
         startGlobalTimer();
     }
 
-    isRunning = true;
+    // ----------------------------------------------------
+    // ⏳ เฟสที่ 1 (0-5 วินาที): แสดงข้อความช้าๆ จนครบประโยค
+    // ----------------------------------------------------
+    isRunning = false; // ยังไม่เริ่มเปิดไมโครโฟน
     document.getElementById("startBtn").disabled = true;
-    document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (5 วินาที)";
-    document.getElementById("status").innerHTML = "กำลังฟังเสียงของคุณ...";
+    document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (5 วินาที)";
+    document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
     document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "...";
+    document.getElementById("heardText").innerHTML = "เตรียมอ่านประโยคเมื่อไมโครโฟนเปิดใน 5 วินาที...";
 
-    // 🌟 1. เริ่มรันการแสดงผลทีละคำ ภายใน 5 วินาที
+    // แสดงข้อความทีละคำ ให้ครบ 5 วินาทีพอดี
     renderSequentialText(questions[currentQuestion].english);
 
-    // 🌟 2. เริ่มนับเวลาถอยหลัง 5 วินาที ถ้าไม่พูดคือผิดทันที
-    questionTimeout = setTimeout(() => {
-        if (isRunning) {
-            isRunning = false;
-            try { recognition.stop(); } catch(e) {}
-            
-            document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
-            document.getElementById("status").className = "status fail";
-            document.getElementById("heardText").innerHTML = "หมดเวลา 5 วินาที คุณพูดไม่ทันเวลาที่กำหนด";
-            clearInterval(displayInterval);
-            
-            failCount++;
-            document.getElementById("failCount").innerHTML = failCount;
-            playFailSound();
-            
-            document.getElementById("startBtn").disabled = true;
-            
-            // ข้ามไปข้อต่อไปหลังจากขึ้นเตือน 1.5 วินาที
-            nextQuestionTimer = setTimeout(() => {
-                if (totalTimeLeftSeconds > 0) {
-                    nextQuestion();
-                }
-            }, 1500);
-        }
-    }, 5000);
+    // ----------------------------------------------------
+    // 🎙️ เฟสที่ 2 (5-10 วินาที): เปิดไมค์รับเสียง 5 วินาที
+    // ----------------------------------------------------
+    startMicDelayTimeout = setTimeout(() => {
+        if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
 
-    try {
-        recognition.start();
-    } catch (e) {
-        console.error("Mic start error:", e);
-    }
+        isRunning = true;
+        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 5 วินาที)";
+        document.getElementById("status").innerHTML = "🎙️ กำลังฟังเสียงของคุณ...";
+        document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ...";
+
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error("Mic start error:", e);
+        }
+
+        // นัดเวลาตัดรอบข้อสอบหลังจากไมค์ทำงานครบ 5 วินาที (รวมเป็น 10 วินาที)
+        questionTimeout = setTimeout(() => {
+            if (isRunning) {
+                isRunning = false;
+                try { recognition.stop(); } catch(e) {}
+                
+                document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
+                document.getElementById("status").className = "status fail";
+                document.getElementById("heardText").innerHTML = "หมดเวลา 5 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
+                
+                failCount++;
+                document.getElementById("failCount").innerHTML = failCount;
+                playFailSound();
+                
+                document.getElementById("startBtn").disabled = true;
+                
+                // ข้ามข้อถัดไปหลังจากแสดงผลแจ้งเตือน 1.5 วินาที
+                nextQuestionTimer = setTimeout(() => {
+                    if (totalTimeLeftSeconds > 0) {
+                        nextQuestion();
+                    }
+                }, 1500);
+            }
+        }, 5000);
+
+    }, 5000);
 }
 
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     clearInterval(displayInterval); 
+    clearTimeout(startMicDelayTimeout);
     clearTimeout(questionTimeout);
     isTestRunning = false;
     
@@ -1337,11 +1364,9 @@ function evaluateFinalResult() {
             db.ref('machine/status').set('ready'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
-            // โหมดใช้งานจริง: สร้าง OTP แทนการปลดล็อกตู้
-            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
-            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            let expireTime = Date.now() + (5 * 60 * 1000); 
 
-            // 🚀 บันทึก OTP และชื่อผู้ทดสอบลง Firebase Realtime Database
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
                 expire: expireTime,
@@ -1453,7 +1478,6 @@ function playFailSound() {
 let currentUtterance = null;
 function playSentenceAudio() {
     stopSentenceAudio(); 
-    // ⚠️ อัปเดตให้ดึงข้อความจาก array แทนหน้าจอ (เพราะหน้าจอซ่อนไว้)
     if (questions.length === 0 || currentQuestion >= questions.length) return;
     const textToSpeak = questions[currentQuestion].english;
     
