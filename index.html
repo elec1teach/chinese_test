@@ -138,6 +138,16 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 .english-text { margin-top:20px; font-size:48px; font-weight:900; line-height:1.2; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); }
 .thai-text { margin-top:12px; font-size:22px; color:#b6c6e8; line-height:1.6; }
 
+/* 🔒 ANTI-CHEAT CSS: ป้องกันการคลุมดำเลือกข้อความ */
+.english-text, 
+.thai-text, 
+.sentence-box {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 /* COUNTDOWN */
 .countdown-wrapper { margin:30px auto 10px; width:160px; height:160px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
 .countdown-wrapper::before { content:""; position:absolute; width:130px; height:130px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); }
@@ -186,7 +196,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
 
-/* RANK MODAL SPECIFIC (อัปเดตใหม่ตามคำขอ) */
+/* RANK MODAL SPECIFIC */
 .rank-modal-content {
     background: #0d1326; 
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -221,7 +231,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     border-radius: 12px 12px 0 0;
     text-align: center;
     font-weight: 700;
-    color: var(--gold); /* ใช้สีเหลืองตามภาพต้นแบบ */
+    color: var(--gold);
     font-size: 16px;
 }
 
@@ -234,7 +244,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     text-align: center;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     color: white;
-    font-size: 18px; /* ปรับฟอนต์ให้ใหญ่และอ่านง่ายขึ้น */
+    font-size: 18px;
 }
 .rank-row:last-child { border-bottom: none; }
 
@@ -258,7 +268,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .rank-1 .rank-badge { 
     background: var(--gold); 
     color: #000; 
-    box-shadow: 0 0 25px rgba(255, 204, 0, 0.6); /* เพิ่มแสงเงาให้เด่นขึ้นเหมือนภาพที่ 1 */
+    box-shadow: 0 0 25px rgba(255, 204, 0, 0.6);
 }
 .rank-2 .rank-badge { 
     background: var(--silver); 
@@ -276,7 +286,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     color: var(--cyan);
     font-family: 'Orbitron', sans-serif;
     font-weight: bold;
-    font-size: 22px; /* ขยายฟอนต์คะแนนให้เด่นชัด */
+    font-size: 22px; 
 }
 
 /* ADMIN MODAL */
@@ -470,13 +480,14 @@ input:checked + .slider:before { transform: translateX(21px); }
 <div class="modal-overlay" id="rankModal">
     <div class="modal-content rank-modal-content">
         <button class="close-modal" onclick="closeRankModal()">✕</button>
+        <div class="modal-title" style="margin-bottom: 5px;">🏆 ตารางจัดอันดับ</div>
         <div class="rank-header-text">ยิ่งขยันทำแบบทดสอบบ่อย ยิ่งสะสม<br>คะแนนรวมได้เยอะ!</div>
         
         <div class="rank-table-header">
             <div>อันดับ</div>
-            <div>ชื่อผู้ทดสอบ</div>
+            <div style="text-align: left; padding-left: 10px;">ชื่อผู้ทดสอบ</div>
             <div>รอบสอบ</div>
-            <div>คะแนนรวม<br>สะสม</div>
+            <div>คะแนนรวม</div>
         </div>
         
         <div class="rank-table-body" id="rankTableBody">
@@ -628,21 +639,66 @@ input:checked + .slider:before { transform: translateX(21px); }
 </div>
 
 <script>
-// 🚀 เปลี่ยนแปลง URL ไปยังโปรเจ็กต์ GAS ใหม่ตามที่ระบุ
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
+// กำหนด URL ของ Google Apps Script ของคุณ
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXKD0RLhj3Pe-Qp9yeLxSovuFkmG2iEugP5neKmlOhmAAFYoOmlWRcgvRjuHLiYaVW1A/exec";
 const ADMIN_PASSWORD = "1234"; 
-const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
+const GAS_QUESTION_URL = GOOGLE_SCRIPT_URL;
 
+// ==========================================
+// 🔒 ANTI-CHEAT JS: ระบบป้องกันการทุจริตแบบ 2 ชั้น
+// ==========================================
+
+// 1. ป้องกันการคลิกขวา
+document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+});
+
+// 2. ป้องกันการคัดลอกข้อความ
+document.addEventListener('copy', (event) => {
+    event.preventDefault();
+    alert("⚠️ ระบบไม่อนุญาตให้คัดลอกข้อความเพื่อป้องกันการทุจริตครับ");
+});
+
+// 3. ป้องกันการสลับหน้าจอหรือคลิกที่อื่นขณะระบบเปิดไมค์อยู่
+window.addEventListener('blur', () => {
+    if (isRunning) {
+        isRunning = false;
+        
+        try { recognition.stop(); } catch(e) {}
+
+        failCount++;
+        document.getElementById("failCount").innerHTML = failCount;
+        document.getElementById("status").innerHTML = "ผิดกติกา! (เปลี่ยนหน้าต่าง) ❌";
+        document.getElementById("status").className = "status fail";
+        document.getElementById("heardText").innerHTML = "ระบบตรวจพบการคลิกออกนอกหน้าจอในระหว่างที่ไมโครโฟนกำลังรับเสียง";
+        
+        playFailSound();
+        
+        document.getElementById("startBtn").disabled = true;
+        nextQuestionTimer = setTimeout(() => {
+            if (totalTimeLeftSeconds > 0) {
+                nextQuestion();
+            }
+        }, 2000);
+
+        alert("⚠️ แจ้งเตือนกติกา: กรุณาอย่าคลิกหน้าต่างอื่นหรือแอปพลิเคชันอื่นในขณะที่ระบบกำลังบันทึกเสียงครับ");
+    }
+});
+
+// ==========================================
+// ส่วนทำงานหลักของระบบ (Main Logic)
+// ==========================================
 const applauseAudio = new Audio('https://actions.google.com/sounds/v1/crowds/crowd_cheer.ogg');
 
+// ตั้งค่า Firebase (กรุณาเปลี่ยนเป็น Config ของโปรเจกต์ภาษาอังกฤษหากใช้แยกกัน)
 const firebaseConfig = {
-    apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
-    authDomain: "engteststation.firebaseapp.com",
-    databaseURL: "https://engteststation-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "engteststation",
-    storageBucket: "engteststation.firebasestorage.app",
-    messagingSenderId: "719237352141",
-    appId: "1:719237352141:web:04359357c9646c5bcd3784"
+  apiKey: "AIzaSyALEdaO0rF7q__W4hKYTlxK9WMp9ysw8sM",
+  authDomain: "chineseteststation.firebaseapp.com",
+  databaseURL: "https://chineseteststation-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chineseteststation",
+  storageBucket: "chineseteststation.firebasestorage.app",
+  messagingSenderId: "237132056712",
+  appId: "1:237132056712:web:cd6cda784b3f318bb8f73d"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -682,6 +738,7 @@ window.onload = async () => {
     }
 
     recognition = new SpeechRecognition();
+    // เปลี่ยนภาษาเป็นภาษาอังกฤษ
     recognition.lang = 'en-US';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
@@ -691,7 +748,7 @@ window.onload = async () => {
         isRunning = false;
 
         const speechResult = event.results[0][0].transcript;
-        const target = questions[currentQuestion].english;
+        const target = questions[currentQuestion].english || questions[currentQuestion].chinese;
         const score = similarity(target, speechResult);
 
         document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
@@ -757,84 +814,6 @@ window.onload = async () => {
     monitorAdminSwitches(); 
     monitorStock(); 
 };
-
-// ==========================================
-// 🏆 ระบบตารางอันดับคะแนน (Rank System) อัปเดตใหม่
-// ==========================================
-function openRankModal() {
-    document.getElementById("rankModal").style.display = "flex";
-    fetchRankData();
-}
-
-function closeRankModal() {
-    document.getElementById("rankModal").style.display = "none";
-}
-
-async function fetchRankData() {
-    const tableBody = document.getElementById("rankTableBody");
-    tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
-
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getRank");
-        const data = await response.json();
-        
-        let rankData = [];
-        
-        if(Array.isArray(data) && data.length > 0 && data[0].name) {
-             rankData = data; 
-        } else {
-             rankData = [
-                 { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
-                 { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
-                 { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
-                 { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
-                 { rank: 5, name: "นะโม", attempts: 1, score: 0 },
-                 { rank: 6, name: "กา", attempts: 1, score: 0 }
-             ];
-        }
-
-        renderRankTable(rankData);
-
-    } catch (error) {
-        console.error("Error fetching rank:", error);
-        tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
-    }
-}
-
-// โค้ด JavaScript จัดอันดับตัวใหม่ ตัดปัญหาข้อมูลวันที่/เวลา
-function renderRankTable(data) {
-    const tableBody = document.getElementById("rankTableBody");
-    tableBody.innerHTML = "";
-
-    if (data.length === 0) {
-        tableBody.innerHTML = '<div class="loading-rank">ยังไม่มีข้อมูลผู้ทดสอบ 🌟</div>';
-        return;
-    }
-
-    data.forEach((user, index) => {
-        // บังคับใช้อันดับจากการนับแถว (index + 1)
-        const actualRank = index + 1; 
-        
-        let rankClass = "";
-        
-        // เพิ่มคลาสพิเศษสำหรับอันดับ 1, 2, 3 เพื่อทำสีเหรียญ
-        if (actualRank === 1) rankClass = "rank-1";
-        else if (actualRank === 2) rankClass = "rank-2";
-        else if (actualRank === 3) rankClass = "rank-3";
-
-        const rowHTML = `
-            <div class="rank-row ${rankClass}">
-                <div class="rank-badge">${actualRank}</div>
-                <div style="text-align: left; padding-left: 10px; font-weight: 500;">${user.name}</div>
-                <div>${user.attempts}</div>
-                <div class="rank-score">${user.score}</div>
-            </div>
-        `;
-        tableBody.innerHTML += rowHTML;
-    });
-}
-// ==========================================
-
 
 function monitorMaintenance() {
     db.ref('machine/maintenance').on('value', (snap) => {
@@ -924,7 +903,7 @@ function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
-    document.getElementById("englishText").innerHTML = questions[index].english;
+    document.getElementById("englishText").innerHTML = questions[index].english || questions[index].chinese;
     document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
     document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
@@ -1259,15 +1238,13 @@ function evaluateFinalResult() {
             db.ref('machine/status').set('ready'); 
             applauseAudio.play().catch(e => console.log("Audio play error:", e));
         } else {
-            // โหมดใช้งานจริง: สร้าง OTP แทนการปลดล็อกตู้
-            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); // สุ่มเลข 4 หลัก
-            let expireTime = Date.now() + (5 * 60 * 1000); // ตั้งเวลาหมดอายุ 5 นาที
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            let expireTime = Date.now() + (5 * 60 * 1000); 
 
-            // 🚀 บันทึก OTP และชื่อผู้ทดสอบลง Firebase Realtime Database
             db.ref('machine/otps/' + otpCode).set({
                 valid: true,
                 expire: expireTime,
-                userName: name // 👈 เพิ่มการแนบชื่อผู้เข้าทดสอบลงใน Node OTP
+                userName: name 
             }).then(() => {
                 document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
                 document.getElementById("status").className = "status pass";
@@ -1296,8 +1273,8 @@ function evaluateFinalResult() {
 }
 
 function similarity(s1, s2) {
-    let longer = s1.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-    let shorter = s2.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+    let longer = s1.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+    let shorter = s2.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
     
     if (longer.length < shorter.length) {
         let temp = longer; longer = shorter; shorter = temp;
@@ -1326,11 +1303,67 @@ function similarity(s1, s2) {
     return score > 100 ? 100 : score;
 }
 
+// -----------------------------------------------------------
+// 🏆 ฟังก์ชันเกี่ยวกับระบบลีดเดอร์บอร์ด (Leaderboard System)
+// -----------------------------------------------------------
+function openRankModal() {
+    document.getElementById("rankModal").style.display = "flex";
+    fetchRankList();
+}
+
+function closeRankModal() {
+    document.getElementById("rankModal").style.display = "none";
+}
+
+async function fetchRankList() {
+    const container = document.getElementById("rankTableBody");
+    container.innerHTML = `<div class="loading-rank">⏳ กำลังดึงข้อมูลอันดับจาก Google Sheet...</div>`;
+    
+    try {
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getRank`);
+        const rankData = await res.json();
+        
+        if (!Array.isArray(rankData) || rankData.length === 0) {
+            container.innerHTML = `<div class="loading-rank">ยังไม่มีข้อมูลคะแนนสะสมในขณะนี้ครับ มาเริ่มทดสอบกันเลย!</div>`;
+            return;
+        }
+        
+        let html = '';
+            
+        rankData.forEach((user, idx) => {
+            let badgeClass = "";
+            if (idx === 0) badgeClass = "rank-1";
+            else if (idx === 1) badgeClass = "rank-2";
+            else if (idx === 2) badgeClass = "rank-3";
+            
+            html += `
+                <div class="rank-row ${badgeClass}">
+                    <div class="rank-badge">${idx + 1}</div>
+                    <div style="font-weight:bold; text-align:left; padding-left:10px;">${user.name}</div>
+                    <div style="color:var(--muted);">${user.attempts}</div>
+                    <div class="rank-score">${user.totalScore.toLocaleString()}</div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (err) {
+        console.error("Error fetching rank:", err);
+        container.innerHTML = `<div class="loading-rank" style="color:var(--red);">ไม่สามารถโหลดตารางอันดับได้ กรุณาลองใหม่อีกครั้ง</div>`;
+    }
+}
+
+// -----------------------------------------------------------
+// 💾 ส่งบันทึกคะแนนไปยัง Google Sheet พร้อมอัปเดตอันดับ
+// -----------------------------------------------------------
 function saveToGoogleSheet(name, score, pass, fail) {
     const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&score=${score}&pass=${pass}&fail=${fail}`;
     
     fetch(url, { mode: 'no-cors' })
-        .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
+        .then(() => {
+            console.log("บันทึกสถิติและอัปเดตตารางอันดับใน Google Sheet สำเร็จ");
+        })
         .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
 }
 
@@ -1380,7 +1413,7 @@ function playSentenceAudio() {
     if (!textToSpeak || textToSpeak === "Loading..." || textToSpeak === "Test Completed!") return;
 
     currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
-    currentUtterance.lang = 'en-US'; 
+    currentUtterance.lang = 'en-US'; // กำหนดให้เสียงอ่านเป็นภาษาอังกฤษ
     currentUtterance.rate = 0.85; 
     
     window.speechSynthesis.speak(currentUtterance);
