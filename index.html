@@ -743,6 +743,26 @@ input:checked + .slider:before { transform: translateX(21px); }
     </div>
 </div>
 
+<!-- 🎯 Initial Level Selection Modal (เพิ่มใหม่) -->
+<div class="modal-overlay" id="initialLevelModal" style="display: none; z-index: 100000;">
+    <div class="modal-content" style="text-align: center; background: #0d1326; border: 1px solid var(--cyan);">
+        <h2 style="color: var(--cyan); margin-top: 0; font-family: 'Orbitron', sans-serif;">SELECT LEVEL</h2>
+        <div style="color: var(--muted); font-size: 16px; margin-bottom: 15px;">
+            กรุณาเลือกระดับคลังข้อสอบ<br>
+            <span style="font-size: 14px;">(ระบบจะเลือกอัตโนมัติใน <span id="initialTimer" style="color: var(--red); font-weight: bold; font-size: 18px;">3</span> วินาที)</span>
+        </div>
+        
+        <select id="popupLevelSelect" class="admin-input" style="font-size: 16px; margin-bottom: 20px; text-align: center; cursor: pointer;">
+            <option value="Primary">ประถมศึกษา (Primary)</option>
+            <option value="Secondary">มัธยมศึกษา (Secondary)</option>
+            <option value="Vocational" selected>อาชีวศึกษา (Vocational)</option>
+            <option value="General">บุคคลทั่วไป (General)</option>
+        </select>
+        
+        <button class="start-btn" onclick="confirmInitialLevel()" style="width: 100%;">✅ ยืนยันการเลือก</button>
+    </div>
+</div>
+
 <script>
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
 const ADMIN_PASSWORD = "1234"; 
@@ -791,6 +811,48 @@ let adminConfig = {
     testDurationSeconds: 60,
     cancelRequirement: false 
 };
+
+// ==========================================
+// 🎯 ระบบ Pop-up เลือกระดับก่อนเริ่ม (เพิ่มใหม่)
+// ==========================================
+let initialCountdownTimer = null;
+let initialTime = 3;
+
+function showInitialPopup() {
+    // แสดง Pop-up
+    document.getElementById("initialLevelModal").style.display = "flex";
+    
+    // ตั้งค่าเริ่มต้น
+    initialTime = 3;
+    document.getElementById("initialTimer").innerText = initialTime;
+    document.getElementById("popupLevelSelect").value = "Vocational"; // ตั้ง Default เป็น Vocational
+
+    // เริ่มนับถอยหลัง 3 วินาที
+    initialCountdownTimer = setInterval(() => {
+        initialTime--;
+        document.getElementById("initialTimer").innerText = initialTime;
+        
+        if (initialTime <= 0) {
+            clearInterval(initialCountdownTimer);
+            confirmInitialLevel(); // หมดเวลาให้ยืนยันอัตโนมัติ
+        }
+    }, 1000);
+}
+
+function confirmInitialLevel() {
+    // หยุดเวลา
+    clearInterval(initialCountdownTimer);
+    
+    // ปิด Pop-up
+    document.getElementById("initialLevelModal").style.display = "none";
+    
+    // นำค่าที่เลือกใน Pop-up ไปอัปเดตให้ Dropdown หลักของระบบ
+    const selectedLevel = document.getElementById("popupLevelSelect").value;
+    document.getElementById("userLevel").value = selectedLevel;
+    
+    // 🚀 เริ่มโหลดข้อมูลจาก Google Sheet และเตรียมข้อสอบตามที่ Admin ตั้งค่าไว้
+    fetchQuestionsFromGAS();
+}
 
 window.onload = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -884,7 +946,10 @@ window.onload = async () => {
 
     monitorMaintenance(); 
     monitorAdminSettings(); 
-    await fetchQuestionsFromGAS();
+    
+    // เรียกใช้ Pop-up แทนการโหลดข้อมูลทันที
+    showInitialPopup(); 
+    
     monitorMachine(); 
     monitorStock(); 
     monitorRewards(); 
