@@ -178,7 +178,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
 .stat { padding:15px; border-radius:20px; position:relative; overflow:hidden; text-align:center; }
-.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat::after { content:"absolute"; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
 .stat-title { font-size:14px; color:var(--muted); letter-spacing: 1px;}
 .stat-value { margin-top:8px; font-size:28px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
@@ -191,7 +191,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 
 /* COUNTDOWN */
 .countdown-wrapper { margin:30px auto 10px; width:160px; height:160px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background: conic-gradient(var(--cyan), var(--violet), var(--blue), var(--cyan)); animation:pulse 2s infinite; box-shadow: 0 0 35px rgba(53,216,255,0.2); }
-.countdown-wrapper::before { content:"absolute"; position:absolute; width:130px; height:130px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1); content:"";}
+.countdown-wrapper::before { content:""; position:absolute; width:130px; height:130px; border-radius:50%; background:#07101f; border:1px solid rgba(255,255,255,0.1);}
 .countdown { position:relative; font-size:32px; font-family:'Orbitron',sans-serif; font-weight:900; z-index:1; text-shadow: 0 0 18px rgba(53,216,255,0.3); letter-spacing: -1px; }
 @keyframes pulse { 50%{ transform:scale(1.04); } }
 
@@ -479,8 +479,8 @@ input:checked + .slider:before { transform: translateX(21px); }
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
     </div>
 
-    <!-- 📚 LEVEL SELECTOR (อัปเดตใหม่ให้เลือกระดับข้อสอบ และไม่รีเซ็ตเมื่อเชื่อมต่อใหม่) -->
-    <div class="level-box glass">
+    <!-- 📚 LEVEL SELECTOR (ปรับปรุงให้รองรับการซ่อนเมื่อ Admin สั่งตัดสิทธิ์) -->
+    <div class="level-box glass" id="userLevelContainer">
         <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ</div>
         <select id="userLevel" onchange="prepareQuestions()">
             <option value="Primary">ประถมศึกษา (Primary)</option>
@@ -697,10 +697,28 @@ input:checked + .slider:before { transform: translateX(21px); }
                 <div style="font-size:12px; color:var(--muted); margin-top:10px;">* ระบบจะย่อขนาดและบันทึกภาพลงฐานข้อมูลอัตโนมัติ</div>
             </div>
 
-            <!-- ⚙️ การตั้งค่าระบบข้อสอบ -->
+            <!-- ⚙️ การตั้งค่าระบบข้อสอบ (เพิ่มส่วนบังคับระดับข้อสอบ) -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">⚙️ Game Settings</div>
                 
+                <!-- 🔒 ระบบตัดการเลือกระดับของ User โดย Admin -->
+                <div class="switch-container" style="background:none; border:none; padding:0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                    <span class="switch-label" style="color: var(--red);">🔒 ตัดการเลือกระดับของ User</span>
+                    <label class="switch">
+                        <input type="checkbox" id="adminForceLevelSwitch" onchange="toggleLevelControl(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="stock-item" id="adminLevelSelectContainer" style="display: none; margin-bottom: 15px; justify-content: space-between;">
+                    <div class="stock-label">เลือกระดับคลังข้อสอบบังคับ:</div>
+                    <select id="adminForcedLevelSelect" onchange="setAdminForcedLevel()" class="admin-select" style="max-width: 150px;">
+                        <option value="Primary">ประถมศึกษา</option>
+                        <option value="Secondary">มัธยมศึกษา</option>
+                        <option value="Vocational">อาชีวศึกษา</option>
+                        <option value="General">บุคคลทั่วไป</option>
+                    </select>
+                </div>
+
                 <div class="stock-item">
                     <div class="stock-label">📝 สุ่มข้อสอบจำนวน (ข้อ)</div>
                     <div class="stock-btns">
@@ -743,7 +761,7 @@ input:checked + .slider:before { transform: translateX(21px); }
     </div>
 </div>
 
-<!-- 🎯 Initial Level Selection Modal (เพิ่มใหม่) -->
+<!-- 🎯 Initial Level Selection Modal -->
 <div class="modal-overlay" id="initialLevelModal" style="display: none; z-index: 100000;">
     <div class="modal-content" style="text-align: center; background: #0d1326; border: 1px solid var(--cyan);">
         <h2 style="color: var(--cyan); margin-top: 0; font-family: 'Orbitron', sans-serif;">SELECT LEVEL</h2>
@@ -804,53 +822,79 @@ let displayInterval = null;
 let startMicDelayTimeout = null; 
 let questionTimeout = null;     
 
+// เพิ่มตัวแปรสำหรับเก็บบริบทการตั้งค่าของ Admin
 let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
     difficulty: "ALL",
     testDurationSeconds: 60,
-    cancelRequirement: false 
+    cancelRequirement: false,
+    forceLevelControl: false, 
+    forcedLevel: "Vocational"
 };
 
-// ==========================================
-// 🎯 ระบบ Pop-up เลือกระดับก่อนเริ่ม (เพิ่มใหม่)
-// ==========================================
 let initialCountdownTimer = null;
 let initialTime = 10;
 
+// ==========================================
+// 🎯 ฟังก์ชันจัดการ Level UI (ใหม่)
+// ==========================================
+function applyLevelControl() {
+    const userContainer = document.getElementById("userLevelContainer");
+    const userSelect = document.getElementById("userLevel");
+    const popup = document.getElementById("initialLevelModal");
+
+    if (adminConfig.forceLevelControl) {
+        // Admin ควบคุม
+        userContainer.style.display = "none";
+        userSelect.value = adminConfig.forcedLevel;
+
+        // ถ้า Pop-up เปิดค้างอยู่ ให้ปิดทิ้งทันที
+        if (popup.style.display === "flex") {
+            clearInterval(initialCountdownTimer);
+            popup.style.display = "none";
+            fetchQuestionsFromGAS(); // โหลดข้อสอบเลยโดยใช้ค่าจาก Admin
+        }
+    } else {
+        // User ควบคุม
+        userContainer.style.display = "flex";
+    }
+}
+
 function showInitialPopup() {
-    // แสดง Pop-up
+    // ถ้า Admin บังคับระดับแล้ว ให้ข้าม Pop-up ไปเลย
+    if (adminConfig.forceLevelControl) {
+        document.getElementById("userLevel").value = adminConfig.forcedLevel;
+        fetchQuestionsFromGAS();
+        return;
+    }
+
     document.getElementById("initialLevelModal").style.display = "flex";
-    
-    // ตั้งค่าเริ่มต้น
     initialTime = 10;
     document.getElementById("initialTimer").innerText = initialTime;
-    document.getElementById("popupLevelSelect").value = "Vocational"; // ตั้ง Default เป็น Vocational
+    document.getElementById("popupLevelSelect").value = "Vocational"; 
 
-    // เริ่มนับถอยหลัง 10 วินาที
     initialCountdownTimer = setInterval(() => {
         initialTime--;
         document.getElementById("initialTimer").innerText = initialTime;
         
         if (initialTime <= 0) {
             clearInterval(initialCountdownTimer);
-            confirmInitialLevel(); // หมดเวลาให้ยืนยันอัตโนมัติ
+            confirmInitialLevel(); 
         }
     }, 1000);
 }
 
 function confirmInitialLevel() {
-    // หยุดเวลา
     clearInterval(initialCountdownTimer);
-    
-    // ปิด Pop-up
     document.getElementById("initialLevelModal").style.display = "none";
     
-    // นำค่าที่เลือกใน Pop-up ไปอัปเดตให้ Dropdown หลักของระบบ
-    const selectedLevel = document.getElementById("popupLevelSelect").value;
-    document.getElementById("userLevel").value = selectedLevel;
+    // ถ้าตอนกด Admin ไม่ได้บังคับสิทธิ์ ให้อัปเดตค่าตามที่ User เลือก
+    if (!adminConfig.forceLevelControl) {
+        const selectedLevel = document.getElementById("popupLevelSelect").value;
+        document.getElementById("userLevel").value = selectedLevel;
+    }
     
-    // 🚀 เริ่มโหลดข้อมูลจาก Google Sheet และเตรียมข้อสอบตามที่ Admin ตั้งค่าไว้
     fetchQuestionsFromGAS();
 }
 
@@ -947,7 +991,7 @@ window.onload = async () => {
     monitorMaintenance(); 
     monitorAdminSettings(); 
     
-    // เรียกใช้ Pop-up แทนการโหลดข้อมูลทันที
+    // เรียกใช้ Pop-up เริ่มแรก (ถ้าโดนบังคับ มันจะถูกข้ามอัตโนมัติในฟังก์ชัน)
     showInitialPopup(); 
     
     monitorMachine(); 
@@ -956,7 +1000,7 @@ window.onload = async () => {
 };
 
 // ==========================================
-// 🔄 ฟังก์ชันเชื่อมต่อใหม่ (คงค่าตัวเลือกระดับข้อสอบเดิม)
+// 🔄 ฟังก์ชันเชื่อมต่อใหม่
 // ==========================================
 function retryConnection() {
     document.getElementById("reconnectBtn").style.display = "none";
@@ -969,19 +1013,14 @@ function retryConnection() {
     document.getElementById("englishText").innerHTML = "Loading...";
     document.getElementById("thaiText").innerHTML = "กำลังเตรียมข้อมูลข้อสอบ";
     
-    // โหลดข้อสอบใหม่โดยไม่เปลี่ยนค่าใน <select id="userLevel">
     fetchQuestionsFromGAS();
 }
 
 // ==========================================
 // 🎁 ระบบดูของรางวัล (Reward System)
 // ==========================================
-function openRewardModal() {
-    document.getElementById("rewardModal").style.display = "flex";
-}
-function closeRewardModal() {
-    document.getElementById("rewardModal").style.display = "none";
-}
+function openRewardModal() { document.getElementById("rewardModal").style.display = "flex"; }
+function closeRewardModal() { document.getElementById("rewardModal").style.display = "none"; }
 
 function monitorRewards() {
     db.ref('machine/rewards').on('value', (snap) => {
@@ -1010,7 +1049,6 @@ function uploadImage(slot) {
             const canvas = document.createElement('canvas');
             const MAX_WIDTH = 600;
             let scaleSize = MAX_WIDTH / img.width;
-            
             if (scaleSize > 1) scaleSize = 1; 
 
             canvas.width = img.width * scaleSize;
@@ -1030,9 +1068,6 @@ function uploadImage(slot) {
     reader.readAsDataURL(file);
 }
 
-// ==========================================
-// ✨ ระบบเปลี่ยนโหมดการใช้งานด้วยตนเอง
-// ==========================================
 function selectUserMode(mode) {
     if (isRunning || isTestRunning) {
         alert("⚠️ กรุณารอให้จบการทดสอบหรือฝึกซ้อมรอบปัจจุบันก่อนเปลี่ยนโหมดครับ");
@@ -1053,22 +1088,14 @@ function selectUserMode(mode) {
     }
 
     updateUIBasedOnState();
-    if (questions.length > 0) {
-        prepareQuestions();
-    }
+    if (questions.length > 0) prepareQuestions();
 }
 
-// ==========================================
-// 🏆 ระบบตารางอันดับคะแนน (Rank System)
-// ==========================================
 function openRankModal() {
     document.getElementById("rankModal").style.display = "flex";
     fetchRankData();
 }
-
-function closeRankModal() {
-    document.getElementById("rankModal").style.display = "none";
-}
+function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
 
 async function fetchRankData() {
     const tableBody = document.getElementById("rankTableBody");
@@ -1187,19 +1214,19 @@ async function fetchQuestionsFromGAS() {
         document.getElementById("englishText").innerHTML = "Connection<br>Error";
         document.getElementById("thaiText").innerHTML = "ไม่สามารถเชื่อมต่อคลังข้อสอบได้";
         
-        // ซ่อนปุ่มเริ่ม และแสดงปุ่ม "เชื่อมต่อใหม่" สีแดงกระพริบแทน
         document.getElementById("startBtn").style.display = "none";
         document.getElementById("reconnectBtn").style.display = "inline-block";
     }
 }
 
-// ==========================================
-// 🛠️ อัปเดต: การจัดเตรียมข้อสอบ กรองตาม "ระดับที่เลือก" และ "ความยาก"
-// ==========================================
 function prepareQuestions() {
     if (masterQuestions.length === 0) return;
 
-    const selectedLevel = document.getElementById("userLevel").value;
+    // เลือกระดับตามสถานะการบังคับของ Admin
+    const selectedLevel = adminConfig.forceLevelControl 
+                          ? adminConfig.forcedLevel 
+                          : document.getElementById("userLevel").value;
+
     let levelFiltered = masterQuestions.filter(q => q.level === selectedLevel);
 
     if (levelFiltered.length === 0) {
@@ -1230,9 +1257,6 @@ function prepareQuestions() {
     updateUIBasedOnState(); 
 }
 
-// ==========================================
-// 🛡️ ระบบแสดงผลทีละคำให้ครบภายใน 5 วินาที
-// ==========================================
 function renderSequentialText(sentence) {
     const container = document.getElementById("englishText");
     container.innerHTML = ""; 
@@ -1266,9 +1290,6 @@ function renderSequentialText(sentence) {
     }, intervalTime); 
 }
 
-// ==========================================
-// 🔄 โหลดข้อสอบ
-// ==========================================
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
@@ -1325,6 +1346,9 @@ function nextQuestion(){
     }
 }
 
+// ==========================================
+// 🛠️ ส่วนจัดการ Admin Settings ใหม่
+// ==========================================
 function monitorAdminSettings() {
     db.ref('machine/config').on('value', (snap) => {
         const conf = snap.val();
@@ -1333,8 +1357,13 @@ function monitorAdminSettings() {
             adminConfig.questionCount = conf.questionCount !== undefined ? conf.questionCount : 10;
             adminConfig.difficulty = conf.difficulty || "ALL";
             adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
+            
+            // รับค่าจาก Firebase สำหรับการจัดการ Level UI
+            adminConfig.forceLevelControl = conf.forceLevelControl || false;
+            adminConfig.forcedLevel = conf.forcedLevel || "Vocational";
         }
 
+        // อัปเดต UI ส่วน Admin Config
         document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
         document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
         document.getElementById("adminDifficulty").value = adminConfig.difficulty;
@@ -1344,12 +1373,36 @@ function monitorAdminSettings() {
         document.getElementById("adminTimeMin").value = m;
         document.getElementById("adminTimeSec").value = s;
 
+        // อัปเดตสถานะสวิตช์ใน Admin Panel
+        document.getElementById("adminForceLevelSwitch").checked = adminConfig.forceLevelControl;
+        document.getElementById("adminForcedLevelSelect").value = adminConfig.forcedLevel;
+        document.getElementById("adminLevelSelectContainer").style.display = adminConfig.forceLevelControl ? "flex" : "none";
+
+        // เรียกฟังก์ชันจัดการแสดงผล Level Dropdown ฝั่ง User
+        applyLevelControl();
+
         if (!isTestRunning) {
             updateTimerDisplay(adminConfig.testDurationSeconds);
             prepareQuestions();
         }
         updateUIBasedOnState(); 
     });
+}
+
+// 📌 ฟังก์ชันสำหรับ Admin ตัดสิทธิ์เลือกระดับ
+function toggleLevelControl(isForced) {
+    db.ref('machine/config/forceLevelControl').set(isForced);
+    if(isForced) {
+        // ถ้ายอมให้ Admin บังคับ ให้เซฟค่าปัจจุบันใน Dropdown ฝั่ง Admin ลงไปด้วย
+        const currentAdminLevel = document.getElementById("adminForcedLevelSelect").value;
+        db.ref('machine/config/forcedLevel').set(currentAdminLevel);
+    }
+}
+
+// 📌 ฟังก์ชันสำหรับ Admin เปลี่ยนระดับบังคับ
+function setAdminForcedLevel() {
+    const level = document.getElementById("adminForcedLevelSelect").value;
+    db.ref('machine/config/forcedLevel').set(level);
 }
 
 function updateAdminConfig(key, change) {
@@ -1561,9 +1614,6 @@ function forceEndTest() {
     setTimeout(() => { evaluateFinalResult(); }, 2000);
 }
 
-// ==========================================
-// 🎙️ การทำงานเมื่อกด "เริ่มพูด"
-// ==========================================
 function startRecognition() {
     stopSentenceAudio(); 
     clearInterval(displayInterval); 
