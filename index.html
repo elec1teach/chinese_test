@@ -100,6 +100,12 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 .login-box input { width:100%; padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:18px; outline:none; transition:0.3s; }
 .login-box input:focus { border-color: var(--cyan); box-shadow: 0 0 15px rgba(53,216,255,0.3); }
 
+/* LEVEL SELECTOR */
+.level-box { margin-bottom:12px; padding: 16px; border-radius: 18px; display: flex; flex-direction: column; gap: 8px;}
+.level-box select { width:100%; padding:16px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:16px; outline:none; cursor:pointer; font-family:'Prompt',sans-serif; transition:0.3s; }
+.level-box select:focus { border-color: var(--cyan); }
+.level-box select option { background: #07101f; color: white; }
+
 /* ✨ USER MODE SELECTOR */
 .mode-selector {
     display: grid;
@@ -444,6 +450,17 @@ input:checked + .slider:before { transform: translateX(21px); }
 
     <div class="login-box">
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
+    </div>
+
+    <!-- 📚 LEVEL SELECTOR (อัปเดตใหม่ให้เลือกระดับข้อสอบ) -->
+    <div class="level-box glass">
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ</div>
+        <select id="userLevel" onchange="prepareQuestions()">
+            <option value="Primary">ประถมศึกษา (Primary)</option>
+            <option value="Secondary">มัธยมศึกษา (Secondary)</option>
+            <option value="Vocational" selected>อาชีวศึกษา (Vocational)</option>
+            <option value="General">บุคคลทั่วไป (General)</option>
+        </select>
     </div>
 
     <!-- ✨ USER MODE SELECTOR -->
@@ -841,7 +858,7 @@ window.onload = async () => {
     await fetchQuestionsFromGAS();
     monitorMachine(); 
     monitorStock(); 
-    monitorRewards(); // ✨ ดึงข้อมูลภาพของรางวัล
+    monitorRewards(); 
 };
 
 // ==========================================
@@ -1060,19 +1077,36 @@ async function fetchQuestionsFromGAS() {
     }
 }
 
+// ==========================================
+// 🛠️ อัปเดต: การจัดเตรียมข้อสอบ กรองตาม "ระดับที่เลือก" และ "ความยาก"
+// ==========================================
 function prepareQuestions() {
     if (masterQuestions.length === 0) return;
 
-    let filtered = masterQuestions;
+    // 1. ดึงค่าระดับข้อสอบที่เลือกจาก Dropdown (Primary, Secondary, Vocational, General)
+    const selectedLevel = document.getElementById("userLevel").value;
+    
+    // 2. กรองข้อมูลเฉพาะระดับที่ตรงกัน
+    let levelFiltered = masterQuestions.filter(q => q.level === selectedLevel);
 
+    // กรณีไม่มีข้อมูลในระดับที่เลือก (กันการพังของระบบเมื่อข้อมูลยังไม่ครบ)
+    if (levelFiltered.length === 0) {
+        document.getElementById("englishText").innerHTML = "ไม่มีข้อสอบระดับนี้";
+        document.getElementById("thaiText").innerHTML = "กรุณาตรวจสอบว่ามีข้อมูลในชีต '" + selectedLevel + "' หรือไม่";
+        questions = [];
+        return;
+    }
+
+    // 3. กรองข้อมูลตามความยาก (จาก Admin Settings)
+    let finalFiltered = levelFiltered;
     if (adminConfig.difficulty !== "ALL") {
-        filtered = masterQuestions.filter(q => q.difficulty && q.difficulty.toUpperCase() === adminConfig.difficulty);
-        if (filtered.length === 0) {
-            filtered = masterQuestions;
+        finalFiltered = levelFiltered.filter(q => q.difficulty && q.difficulty.toUpperCase() === adminConfig.difficulty);
+        if (finalFiltered.length === 0) {
+            finalFiltered = levelFiltered; // ถ้าความยากไม่มีให้เอาชุดหลักมาใช้แทน
         }
     }
 
-    let shuffled = filtered.sort(() => 0.5 - Math.random());
+    let shuffled = finalFiltered.sort(() => 0.5 - Math.random());
     questions = shuffled.slice(0, adminConfig.questionCount);
     currentQuestion = 0;
 
@@ -1237,8 +1271,14 @@ function updateUIBasedOnState() {
     const audioControls = document.getElementById("audioControls"); 
     const listenBtn = document.getElementById("listenBtn");
     const skipBtn = document.getElementById("skipBtn");
+    const userLevelSelect = document.getElementById("userLevel"); // เพิ่มล็อคระดับ
 
-    if (isRunning || isTestRunning) return;
+    if (isRunning || isTestRunning) {
+        userLevelSelect.disabled = true;
+        return;
+    } else {
+        userLevelSelect.disabled = false;
+    }
 
     if (adminConfig.cancelRequirement) {
         ui.innerHTML = "PRACTICE MODE";
@@ -1494,6 +1534,7 @@ function evaluateFinalResult() {
     isTestRunning = false;
     
     document.getElementById("audioControls").style.display = "none";
+    document.getElementById("userLevel").disabled = false; // ปลดล็อคระดับทดสอบเมื่อจบการสอบ
     
     const name = document.getElementById("studentName").value || "Unknown User";
 
