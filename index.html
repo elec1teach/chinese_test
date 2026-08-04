@@ -743,13 +743,13 @@ input:checked + .slider:before { transform: translateX(21px); }
     </div>
 </div>
 
-<!-- 🎯 Initial Level Selection Modal (ปรับแก้เป็น 10 วินาที) -->
+<!-- 🎯 Initial Level Selection Modal (เพิ่มใหม่) -->
 <div class="modal-overlay" id="initialLevelModal" style="display: none; z-index: 100000;">
     <div class="modal-content" style="text-align: center; background: #0d1326; border: 1px solid var(--cyan);">
         <h2 style="color: var(--cyan); margin-top: 0; font-family: 'Orbitron', sans-serif;">SELECT LEVEL</h2>
         <div style="color: var(--muted); font-size: 16px; margin-bottom: 15px;">
             กรุณาเลือกระดับคลังข้อสอบ<br>
-            <span style="font-size: 14px;">(ระบบจะเลือกอัตโนมัติใน <span id="initialTimer" style="color: var(--red); font-weight: bold; font-size: 18px;">10</span> วินาที)</span>
+            <span style="font-size: 14px;">(ระบบจะเลือกอัตโนมัติใน <span id="initialTimer" style="color: var(--red); font-weight: bold; font-size: 18px;">3</span> วินาที)</span>
         </div>
         
         <select id="popupLevelSelect" class="admin-input" style="font-size: 16px; margin-bottom: 20px; text-align: center; cursor: pointer;">
@@ -813,21 +813,21 @@ let adminConfig = {
 };
 
 // ==========================================
-// 🎯 ระบบ Pop-up เลือกระดับก่อนเริ่ม (ปรับแก้เวลาเป็น 10 วินาที)
+// 🎯 ระบบ Pop-up เลือกระดับก่อนเริ่ม (เพิ่มใหม่)
 // ==========================================
 let initialCountdownTimer = null;
-let initialTime = 10;
+let initialTime = 3;
 
 function showInitialPopup() {
     // แสดง Pop-up
     document.getElementById("initialLevelModal").style.display = "flex";
     
     // ตั้งค่าเริ่มต้น
-    initialTime = 10;
+    initialTime = 3;
     document.getElementById("initialTimer").innerText = initialTime;
     document.getElementById("popupLevelSelect").value = "Vocational"; // ตั้ง Default เป็น Vocational
 
-    // เริ่มนับถอยหลัง
+    // เริ่มนับถอยหลัง 3 วินาที
     initialCountdownTimer = setInterval(() => {
         initialTime--;
         document.getElementById("initialTimer").innerText = initialTime;
@@ -1372,104 +1372,165 @@ function updateTestTime() {
         db.ref('machine/config/testDurationSeconds').set(totalSecs);
         alert("บันทึกเวลาทดสอบเรียบร้อย: " + totalSecs + " วินาที");
     } else {
-        alert("กรุณาใส่เวลาอย่างน้อย 1 วินาทีครับ");
+        alert("กรุณาใส่เวลาอย่างน้อย 1 วินาที");
     }
-}
-
-function evaluateFinalResult() {
-    isTestRunning = false;
-    clearInterval(testTimerInterval);
-    clearInterval(displayInterval); 
-    clearTimeout(nextQuestionTimer);
-    clearTimeout(startMicDelayTimeout);
-    clearTimeout(questionTimeout); 
-
-    if (isRunning) {
-        isRunning = false;
-        try { recognition.stop(); } catch(e){}
-    }
-
-    const studentNameInput = document.getElementById("studentName").value.trim() || "ผู้ทดสอบไม่ระบุชื่อ";
-    const selectedLevelName = document.getElementById("userLevel").options[document.getElementById("userLevel").selectedIndex].text;
-    
-    fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            action: 'saveScore',
-            name: studentNameInput,
-            totalScore: totalScore,
-            passCount: passCount,
-            failCount: failCount,
-            testLevel: selectedLevelName 
-        })
-    }).then(r => r.text()).then(res => console.log("Save Score Result:", res)).catch(e => console.error(e));
-
-    let endMessage = "";
-    document.getElementById("audioControls").style.display = "none";
-    document.getElementById("startBtn").innerHTML = "เริ่มทดสอบใหม่รอบถัดไป";
-    document.getElementById("startBtn").disabled = false;
-    document.getElementById("startBtn").onclick = restartTest;
-
-    if (adminConfig.cancelRequirement) {
-        endMessage = "จบโหมดฝึกซ้อม เก่งมากครับ! 🎉";
-        document.getElementById("status").innerHTML = "จบการฝึกซ้อม";
-        document.getElementById("status").className = "status pass";
-        document.getElementById("heardText").innerHTML = endMessage;
-        applauseAudio.play();
-    } else {
-        if (passCount >= adminConfig.passRequirement) {
-            endMessage = "ยินดีด้วย! คุณผ่านเกณฑ์ได้รับของรางวัล! 🎁";
-            document.getElementById("status").innerHTML = "YOU WIN! 🎉";
-            document.getElementById("status").className = "status pass";
-            db.ref('machine/status').set('unlocked');
-            applauseAudio.play();
-        } else {
-            endMessage = `เสียใจด้วย คุณตอบถูก ${passCount} ข้อ (ต้องการ ${adminConfig.passRequirement} ข้อ)`;
-            document.getElementById("status").innerHTML = "GAME OVER";
-            document.getElementById("status").className = "status fail";
-        }
-        document.getElementById("heardText").innerHTML = endMessage;
-    }
-    
-    db.ref('machine/totalTests').set(firebase.database.ServerValue.increment(1));
 }
 
 function updateUIBasedOnState() {
+    const ui = document.getElementById("machineStatusUI");
+    const startBtn = document.getElementById("startBtn");
+    const audioControls = document.getElementById("audioControls"); 
+    const listenBtn = document.getElementById("listenBtn");
+    const skipBtn = document.getElementById("skipBtn");
     const userLevelSelect = document.getElementById("userLevel");
-    const modeSelector = document.querySelector(".mode-selector");
-    const modeRewardBtn = document.getElementById("modeRewardBtn");
-    const modePracticeBtn = document.getElementById("modePracticeBtn");
-    const actionGroup = document.querySelector(".action-btn-group");
 
-    if (adminConfig.cancelRequirement) {
-        if (!modePracticeBtn.classList.contains("active")) {
-            modePracticeBtn.classList.add("active");
-            modeRewardBtn.classList.remove("active");
-        }
-    } else {
-        if (!modeRewardBtn.classList.contains("active")) {
-            modeRewardBtn.classList.add("active");
-            modePracticeBtn.classList.remove("active");
-        }
-    }
-    
-    if (isTestRunning) {
+    if (isRunning || isTestRunning) {
         userLevelSelect.disabled = true;
-        modeSelector.style.display = "none";
-        actionGroup.style.display = "none"; 
+        return;
     } else {
         userLevelSelect.disabled = false;
-        modeSelector.style.display = "grid";
-        actionGroup.style.display = "grid"; 
+    }
+
+    if (adminConfig.cancelRequirement) {
+        ui.innerHTML = "PRACTICE MODE";
+        ui.style.color = "#b56cff"; 
+        ui.style.background = "rgba(181, 108, 255, 0.08)";
+        ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
+        
+        if (currentQuestion >= questions.length && questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🔄 เริ่มฝึกใหม่";
+            startBtn.onclick = prepareQuestions; 
+            if (audioControls) audioControls.style.display = "none"; 
+        } else if (questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 เริ่มพูด";
+            startBtn.onclick = startRecognition;
+            if (audioControls) {
+                audioControls.style.display = "flex";
+                if (listenBtn) listenBtn.style.display = "flex";
+                if (skipBtn) skipBtn.style.display = "flex";
+            }
+        }
+        return; 
+    }
+
+    ui.style.background = "rgba(29,255,149,0.08)";
+    ui.style.borderColor = "rgba(29,255,149,0.25)";
+    startBtn.onclick = startRecognition; 
+
+    if(currentMachineStatus === 'ready') {
+        ui.innerHTML = "MACHINE READY";
+        ui.style.color = "#1dff95";
+        
+        if (currentQuestion >= questions.length && questions.length > 0) {
+             startBtn.disabled = true;
+             startBtn.innerHTML = "รอรอบต่อไป";
+             if (audioControls) audioControls.style.display = "none";
+        } else if (questions.length > 0) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 เริ่มพูด";
+            if (audioControls) {
+                audioControls.style.display = "flex";
+                if (listenBtn) listenBtn.style.display = "none";
+                if (skipBtn) skipBtn.style.display = "flex";
+            }
+        }
+    } else if (currentMachineStatus === 'unlocked') {
+        ui.innerHTML = "MACHINE UNLOCKED";
+        ui.style.color = "#35d8ff";
+        startBtn.disabled = true;
+        startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
+        if (audioControls) audioControls.style.display = "none";
+    } else { 
+        ui.innerHTML = "MACHINE BUSY";
+        ui.style.color = "#ff4d6d";
+        startBtn.disabled = true;
+        startBtn.innerHTML = "🔒 รอคิวใช้งาน";
+        if (audioControls) audioControls.style.display = "none";
     }
 }
 
-function startTestTimer() {
+function monitorMachine() {
+    db.ref('machine/status').on('value', (snap) => {
+        currentMachineStatus = snap.val() || 'ready';
+        updateUIBasedOnState(); 
+    });
+}
+
+function openAdminModal() {
+    document.getElementById("adminModal").style.display = "flex";
+    if(isAdminLoggedIn) {
+        document.getElementById("adminLoginGroup").style.display = "none";
+        document.getElementById("adminControlGroup").style.display = "block";
+    } else {
+        document.getElementById("adminLoginGroup").style.display = "block";
+        document.getElementById("adminControlGroup").style.display = "none";
+        document.getElementById("adminError").style.display = "none";
+        document.getElementById("adminPassword").value = "";
+    }
+}
+
+function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; }
+
+function verifyAdmin() {
+    const pass = document.getElementById("adminPassword").value;
+    if(pass === ADMIN_PASSWORD) {
+        isAdminLoggedIn = true;
+        document.getElementById("adminLoginGroup").style.display = "none";
+        document.getElementById("adminControlGroup").style.display = "block";
+    } else {
+        document.getElementById("adminError").style.display = "block";
+    }
+}
+
+function setSystemStatus(status) {
+    db.ref('machine/status').set(status)
+        .then(() => { 
+            if (status === 'ready') {
+                alert("✅ ระบบถูกตั้งสถานะเป็น Ready (พร้อมใช้งาน) เรียบร้อยแล้ว!");
+                prepareQuestions(); 
+            } else if (status === 'unlocked') {
+                alert("🔓 ระบบถูกตั้งสถานะเป็น Unlocked (ปลดล็อกตู้) เรียบร้อยแล้ว!");
+            } else if (status === 'busy') {
+                alert("🔒 ระบบถูกตั้งสถานะเป็น Busy (ล็อกการใช้งานเพื่อปรับปรุง) เรียบร้อยแล้ว!");
+            }
+        })
+        .catch((error) => alert("❌ เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: " + error));
+}
+
+function updateStock(slot, changeAmount) {
+    let newValue = currentStock[slot] + changeAmount;
+    if (newValue < 0) newValue = 0;
+    db.ref(`machine/stock/${slot}`).set(newValue);
+}
+
+function monitorStock() {
+    db.ref('machine/stock').on('value', (snap) => {
+        const data = snap.val();
+        if (data) {
+            currentStock.slot1 = data.slot1 || 0;
+            currentStock.slot2 = data.slot2 || 0;
+            
+            document.getElementById("slot1StockUI").innerText = currentStock.slot1;
+            document.getElementById("slot2StockUI").innerText = currentStock.slot2;
+            
+            document.getElementById("rewardStock1UI").innerText = currentStock.slot1;
+            document.getElementById("rewardStock2UI").innerText = currentStock.slot2;
+        }
+    });
+}
+
+function updateTimerDisplay(seconds) {
+    let m = Math.floor(seconds / 60);
+    let s = seconds % 60;
+    document.getElementById("countdown").innerHTML = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+}
+
+function startGlobalTimer() {
+    isTestRunning = true;
     totalTimeLeftSeconds = adminConfig.testDurationSeconds;
     updateTimerDisplay(totalTimeLeftSeconds);
-    isTestRunning = true;
-    updateUIBasedOnState(); 
 
     testTimerInterval = setInterval(() => {
         totalTimeLeftSeconds--;
@@ -1477,345 +1538,261 @@ function startTestTimer() {
 
         if (totalTimeLeftSeconds <= 0) {
             clearInterval(testTimerInterval);
-            evaluateFinalResult(); 
+            forceEndTest();
         }
     }, 1000);
 }
 
-function updateTimerDisplay(secs) {
-    let m = Math.floor(secs / 60);
-    let s = secs % 60;
-    if(m < 10) m = "0" + m;
-    if(s < 10) s = "0" + s;
-    document.getElementById("countdown").innerHTML = `${m}:${s}`;
+function forceEndTest() {
+    isRunning = false;
+    clearTimeout(startMicDelayTimeout);
+    clearTimeout(questionTimeout);
+    try { recognition.stop(); } catch(e){}
+    
+    document.getElementById("status").innerHTML = "หมดเวลาทดสอบรวม ⏰";
+    document.getElementById("status").className = "status fail";
+    document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
+    
+    document.getElementById("audioControls").style.display = "none";
+    clearInterval(displayInterval); 
+    
+    playFailSound();
+    
+    setTimeout(() => { evaluateFinalResult(); }, 2000);
 }
 
-function startRecognition(){
-    if (!isTestRunning) {
-        if(!adminConfig.cancelRequirement && currentMachineStatus !== 'ready') {
-            alert("ตู้ไม่พร้อมใช้งาน หรือของรางวัลหมด กรุณาติดต่อครูผู้ดูแลครับ");
-            return;
-        }
-
-        const nameInput = document.getElementById("studentName").value.trim();
-        if(!nameInput) {
-            alert("กรุณากรอกชื่อผู้เข้าทดสอบก่อนเริ่มใช้งานครับ");
-            document.getElementById("studentName").focus();
-            return;
-        }
-        
-        startTestTimer();
+// ==========================================
+// 🎙️ การทำงานเมื่อกด "เริ่มพูด"
+// ==========================================
+function startRecognition() {
+    stopSentenceAudio(); 
+    clearInterval(displayInterval); 
+    clearTimeout(questionTimeout); 
+    clearTimeout(startMicDelayTimeout);
+    
+    const studentName = document.getElementById("studentName").value;
+    if (studentName.trim() === "") {
+        alert("กรุณากรอกชื่อผู้เข้าทดสอบก่อนเริ่มใช้งานครับ!");
+        document.getElementById("studentName").focus();
+        return;
     }
 
-    if (adminConfig.cancelRequirement) {
-        document.getElementById("status").innerHTML = "กำลังฟัง...";
-        document.getElementById("status").className = "status";
-        document.getElementById("startBtn").disabled = true;
-        try { recognition.start(); isRunning = true; } catch(e){}
-    } else {
-        document.getElementById("startBtn").disabled = true;
-        document.getElementById("status").innerHTML = "กำลังเตรียมประโยค...";
+    if (!isTestRunning) {
+        totalScore = 0; passCount = 0; failCount = 0;
+        document.getElementById("totalScore").innerHTML = 0;
+        document.getElementById("passCount").innerHTML = 0;
+        document.getElementById("failCount").innerHTML = 0;
         
-        const sentence = questions[currentQuestion].english;
-        renderSequentialText(sentence);
+        startGlobalTimer();
+    }
 
-        startMicDelayTimeout = setTimeout(() => {
-            document.getElementById("status").innerHTML = "เริ่มพูดได้เลย! (มีเวลา 10 วินาที)";
-            document.getElementById("status").className = "status pass"; 
-            try { 
-                recognition.start(); 
-                isRunning = true; 
+    isRunning = false; 
+    document.getElementById("startBtn").disabled = true;
+    document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (5 วินาที)";
+    document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
+    document.getElementById("status").className = "status";
+    document.getElementById("heardText").innerHTML = "เตรียมอ่านประโยคเมื่อไมโครโฟนเปิดใน 5 วินาที...";
+
+    renderSequentialText(questions[currentQuestion].english);
+
+    startMicDelayTimeout = setTimeout(() => {
+        if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
+
+        isRunning = true;
+        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 5 วินาที)";
+        document.getElementById("status").innerHTML = "🎙️ กำลังฟังเสียงของคุณ...";
+        document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ...";
+
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error("Mic start error:", e);
+        }
+
+        questionTimeout = setTimeout(() => {
+            if (isRunning) {
+                isRunning = false;
+                try { recognition.stop(); } catch(e) {}
                 
-                questionTimeout = setTimeout(() => {
-                    if(isRunning) {
-                        isRunning = false;
-                        recognition.stop();
-                        console.log("หมดเวลาตอบ 10 วินาที");
-                        document.getElementById("status").innerHTML = "หมดเวลาตอบ! ⏱️";
-                        document.getElementById("status").className = "status fail";
-                        document.getElementById("heardText").innerHTML = "ไม่ได้ยินเสียงในเวลาที่กำหนด ข้ามไปข้อถัดไป...";
-                        
-                        failCount++;
-                        document.getElementById("failCount").innerHTML = failCount;
-                        playFailSound();
-                        
-                        nextQuestionTimer = setTimeout(() => {
-                            if (totalTimeLeftSeconds > 0) {
-                                nextQuestion();
-                            }
-                        }, 1500);
+                document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
+                document.getElementById("status").className = "status fail";
+                document.getElementById("heardText").innerHTML = "หมดเวลา 5 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
+                
+                failCount++;
+                document.getElementById("failCount").innerHTML = failCount;
+                playFailSound();
+                
+                document.getElementById("startBtn").disabled = true;
+                
+                nextQuestionTimer = setTimeout(() => {
+                    if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
+                        nextQuestion();
                     }
-                }, 10000); 
-
-            } catch(e) {
-                console.error("Mic Error:", e);
+                }, 1500);
             }
         }, 5000);
-    }
+
+    }, 5000);
 }
 
-function restartTest() {
-    isTestRunning = false;
+function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     clearInterval(displayInterval); 
-    clearTimeout(nextQuestionTimer);
     clearTimeout(startMicDelayTimeout);
-    clearTimeout(questionTimeout); 
+    clearTimeout(questionTimeout);
+    isTestRunning = false;
+    
+    document.getElementById("audioControls").style.display = "none";
+    document.getElementById("userLevel").disabled = false;
+    
+    const name = document.getElementById("studentName").value || "Unknown User";
 
-    totalScore = 0;
-    passCount = 0;
-    failCount = 0;
-    document.getElementById("totalScore").innerHTML = 0;
-    document.getElementById("passCount").innerHTML = 0;
-    document.getElementById("failCount").innerHTML = 0;
+    document.getElementById("englishText").innerHTML = "Test Completed!";
+    document.getElementById("thaiText").innerHTML = "สิ้นสุดการทดสอบ";
+    document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
 
-    prepareQuestions();
-}
+    let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
+    document.getElementById("score").innerHTML = finalPercent + "%";
 
-// ==========================================
-// ⚙️ ระบบ Admin 
-// ==========================================
-function openAdminModal() {
-    document.getElementById("adminModal").style.display = "flex";
-    if (isAdminLoggedIn) {
-        showAdminControls();
+    if (passCount >= adminConfig.passRequirement) {
+        if (adminConfig.cancelRequirement) { 
+            document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
+            document.getElementById("status").className = "status pass";
+            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").onclick = prepareQuestions; 
+            db.ref('machine/status').set('ready'); 
+            applauseAudio.play().catch(e => console.log("Audio play error:", e));
+        } else {
+            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
+            let expireTime = Date.now() + (5 * 60 * 1000); 
+
+            db.ref('machine/otps/' + otpCode).set({
+                valid: true,
+                expire: expireTime,
+                userName: name 
+            }).then(() => {
+                document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
+                document.getElementById("status").className = "status pass";
+                document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
+                document.getElementById("startBtn").disabled = true;
+                applauseAudio.play().catch(e => console.log("Audio play error:", e));
+            });
+        }
     } else {
-        document.getElementById("adminLoginGroup").style.display = "block";
-        document.getElementById("adminControlGroup").style.display = "none";
-        document.getElementById("adminPassword").value = "";
-        document.getElementById("adminError").style.display = "none";
-        document.getElementById("adminPassword").focus();
+        if (adminConfig.cancelRequirement) {
+            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ (โหมดฝึกซ้อม)";
+            document.getElementById("status").className = "status fail";
+            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").onclick = prepareQuestions;
+        } else {
+            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
+            document.getElementById("status").className = "status fail";
+            document.getElementById("startBtn").innerHTML = "จบการทดสอบ";
+            document.getElementById("startBtn").disabled = true;
+            db.ref('machine/status').set('ready'); 
+        }
     }
+
+    saveToGoogleSheet(name, totalScore, passCount, failCount);
 }
 
-function closeAdminModal() {
-    document.getElementById("adminModal").style.display = "none";
-}
-
-function verifyAdmin() {
-    const pw = document.getElementById("adminPassword").value;
-    if (pw === ADMIN_PASSWORD) {
-        isAdminLoggedIn = true;
-        showAdminControls();
-    } else {
-        document.getElementById("adminError").style.display = "block";
-    }
-}
-
-function showAdminControls() {
-    document.getElementById("adminLoginGroup").style.display = "none";
-    document.getElementById("adminControlGroup").style.display = "block";
-}
-
-function monitorMachine() {
-    db.ref('machine/status').on('value', (snap) => {
-        currentMachineStatus = snap.val() || 'ready';
-        updateMachineStatusUI();
-    });
-}
-
-function monitorStock() {
-    db.ref('machine/stock').on('value', (snap) => {
-        const stock = snap.val() || { slot1: 0, slot2: 0 };
-        currentStock = stock;
-        document.getElementById("slot1StockUI").innerText = stock.slot1;
-        document.getElementById("slot2StockUI").innerText = stock.slot2;
-
-        document.getElementById("rewardStock1UI").innerText = stock.slot1;
-        document.getElementById("rewardStock2UI").innerText = stock.slot2;
-    });
-}
-
-function setSystemStatus(status) {
-    db.ref('machine/status').set(status)
-    .then(() => alert(`ปรับสถานะระบบเป็น ${status.toUpperCase()} สำเร็จ`));
-}
-
-function updateStock(slot, amount) {
-    let newStock = currentStock[slot] + amount;
-    if (newStock < 0) newStock = 0;
-    db.ref(`machine/stock/${slot}`).set(newStock);
-}
-
-function updateMachineStatusUI() {
-    const statusUI = document.getElementById("machineStatusUI");
-    if (currentMachineStatus === 'ready') {
-        statusUI.innerHTML = "MACHINE READY";
-        statusUI.style.background = "rgba(29,255,149,0.08)";
-        statusUI.style.borderColor = "rgba(29,255,149,0.25)";
-        statusUI.style.color = "#87ffca";
-    } else if (currentMachineStatus === 'unlocked') {
-        statusUI.innerHTML = "BOX UNLOCKED 🎁";
-        statusUI.style.background = "rgba(53,216,255,0.1)";
-        statusUI.style.borderColor = "rgba(53,216,255,0.3)";
-        statusUI.style.color = "var(--cyan)";
-    } else {
-        statusUI.innerHTML = "SYSTEM BUSY";
-        statusUI.style.background = "rgba(255,77,109,0.1)";
-        statusUI.style.borderColor = "rgba(255,77,109,0.3)";
-        statusUI.style.color = "var(--red)";
-    }
-}
-
-// ==========================================
-// 🧮 อัลกอริทึมเปรียบเทียบเสียง (Similarity)
-// ==========================================
 function similarity(s1, s2) {
-    s1 = s1.toLowerCase().replace(/[^\w\s]/g, "");
-    s2 = s2.toLowerCase().replace(/[^\w\s]/g, "");
+    let longer = s1.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+    let shorter = s2.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
     
-    if (s1 === s2) return 100;
-    if (s1.length < 2 || s2.length < 2) {
-        return s1 === s2 ? 100 : 0;
+    if (longer.length < shorter.length) {
+        let temp = longer; longer = shorter; shorter = temp;
     }
+    if (longer.length == 0) return 100;
     
-    const words1 = s1.split(/\s+/);
-    const words2 = s2.split(/\s+/);
-    
-    let matchCount = 0;
-    let usedIndices = new Set();
-    
-    for (let i = 0; i < words1.length; i++) {
-        let bestMatchIndex = -1;
-        let bestScore = 0;
-        
-        for (let j = 0; j < words2.length; j++) {
-            if (!usedIndices.has(j)) {
-                let currentScore = getWordSimilarity(words1[i], words2[j]);
-                if (currentScore > bestScore) {
-                    bestScore = currentScore;
-                    bestMatchIndex = j;
-                }
-            }
-        }
-        
-        if (bestScore > 0.7) { 
-            matchCount++;
-            usedIndices.add(bestMatchIndex);
-        }
-    }
-    
-    const accuracy = (matchCount / words1.length) * 100;
-    return Math.min(Math.round(accuracy), 100);
-}
-
-function getWordSimilarity(w1, w2) {
-    if (w1 === w2) return 1;
-    let longer = w1.length > w2.length ? w1 : w2;
-    let shorter = w1.length > w2.length ? w2 : w1;
-    let distance = editDistance(longer, shorter);
-    return (longer.length - distance) / parseFloat(longer.length);
-}
-
-function editDistance(s1, s2) {
+    let longerLength = longer.length;
     let costs = new Array();
-    for (let i = 0; i <= s1.length; i++) {
+    for (let i = 0; i <= longer.length; i++) {
         let lastValue = i;
-        for (let j = 0; j <= s2.length; j++) {
+        for (let j = 0; j <= shorter.length; j++) {
             if (i == 0) costs[j] = j;
             else {
                 if (j > 0) {
                     let newValue = costs[j - 1];
-                    if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                    if (longer.charAt(i - 1) != shorter.charAt(j - 1))
                         newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
                     costs[j - 1] = lastValue;
                     lastValue = newValue;
                 }
             }
         }
-        if (i > 0) costs[s2.length] = lastValue;
+        if (i > 0) costs[shorter.length] = lastValue;
     }
-    return costs[s2.length];
+    let score = Math.round(((longerLength - costs[shorter.length]) / parseFloat(longerLength)) * 100);
+    return score > 100 ? 100 : score;
 }
 
-let sentenceAudio = null;
-
-function playSentenceAudio() {
-    if (questions.length === 0) return;
+function saveToGoogleSheet(name, score, pass, fail) {
+    const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&score=${score}&pass=${pass}&fail=${fail}`;
     
-    const textToSpeak = questions[currentQuestion].english;
-    if (!textToSpeak) return;
-
-    if (sentenceAudio && !sentenceAudio.paused) {
-        sentenceAudio.pause();
-        sentenceAudio.currentTime = 0;
-    }
-
-    const encodedText = encodeURIComponent(textToSpeak);
-    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodedText}`;
-    
-    sentenceAudio = new Audio(audioUrl);
-    
-    document.getElementById("listenBtn").innerHTML = "🔊 กำลังเล่น...";
-    document.getElementById("listenBtn").disabled = true;
-
-    sentenceAudio.play().catch(e => {
-        console.error("Audio Playback Error: ", e);
-        alert("ไม่สามารถเล่นเสียงได้ กรุณาลองใหม่อีกครั้ง");
-        resetAudioButton();
-    });
-
-    sentenceAudio.onended = () => {
-        resetAudioButton();
-    };
+    fetch(url, { mode: 'no-cors' })
+        .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
+        .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
 }
 
-function resetAudioButton() {
-    const listenBtn = document.getElementById("listenBtn");
-    if (listenBtn) {
-        listenBtn.innerHTML = "🔊 ฟัง / เล่นซ้ำ";
-        listenBtn.disabled = false;
-    }
-}
-
-function stopSentenceAudio() {
-    if (sentenceAudio && !sentenceAudio.paused) {
-        sentenceAudio.pause();
-        sentenceAudio.currentTime = 0;
-    }
-    resetAudioButton();
-}
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playPassSound() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gainNode = audioCtx.createGain();
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-
+    
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
-    osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3); // C6
-
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-
-    osc.start(audioCtx.currentTime);
+    osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    
+    osc.start();
     osc.stop(audioCtx.currentTime + 0.5);
 }
 
 function playFailSound() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gainNode = audioCtx.createGain();
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-
+    
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-    osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.3); 
-
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
-
-    osc.start(audioCtx.currentTime);
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime); 
+    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    
+    osc.start();
     osc.stop(audioCtx.currentTime + 0.3);
 }
 
+let currentUtterance = null;
+function playSentenceAudio() {
+    stopSentenceAudio(); 
+    if (questions.length === 0 || currentQuestion >= questions.length) return;
+    const textToSpeak = questions[currentQuestion].english;
+    
+    currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+    currentUtterance.lang = 'en-US'; 
+    currentUtterance.rate = 0.85; 
+    
+    window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopSentenceAudio() {
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel(); 
+    }
+}
 </script>
 </body>
 </html>
