@@ -749,7 +749,7 @@ input:checked + .slider:before { transform: translateX(21px); }
         <h2 style="color: var(--cyan); margin-top: 0; font-family: 'Orbitron', sans-serif;">SELECT LEVEL</h2>
         <div style="color: var(--muted); font-size: 16px; margin-bottom: 15px;">
             กรุณาเลือกระดับคลังข้อสอบ<br>
-            <span style="font-size: 14px;">(ระบบจะเลือกอัตโนมัติใน <span id="initialTimer" style="color: var(--red); font-weight: bold; font-size: 18px;">3</span> วินาที)</span>
+            <span style="font-size: 14px;">(ระบบจะเลือกอัตโนมัติใน <span id="initialTimer" style="color: var(--red); font-weight: bold; font-size: 18px;">10</span> วินาที)</span>
         </div>
         
         <select id="popupLevelSelect" class="admin-input" style="font-size: 16px; margin-bottom: 20px; text-align: center; cursor: pointer;">
@@ -816,18 +816,18 @@ let adminConfig = {
 // 🎯 ระบบ Pop-up เลือกระดับก่อนเริ่ม (เพิ่มใหม่)
 // ==========================================
 let initialCountdownTimer = null;
-let initialTime = 3;
+let initialTime = 10;
 
 function showInitialPopup() {
     // แสดง Pop-up
     document.getElementById("initialLevelModal").style.display = "flex";
     
     // ตั้งค่าเริ่มต้น
-    initialTime = 3;
+    initialTime = 10;
     document.getElementById("initialTimer").innerText = initialTime;
     document.getElementById("popupLevelSelect").value = "Vocational"; // ตั้ง Default เป็น Vocational
 
-    // เริ่มนับถอยหลัง 3 วินาที
+    // เริ่มนับถอยหลัง 10 วินาที
     initialCountdownTimer = setInterval(() => {
         initialTime--;
         document.getElementById("initialTimer").innerText = initialTime;
