@@ -100,7 +100,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 .login-box input { width:100%; padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(7,12,30,0.75); color:white; font-size:18px; outline:none; transition:0.3s; }
 .login-box input:focus { border-color: var(--cyan); box-shadow: 0 0 15px rgba(53,216,255,0.3); }
 
-/* ✨ เพิ่มใหม่: USER MODE SELECTOR (ปุ่มเลือกโหมดสำหรับผู้ใช้งาน) */
+/* ✨ USER MODE SELECTOR */
 .mode-selector {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -373,7 +373,6 @@ input:checked + .slider:before { transform: translateX(21px); }
     .login-box { margin-bottom:10px; } 
     .login-box input { padding:14px; font-size:16px; border-radius:15px; }
     
-    /* Responsive แถบเลือกโหมด */
     .mode-selector { grid-template-columns: 1fr; gap: 8px; }
     .mode-btn { padding: 12px; font-size: 14px; }
 
@@ -446,7 +445,7 @@ input:checked + .slider:before { transform: translateX(21px); }
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
     </div>
 
-    <!-- ✨ เพิ่มใหม่: แถบเลือกโหมดโดยผู้ใช้งาน (USER MODE SELECTOR) -->
+    <!-- ✨ USER MODE SELECTOR -->
     <div class="mode-selector glass">
         <button class="mode-btn active" id="modeRewardBtn" onclick="selectUserMode('reward')">
             🎁 โหมดทดสอบรับรางวัล
@@ -531,7 +530,7 @@ input:checked + .slider:before { transform: translateX(21px); }
     </div>
 </div>
 
-<!-- Admin Modal Panel (✨ ตัดโหมด ยกเลิกเกณฑ์, Restock Mode และ Test Mode ออกแล้ว) -->
+<!-- Admin Modal Panel -->
 <div class="modal-overlay" id="adminModal">
     <div class="modal-content">
         <button class="close-modal" onclick="closeAdminModal()">✕</button>
@@ -688,15 +687,15 @@ let currentMachineStatus = 'ready';
 
 let nextQuestionTimer = null;
 let displayInterval = null; 
-let startMicDelayTimeout = null; // 🛡️ หน่วงเวลาเปิดไมค์ 5 วินาที
-let questionTimeout = null;     // 🛡️ จับเวลาพูดของผู้เรียน 5 วินาที
+let startMicDelayTimeout = null; 
+let questionTimeout = null;     
 
 let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
     difficulty: "ALL",
     testDurationSeconds: 60,
-    cancelRequirement: false // เป็นค่าสถานะโหมด: false = รับรางวัล, true = ฝึกซ้อม
+    cancelRequirement: false 
 };
 
 window.onload = async () => {
@@ -714,7 +713,7 @@ window.onload = async () => {
     recognition.onresult = function(event){
         if(!isRunning) return;
         isRunning = false;
-        clearTimeout(questionTimeout); // หยุดนับเวลาเมื่อผู้เรียนตอบสำเร็จ
+        clearTimeout(questionTimeout); 
 
         const speechResult = event.results[0][0].transcript;
         const target = questions[currentQuestion].english;
@@ -797,7 +796,7 @@ window.onload = async () => {
 };
 
 // ==========================================
-// ✨ ระบบเปลี่ยนโหมดการใช้งานด้วยตนเอง (USER MODE SELECTOR)
+// ✨ ระบบเปลี่ยนโหมดการใช้งานด้วยตนเอง
 // ==========================================
 function selectUserMode(mode) {
     if (isRunning || isTestRunning) {
@@ -809,11 +808,11 @@ function selectUserMode(mode) {
     const btnPractice = document.getElementById("modePracticeBtn");
 
     if (mode === 'practice') {
-        adminConfig.cancelRequirement = true; // เปิดโหมดฝึกซ้อม (Practice Mode / ยกเลิกเกณฑ์)
+        adminConfig.cancelRequirement = true; 
         btnPractice.classList.add("active");
         btnReward.classList.remove("active");
     } else {
-        adminConfig.cancelRequirement = false; // เปิดโหมดสอบเพื่อรับรางวัล (Reward Mode)
+        adminConfig.cancelRequirement = false; 
         btnReward.classList.add("active");
         btnPractice.classList.remove("active");
     }
@@ -1015,14 +1014,19 @@ function renderSequentialText(sentence) {
 }
 
 // ==========================================
-// 🔄 โหลดข้อสอบ
+// 🔄 โหลดข้อสอบ (✨ ปรับปรุงเงื่อนไขแสดงประโยคทันทีในโหมดฝึกฝน)
 // ==========================================
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
     
-    document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลา 10 วินาที)</span>';
+    // ✨ ตรวจสอบโหมด: หากเป็นโหมดฝึกฝน ให้แสดงประโยคภาษาอังกฤษทันที!
+    if (adminConfig.cancelRequirement) {
+        document.getElementById("englishText").innerHTML = questions[index].english;
+    } else {
+        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลา 10 วินาที)</span>';
+    }
     
     document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
@@ -1077,7 +1081,6 @@ function monitorAdminSettings() {
             adminConfig.questionCount = conf.questionCount !== undefined ? conf.questionCount : 10;
             adminConfig.difficulty = conf.difficulty || "ALL";
             adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
-            // ✨ ตัดการดึง cancelRequirement จาก Admin เพื่อให้ User คุมโหมดเองได้จากหน้าจอ UI
         }
 
         document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
@@ -1297,7 +1300,7 @@ function forceEndTest() {
 }
 
 // ==========================================
-// 🎙️ การทำงานเมื่อกด "เริ่มพูด" (10 วินาที / ข้อ)
+// 🎙️ การทำงานเมื่อกด "เริ่มพูด"
 // ==========================================
 function startRecognition() {
     stopSentenceAudio(); 
