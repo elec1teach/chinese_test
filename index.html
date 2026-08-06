@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI Pronunciation Test Station</title>
 
+<!-- 🚀 เร่งความเร็วการเชื่อมต่อ Google Apps Script & Google User Content -->
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+
 <!-- 🚀 สคริปต์บังคับเปิดใน Google Chrome / External Browser อัตโนมัติ -->
 <script>
 (function forceExternalBrowser() {
@@ -1021,7 +1025,7 @@ window.onload = async () => {
 };
 
 // ==========================================
-// 🔄 ฟังก์ชันเชื่อมต่อใหม่
+// 🔄 ฟังก์ชันเชื่อมต่อใหม่ (บังคับดึงข้อมูลสดจาก GAS ไม่ใช้ Cache)
 // ==========================================
 function retryConnection() {
     document.getElementById("reconnectBtn").style.display = "none";
@@ -1034,7 +1038,8 @@ function retryConnection() {
     document.getElementById("englishText").innerHTML = "Loading...";
     document.getElementById("thaiText").innerHTML = "กำลังเตรียมข้อมูลข้อสอบ";
     
-    fetchQuestionsFromGAS();
+    // ส่งค่า true เพื่อบังคับให้ดึงข้อมูลจาก GAS โดยไม่ใช้ Cache
+    fetchQuestionsFromGAS(true);
 }
 
 // ==========================================
@@ -1118,33 +1123,48 @@ function openRankModal() {
 }
 function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
 
-async function fetchRankData() {
+// ==========================================
+// 🏆 ฟังก์ชันดึงข้อมูล Rank แบบมีระบบ Cache เร่งความเร็ว
+// ==========================================
+async function fetchRankData(forceRefresh = false) {
     const tableBody = document.getElementById("rankTableBody");
-    tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
+    const RANK_CACHE_KEY = "gas_rank_cache";
 
+    // 1. แสดงข้อมูล Rank จาก Cache ก่อนทันทีถ้ามี
+    const cachedRank = sessionStorage.getItem(RANK_CACHE_KEY);
+    if (cachedRank && !forceRefresh) {
+        renderRankTable(JSON.parse(cachedRank));
+    } else {
+        tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
+    }
+
+    // 2. ดึงข้อมูลใหม่จาก GAS เพื่ออัปเดตตาราง
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getRank");
         const data = await response.json();
         
         let rankData = [];
-        if(Array.isArray(data) && data.length > 0 && data[0].name) {
-             rankData = data; 
+        if (Array.isArray(data) && data.length > 0 && data[0].name) {
+            rankData = data; 
+            sessionStorage.setItem(RANK_CACHE_KEY, JSON.stringify(data)); // เก็บแคชไว้ใช้รอบหน้า
         } else {
-             rankData = [
-                 { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
-                 { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
-                 { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
-                 { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
-                 { rank: 5, name: "นะโม", attempts: 1, score: 0 },
-                 { rank: 6, name: "กา", attempts: 1, score: 0 }
-             ];
+            rankData = [
+                { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
+                { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
+                { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
+                { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
+                { rank: 5, name: "นะโม", attempts: 1, score: 0 },
+                { rank: 6, name: "กา", attempts: 1, score: 0 }
+            ];
         }
 
         renderRankTable(rankData);
 
     } catch (error) {
         console.error("Error fetching rank:", error);
-        tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
+        if (!cachedRank) {
+            tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
+        }
     }
 }
 
@@ -1216,27 +1236,99 @@ function saveMaintenanceInfo() {
     alert("บันทึกข้อมูลแจ้งเตือน Maintenance สำเร็จเรียบร้อยแล้ว!");
 }
 
-async function fetchQuestionsFromGAS() {
+// ==========================================
+// 🚀 ฟังก์ชันดึงข้อสอบแบบ "ทันทีทันใด" (Instant Load by Cache + Silent Revalidate)
+// ==========================================
+async function fetchQuestionsFromGAS(forceRefresh = false) {
+    const CACHE_KEY = "gas_questions_cache";
+    const CACHE_TIME_KEY = "gas_questions_cache_timestamp";
+    const CACHE_EXPIRE_MS = 1000 * 60 * 30; // อายุแคช 30 นาที (ปรับเปลี่ยนได้)
+
+    // 1. ตรวจสอบข้อมูลใน LocalStorage ก่อน
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cacheTimestamp = localStorage.getItem(CACHE_TIME_KEY);
+    const isCacheValid = cachedData && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_EXPIRE_MS);
+
+    // 2. ถ้ามีแคชและยังไม่หมดอายุ -> โหลดแสดงผลทันทีใน 0.01 วินาที!
+    if (isCacheValid && !forceRefresh) {
+        console.log("⚡ โหลดคลังข้อสอบจาก Cache ทันที (Instant Load)!");
+        try {
+            masterQuestions = JSON.parse(cachedData);
+            document.getElementById("reconnectBtn").style.display = "none";
+            document.getElementById("startBtn").style.display = "inline-block";
+            prepareQuestions();
+            
+            // แอบอัปเดตข้อมูลใหม่จาก GAS ในพื้นหลัง (ไม่รบกวนผู้ใช้)
+            fetchGASInBackground(CACHE_KEY, CACHE_TIME_KEY);
+            return;
+        } catch (e) {
+            console.warn("แคชมีปัญหา กำลังดึงข้อมูลใหม่จากเซิร์ฟเวอร์...", e);
+        }
+    }
+
+    // 3. ถ้าไม่มีแคช หรือกดปุ่มเชื่อมต่อใหม่ -> ดึงข้อมูลจาก GAS พร้อมระบบตัดเวลา (Timeout 8 วินาที)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // ตัดการทำงานถ้าเกิน 8 วินาที
+
     try {
-        const response = await fetch(GAS_QUESTION_URL);
+        console.log("🌐 กำลังเชื่อมต่อ Google Apps Script...");
+        const response = await fetch(GAS_QUESTION_URL, { 
+            signal: controller.signal,
+            cache: 'no-store' // ป้องกันเบราว์เซอร์จำแคชเก่าของ HTTP
+        });
+        clearTimeout(timeoutId);
+
         const data = await response.json();
 
         if (Array.isArray(data) && data.length > 0) {
             masterQuestions = data;
+            
+            // บันทึกข้อสอบลง LocalStorage เพื่อใช้ทันทีในรอบต่อไป
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+            localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+
             document.getElementById("reconnectBtn").style.display = "none";
             document.getElementById("startBtn").style.display = "inline-block";
-            prepareQuestions(); 
+            prepareQuestions();
+            console.log("✅ ดึงข้อสอบสำเร็จและบันทึกลง Cache แล้ว");
         } else {
             throw new Error("Empty Data");
         }
     } catch (error) {
+        clearTimeout(timeoutId);
         console.error("Error fetching questions:", error);
+
+        // ถ้าเชื่อมต่อเน็ตไม่ได้ แต่มีแคชเก่าเหลืออยู่ ให้ดึงแคชเก่ามาใช้แก้ขัดก่อน
+        if (cachedData) {
+            console.warn("⚠️ ใช้ข้อมูลจาก Cache เก่าเนื่องจากเชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ");
+            masterQuestions = JSON.parse(cachedData);
+            document.getElementById("reconnectBtn").style.display = "none";
+            document.getElementById("startBtn").style.display = "inline-block";
+            prepareQuestions();
+            return;
+        }
+
+        // หากไม่มีทั้งเน็ตและไม่มีแคช -> แสดงหน้าจอ Error
         document.getElementById("questionNumber").innerHTML = "การเชื่อมต่อขัดข้อง";
         document.getElementById("englishText").innerHTML = "Connection<br>Error";
         document.getElementById("thaiText").innerHTML = "ไม่สามารถเชื่อมต่อคลังข้อสอบได้";
-        
         document.getElementById("startBtn").style.display = "none";
         document.getElementById("reconnectBtn").style.display = "inline-block";
+    }
+}
+
+// ฟังก์ชันแอบอัปเดตข้อมูลเงียบๆ ในพื้นหลัง
+async function fetchGASInBackground(cacheKey, timeKey) {
+    try {
+        const response = await fetch(GAS_QUESTION_URL);
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+            localStorage.setItem(timeKey, Date.now().toString());
+            console.log("🔄 อัปเดตคลังข้อสอบในพื้นหลังเรียบร้อยแล้ว");
+        }
+    } catch (err) {
+        console.log("Background sync failed (ไม่ส่งผลต่อการทำงานหลัก):", err);
     }
 }
 
