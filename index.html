@@ -375,6 +375,23 @@ input:checked + .slider:before { transform: translateX(21px); }
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
+<!-- 🚨 ANTI-CHEAT MODAL OVERLAY -->
+<div class="modal-overlay" id="cheatModal" style="z-index: 999999;">
+    <div class="modal-content" style="background:#1a0505; border: 2px solid var(--red); text-align:center;">
+        <h2 style="color:var(--red); font-family:'Orbitron',sans-serif; margin-top: 0;">🚨 WARNING: ANTI-CHEAT 🚨</h2>
+        <div style="color:#ffb3b3; font-size:16px; margin-bottom:20px; line-height: 1.6;">
+            ระบบตรวจพบพฤติกรรมส่อทุจริต!<br>
+            ห้ามกระทำการดังต่อไปนี้ระหว่างทดสอบ:<br>
+            <strong style="color:white;">1. แคปหน้าจอ (Screen Capture)</strong><br>
+            <strong style="color:white;">2. คัดลอกข้อความ (Copy Text)</strong><br>
+            <strong style="color:white;">3. สลับหน้าจอ/แอปพลิเคชัน (Switch Tabs)</strong><br>
+            <br>
+            <span style="font-size: 14px; color: var(--muted);">ระบบได้ทำการบันทึกว่าผิด และข้ามข้อสอบข้อนี้แล้ว</span>
+        </div>
+        <button class="start-btn" style="background: var(--red); color: white; width: 100%; box-shadow: 0 0 20px rgba(255, 77, 109, 0.4);" onclick="closeCheatModal()">รับทราบและทำข้อต่อไป</button>
+    </div>
+</div>
+
 <!-- 🛠️ หน้าจอแจ้งเตือนปรับปรุงระบบ -->
 <div class="maintenance-overlay" id="maintenanceOverlay">
     <div class="maintenance-admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
@@ -716,6 +733,7 @@ const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFx
 const applauseAudio = new Audio('https://actions.google.com/sounds/v1/crowds/crowd_cheer.ogg');
 const audioPass = new Audio('https://actions.google.com/sounds/v1/cartoon/clown_horn.ogg'); 
 const audioFail = new Audio('https://actions.google.com/sounds/v1/cartoon/slip_and_crash.ogg'); 
+const cheatAudio = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg'); // เสียงเตือน Anti-Cheat
 
 const firebaseConfig = {
     apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
@@ -738,9 +756,9 @@ let passCount = 0;
 let failCount = 0;
 
 let recognition;
-let testTimerInterval = null;
 let isTestRunning = false; 
 let isRunning = false; 
+let isTestingPhase = false; // ตัวแปรคอยจับว่าเข้าสู่ขั้นตอนการอ่านข้อสอบอยู่หรือไม่ (สำหรับ Anti-cheat)
 let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
@@ -750,9 +768,6 @@ let displayInterval = null;
 let startMicDelayTimeout = null; 
 let questionTimeout = null;     
 let speechCountdownInterval = null;
-
-// สำหรับจัดการระบบเริ่มใหม่ (Auto-Restart)
-let autoRestartTimerId = null;
 
 let adminConfig = {
     passRequirement: 5,
@@ -768,6 +783,69 @@ let initialCountdownTimer = null;
 let initialTime = 10;
 let footerClickCount = 0;
 let footerClickTimer = null;
+
+// ==========================================
+// 🚨 ANTI-CHEAT SYSTEM 🚨
+// ==========================================
+
+function closeCheatModal() {
+    document.getElementById("cheatModal").style.display = "none";
+}
+
+function triggerAntiCheat() {
+    // จะทำงานเฉพาะตอนอยู่ในช่วงอ่านข้อสอบ และอยู่ในโหมดรับรางวัลเท่านั้น
+    if (!isTestingPhase || adminConfig.cancelRequirement) return;
+
+    // แจ้งเตือน Pop-up และเล่นเสียง
+    document.getElementById("cheatModal").style.display = "flex";
+    cheatAudio.play().catch(e=>console.log(e));
+
+    // ปรับตกและข้ามข้อ
+    failCount++;
+    document.getElementById("failCount").innerHTML = failCount;
+    
+    document.getElementById("status").innerHTML = "ทุจริต! ข้ามข้อ ❌";
+    document.getElementById("status").className = "status fail";
+    document.getElementById("heardText").innerHTML = "ตรวจพบพฤติกรรมส่อทุจริต ระบบจึงข้ามข้อนี้";
+    
+    // ปิด Flag เพื่อไม่ให้ Trigger ซ้ำซ้อนตอนหน่วงเวลา
+    isTestingPhase = false; 
+    
+    setTimeout(() => {
+        nextQuestion();
+    }, 2500); // หน่วงเวลาให้ User อ่านคำเตือนนิดนึงก่อนกระโดดข้ามข้อ
+}
+
+// 1. ดักจับการ Copy และ คลิกขวา (Context Menu)
+document.addEventListener('copy', (e) => {
+    if (isTestingPhase && !adminConfig.cancelRequirement) {
+        e.preventDefault();
+        triggerAntiCheat();
+    }
+});
+document.addEventListener('contextmenu', (e) => {
+    if (isTestingPhase && !adminConfig.cancelRequirement) {
+        e.preventDefault();
+    }
+});
+
+// 2. ดักจับการสลับหน้าต่าง, ซ่อนหน้าจอ, เปลี่ยนแอป, เปลี่ยนแท็บ
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isTestingPhase && !adminConfig.cancelRequirement) {
+        triggerAntiCheat();
+    }
+});
+
+// 3. ดักจับปุ่มคีย์บอร์ดสำหรับการแคปหน้าจอ (PrintScreen, Ctrl+C, Cmd+Shift+3, etc.)
+document.addEventListener('keydown', (e) => {
+    if (isTestingPhase && !adminConfig.cancelRequirement) {
+        if (e.key === 'PrintScreen' || 
+           (e.ctrlKey && e.key === 'c') || 
+           (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === 's'))) {
+            triggerAntiCheat();
+        }
+    }
+});
 
 // ==========================================
 // 💡 Dynamic Calculation & Recognition Algorithm
@@ -787,17 +865,17 @@ function calculateDynamicTime(sentence) {
     let totalSyllables = 0;
     words.forEach(w => totalSyllables += countSyllables(w));
 
-    // 1. เวลาสำหรับการแสดงข้อความแบบ Progressive Reveal (คำละ 500ms + Base 1.5s)
+    // 1. เวลาสำหรับการแสดงข้อความ (คำละ 500ms + Base 1.5s)
     const displayTime = Math.max(2500, (wordCount * 500) + 1000);
     
-    // 2. Dynamic Speech Timeout Algorithm
-    // ขยายเวลาตามจำนวนพยางค์และความยาวประโยค (8-15 วินาที)
+    // 2. Dynamic Speech Timeout Algorithm (8-15 วินาที)
     let speechTime = Math.max(8000, (totalSyllables * 850) + (wordCount * 500));
-    if (speechTime > 15000) speechTime = 15000; // Cap ไว้สูงสุดที่ 15 วินาทีตามสเปก
+    if (speechTime > 15000) speechTime = 15000; 
     
     return { displayTime, speechTime, wordCount, totalSyllables };
 }
 
+// 🔄 อัปเดต: เปลี่ยนระบบ Progressive Reveal ให้ตัวอักษรที่ยังไม่ถึงคิวซ่อน 100% ไม่มีความโปร่งใส
 function renderSequentialText(sentence, totalDisplayTime) {
     const container = document.getElementById("englishText");
     container.innerHTML = ""; 
@@ -810,7 +888,8 @@ function renderSequentialText(sentence, totalDisplayTime) {
     words.forEach(word => {
         const span = document.createElement("span");
         span.innerText = word + " ";
-        span.style.opacity = "0.15"; 
+        // 🚨 แก้ไขการซ่อนอักษร: เปลี่ยนจาก opacity: 0.15 เป็น 0 (ซ่อนสมบูรณ์)
+        span.style.opacity = "0"; 
         span.style.transition = "opacity 0.25s ease-in-out, color 0.25s ease-in-out"; 
         container.appendChild(span);
     });
@@ -858,6 +937,9 @@ function startRecognition() {
     const currentSentence = questions[currentQuestion].english;
     const timing = calculateDynamicTime(currentSentence);
 
+    // เปิด Flag การทำข้อสอบ เพื่อให้ระบบ Anti-Cheat เริ่มตรวจสอบ
+    isTestingPhase = true;
+
     document.getElementById("startBtn").disabled = true;
     document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงประโยค...";
     document.getElementById("status").innerHTML = "เตรียมตัวพูด...";
@@ -892,6 +974,7 @@ function startRecognition() {
                     document.getElementById("failCount").innerHTML = failCount;
                     playFailSound();
 
+                    isTestingPhase = false; // ปิด Flag เมื่อหมดเวลา
                     nextQuestionTimer = setTimeout(() => {
                         nextQuestion();
                     }, 1500);
@@ -901,6 +984,7 @@ function startRecognition() {
         } catch (e) {
             console.error("Mic error:", e);
             isRunning = false;
+            isTestingPhase = false;
             document.getElementById("startBtn").disabled = false;
             document.getElementById("startBtn").innerHTML = "🎤 เริ่มพูดอีกครั้ง";
         }
@@ -995,6 +1079,7 @@ window.onload = async () => {
     recognition.onresult = function(event){
         if(!isRunning) return;
         isRunning = false;
+        isTestingPhase = false; // รับผลเสร็จแล้ว ปิดการตรวจจับ Anti-cheat ชั่วคราว
         clearTimeout(questionTimeout); 
         clearInterval(speechCountdownInterval);
 
@@ -1032,6 +1117,7 @@ window.onload = async () => {
         console.log("Recognition Error:", event.error);
         if(!isRunning) return;
         isRunning = false; 
+        isTestingPhase = false;
         clearTimeout(questionTimeout);
         clearInterval(speechCountdownInterval);
 
@@ -1052,6 +1138,7 @@ window.onload = async () => {
         if(isRunning) { 
             console.log("Recognition ended unexpectedly."); 
             isRunning = false;
+            isTestingPhase = false;
             clearTimeout(questionTimeout);
             clearInterval(speechCountdownInterval);
 
@@ -1298,8 +1385,8 @@ async function fetchQuestionsFromGAS() {
 function prepareQuestions() {
     if (masterQuestions.length === 0) return;
 
-    // เคลียร์ Timer ของการเริ่มรอบใหม่ (ถ้ามีการกดสลับโหมดขณะรอ)
-    if (autoRestartTimerId) clearInterval(autoRestartTimerId);
+    isTestRunning = true;
+    isTestingPhase = false; // ยังไม่เข้าหน้าคำถาม
 
     const selectedLevel = adminConfig.forceLevelControl 
                           ? adminConfig.forcedLevel 
@@ -1336,23 +1423,25 @@ function prepareQuestions() {
     const startBtn = document.getElementById("startBtn");
     startBtn.onclick = startRecognition;
 
-    if(!isTestRunning) {
-        loadQuestion(0);
-    }
+    loadQuestion(0);
 }
 
+// 🔄 อัปเดตฟังก์ชัน loadQuestion() เพื่อซ่อนคำแปลในโหมดจริง
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
     
     if (adminConfig.cancelRequirement) {
+        // โหมดฝึกซ้อม: แสดงข้อความและคำแปลตามปกติ
         document.getElementById("englishText").innerHTML = questions[index].english;
+        document.getElementById("thaiText").innerHTML = questions[index].thai;
     } else {
+        // โหมดรับรางวัล: ซ่อนประโยคก่อนเริ่ม และ ซ่อนคำแปลตลอดการสอบ
         document.getElementById("englishText").innerHTML = '<span style="font-size: 22px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค</span>';
+        document.getElementById("thaiText").innerHTML = '<span style="font-size: 18px; color: var(--red);">🔒 ซ่อนคำแปลเพื่อป้องกันการทุจริต</span>';
     }
     
-    document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
     document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
     document.getElementById("status").className = "status";
@@ -1390,6 +1479,8 @@ function nextQuestion(){
         try { recognition.stop(); } catch(e) {}
     }
     
+    isTestingPhase = false; // ปิดสถานะป้องกันระหว่างสลับข้อ
+
     currentQuestion++;
     if(currentQuestion >= questions.length){
         evaluateFinalResult();
@@ -1518,9 +1609,11 @@ function playSentenceAudio() {
 }
 function stopSentenceAudio() { window.speechSynthesis.cancel(); }
 
-// 🔄 อัปเดตฟังก์ชัน evaluateFinalResult เพื่อแก้ปัญหา OTP และระบบเริ่มรอบใหม่
+// 🔄 อัปเดตฟังก์ชัน evaluateFinalResult: ยกเลิกการเริ่มใหม่เอง ปล่อย OTP ค้างหน้าจอ
 function evaluateFinalResult() { 
     isTestRunning = false;
+    isTestingPhase = false; // ปิดสถานะต้านโกง
+    
     document.getElementById("questionNumber").innerHTML = "ทดสอบเสร็จสิ้น!";
     document.getElementById("englishText").innerHTML = "🎉 COMPLETE!";
     document.getElementById("thaiText").innerHTML = "ประมวลผลคะแนน...";
@@ -1529,7 +1622,6 @@ function evaluateFinalResult() {
     
     const sName = document.getElementById("studentName").value.trim() || "ผู้ทดสอบไม่ระบุชื่อ";
     
-    // ส่งผลไปยัง Google Sheet สำหรับตาราง Rank
     try {
         fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -1539,52 +1631,34 @@ function evaluateFinalResult() {
         });
     } catch(e) { console.error("Error saving score:", e); }
 
-    let waitTime = 5; // เวลาสำหรับนับถอยหลังเพื่อเริ่มรอบใหม่
-
-    // ตรวจสอบว่าผ่านเกณฑ์และอยู่ในโหมดรับรางวัลหรือไม่
     if (passCount >= adminConfig.passRequirement && !adminConfig.cancelRequirement) {
         applauseAudio.play().catch(e=>console.log(e));
         
-        // 🔑 1. สุ่มรหัส OTP 4 หลัก
         const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-        // 📤 2. ส่ง OTP และชื่อผู้ใช้ไปยัง Firebase เพื่อให้ตู้ Kiosk นำไปตรวจสอบ
         db.ref('machine/otps/' + otpCode).set({
             valid: true,
             userName: sName
         });
 
-        // 🖥️ 3. แสดงรหัส OTP อย่างโดดเด่นบนหน้าจอ
         document.getElementById("status").innerHTML = "คุณผ่านเกณฑ์! 🎁";
         document.getElementById("englishText").innerHTML = `OTP: <span style="color: #ffcc00; font-size: 70px; text-shadow: 0 0 20px rgba(255, 204, 0, 0.5);">${otpCode}</span>`;
         document.getElementById("thaiText").innerHTML = "นำรหัส 4 หลักนี้ไปกดรับรางวัลที่ตู้ Kiosk";
         document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ (คะแนนรวม: ${totalScore})`;
 
-        waitTime = 15; // ให้เวลา 15 วินาทีในการจดจำ/ถ่ายรูปรหัส OTP ก่อนเริ่มรอบใหม่
     } else {
-        // กรณีไม่ผ่านเกณฑ์ หรืออยู่ในโหมดฝึกซ้อม
         if(!adminConfig.cancelRequirement) {
             document.getElementById("status").innerHTML = "พยายามใหม่อีกนิด! ✌️";
             document.getElementById("status").className = "status fail";
         }
         document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ (คะแนนรวม: ${totalScore})`;
-        waitTime = 7; // ให้เวลา 7 วินาทีก่อนเริ่มรอบใหม่
     }
 
-    // 🔄 4. ระบบ Auto-Restart สุ่มข้อสอบเริ่มรอบใหม่ (ยังคงจำชื่อ User เดิมไว้)
-    document.getElementById("startBtn").disabled = true;
-    
-    if (autoRestartTimerId) clearInterval(autoRestartTimerId);
-    
-    autoRestartTimerId = setInterval(() => {
-        document.getElementById("startBtn").innerHTML = `เริ่มรอบใหม่โดยอัตโนมัติใน ${waitTime} วินาที...`;
-        waitTime--;
-        
-        if (waitTime < 0) {
-            clearInterval(autoRestartTimerId);
-            prepareQuestions(); // สุ่มข้อสอบใหม่ รีเซ็ตค่า UI เคลียร์กระดานทันที
-        }
-    }, 1000);
+    // 🔄 เปิดปุ่มให้ User กดเริ่มสอบรอบใหม่ด้วยตนเอง
+    const startBtn = document.getElementById("startBtn");
+    startBtn.disabled = false;
+    startBtn.innerHTML = "🔄 เริ่มทำข้อสอบรอบใหม่";
+    startBtn.onclick = prepareQuestions;
 }
 
 // อัลกอริทึมวัดความเหมือนของประโยค (Levenshtein Distance)
