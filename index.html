@@ -178,7 +178,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
 .stat { padding:15px; border-radius:20px; position:relative; overflow:hidden; text-align:center; }
-.stat::after { content:"absolute"; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
 .stat-title { font-size:14px; color:var(--muted); letter-spacing: 1px;}
 .stat-value { margin-top:8px; font-size:28px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
@@ -186,7 +186,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 .main-grid { display:grid; grid-template-columns:1.3fr 0.8fr; gap:20px; }
 .sentence-box { padding:30px; border-radius:25px; position:relative; overflow:hidden; text-align:center; }
 .question-number { display:inline-block; padding:8px 16px; border-radius:999px; background:rgba(255,255,255,0.06); font-size:14px; letter-spacing:2px; color:#c6d6f4; }
-.english-text { margin-top:20px; font-size:48px; font-weight:900; line-height:1.2; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); min-height: 115px;}
+.english-text { margin-top:20px; font-size:40px; font-weight:900; line-height:1.3; font-family:'Orbitron',sans-serif; text-shadow: 0 0 20px rgba(53,216,255,0.15); min-height: 115px; word-break: break-word;}
 .thai-text { margin-top:12px; font-size:22px; color:#b6c6e8; line-height:1.6; }
 
 /* COUNTDOWN */
@@ -204,30 +204,14 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 
 /* 🚨 BLINKING RED RECONNECT BUTTON */
 @keyframes blinkRed {
-    0%, 100% {
-        background: var(--red);
-        box-shadow: 0 0 20px rgba(255, 77, 109, 0.85);
-        transform: scale(1);
-    }
-    50% {
-        background: #ff1a40;
-        box-shadow: 0 0 35px rgba(255, 77, 109, 1);
-        transform: scale(1.04);
-    }
+    0%, 100% { background: var(--red); box-shadow: 0 0 20px rgba(255, 77, 109, 0.85); transform: scale(1); }
+    50% { background: #ff1a40; box-shadow: 0 0 35px rgba(255, 77, 109, 1); transform: scale(1.04); }
 }
 .reconnect-btn {
-    display: none;
-    background: var(--red);
-    color: white;
-    box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
-    width: 100%;
-    max-width: 300px;
-    animation: blinkRed 1.1s infinite ease-in-out;
-    border: 2px solid rgba(255, 255, 255, 0.4);
+    display: none; background: var(--red); color: white; box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
+    width: 100%; max-width: 300px; animation: blinkRed 1.1s infinite ease-in-out; border: 2px solid rgba(255, 255, 255, 0.4);
 }
-.reconnect-btn:hover {
-    filter: brightness(1.15);
-}
+.reconnect-btn:hover { filter: brightness(1.15); }
 
 .result-box { padding:30px; border-radius:25px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .score { font-size:75px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
@@ -239,9 +223,9 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .teacher-box { margin-top:20px; padding:15px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.7; font-size:16px; text-align:center; }
 .teacher-title { font-weight:bold; color:#90dfff; margin-bottom:5px; font-size:18px; }
 
-/* 🔒 HIDDEN ADMIN TRIGGER */
-.footer { margin-top:20px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; padding: 10px; cursor: pointer; user-select: none; transition: 0.3s; }
-.footer:hover { color: var(--cyan); }
+/* 🔒 HIDDEN ADMIN TRIGGER FOOTER */
+.footer { margin-top:20px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; padding: 15px; cursor: pointer; user-select: none; transition: 0.3s; border-radius: 12px; }
+.footer:hover { color: var(--cyan); background: rgba(255,255,255,0.02); }
 
 /* 🛠️ MAINTENANCE OVERLAY */
 .maintenance-overlay {
@@ -256,11 +240,10 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 
 /* MODAL OVERLAY GENERAL */
 .modal-overlay { 
-    display: none; 
-    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
     align-items: center; justify-content: center; backdrop-filter: blur(8px); 
 }
-.modal-content { width: 90%; max-width: 450px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.modal-content { width: 90%; max-width: 480px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
 .close-modal:hover { color: white; }
 
@@ -274,75 +257,18 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 @media(max-width:400px) { .reward-container { flex-direction: column; } }
 
 /* RANK MODAL SPECIFIC */
-.rank-modal-content {
-    background: #0d1326; 
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    width: 95%;
-    max-width: 500px;
-    padding: 30px 20px;
-}
-.rank-header-text {
-    text-align: center;
-    color: #92a4c9;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-.rank-table-body {
-    background: rgba(255,255,255,0.02);
-    border-radius: 0 0 12px 12px;
-    overflow-y: auto;
-    max-height: 50vh;
-}
-.loading-rank {
-    text-align: center;
-    padding: 30px;
-    color: var(--cyan);
-}
-.rank-table-header {
-    display: grid;
-    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
-    background: rgba(255,255,255,0.05);
-    padding: 18px 10px;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-    font-weight: 700;
-    color: var(--gold); 
-    font-size: 16px;
-}
-.rank-row {
-    display: grid;
-    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
-    padding: 16px 10px;
-    align-items: center;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: white;
-    font-size: 18px; 
-}
+.rank-modal-content { background: #0d1326; border: 1px solid rgba(255, 255, 255, 0.1); width: 95%; max-width: 500px; padding: 30px 20px; }
+.rank-header-text { text-align: center; color: #92a4c9; font-size: 16px; margin-bottom: 20px; }
+.rank-table-body { background: rgba(255,255,255,0.02); border-radius: 0 0 12px 12px; overflow-y: auto; max-height: 50vh; }
+.loading-rank { text-align: center; padding: 30px; color: var(--cyan); }
+.rank-table-header { display: grid; grid-template-columns: 0.8fr 1.5fr 1fr 1fr; background: rgba(255,255,255,0.05); padding: 18px 10px; border-radius: 12px 12px 0 0; text-align: center; font-weight: 700; color: var(--gold); font-size: 16px; }
+.rank-row { display: grid; grid-template-columns: 0.8fr 1.5fr 1fr 1fr; padding: 16px 10px; align-items: center; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); color: white; font-size: 18px; }
 .rank-row:last-child { border-bottom: none; }
-.rank-badge {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    background: rgba(255,255,255,0.1);
-    font-weight: 900;
-    color: white;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 18px;
-}
+.rank-badge { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; background: rgba(255,255,255,0.1); font-weight: 900; color: white; font-family: 'Orbitron', sans-serif; font-size: 18px; }
 .rank-1 .rank-badge { background: var(--gold); color: #000; box-shadow: 0 0 25px rgba(255, 204, 0, 0.6); }
 .rank-2 .rank-badge { background: var(--silver); color: #000; box-shadow: 0 0 15px rgba(160, 165, 177, 0.4); }
 .rank-3 .rank-badge { background: var(--bronze); color: #000; box-shadow: 0 0 15px rgba(205, 127, 50, 0.4); }
-.rank-score {
-    color: var(--cyan);
-    font-family: 'Orbitron', sans-serif;
-    font-weight: bold;
-    font-size: 22px; 
-}
+.rank-score { color: var(--cyan); font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 22px; }
 
 /* ADMIN MODAL */
 .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
@@ -390,7 +316,7 @@ input:checked + .slider:before { transform: translateX(21px); }
 @media(max-width:900px) { 
     .main-grid { grid-template-columns:1fr; } 
     h1 { font-size:32px; } 
-    .english-text { font-size:38px; } 
+    .english-text { font-size:34px; } 
 }
 @media(max-width:600px) {
     body { padding:10px; } 
@@ -419,12 +345,12 @@ input:checked + .slider:before { transform: translateX(21px); }
     
     .sentence-box { padding:20px 15px; border-radius:20px; } 
     .question-number { font-size:12px; padding:6px 12px; } 
-    .english-text { font-size:32px; margin-top:15px; } 
+    .english-text { font-size:28px; margin-top:15px; } 
     .thai-text { font-size:16px; margin-top:8px; }
     
     .countdown-wrapper { margin:20px auto 10px; width:120px; height:120px; } 
     .countdown-wrapper::before { width:95px; height:95px; } 
-    .countdown { font-size:24px; }
+    .countdown { font-size:22px; }
     
     .controls { margin-top:15px; } 
     button { width:100%; padding:14px; font-size:16px; border-radius:14px; max-width: 100%;}
@@ -537,7 +463,7 @@ input:checked + .slider:before { transform: translateX(21px); }
             
             <div class="thai-text" id="thaiText">กำลังเตรียมข้อมูลข้อสอบ</div>
             <div class="countdown-wrapper">
-                <div class="countdown" id="countdown">01:00</div>
+                <div class="countdown" id="countdown">00:00</div>
             </div>
             <div class="controls">
                 <button class="start-btn" id="startBtn" onclick="startRecognition()" disabled>⏳ กรุณารอสักครู่</button>
@@ -559,7 +485,8 @@ input:checked + .slider:before { transform: translateX(21px); }
         วิทยาลัยสารพัดช่างศรีสะเกษ
     </div>
 
-    <div class="footer" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
+    <!-- 🔒 HIDDEN ADMIN TRIGGER (Double Click หรือคลิก 3 ครั้งสำหรับมือถือ) -->
+    <div class="footer" id="footerAdminTrigger" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
 </div>
 
 <!-- 🎁 Reward Modal Panel -->
@@ -606,7 +533,7 @@ input:checked + .slider:before { transform: translateX(21px); }
 <div class="modal-overlay" id="adminModal">
     <div class="modal-content">
         <button class="close-modal" onclick="closeAdminModal()">✕</button>
-        <div class="modal-title">Admin Panel</div>
+        <div class="modal-title">⚙️ Admin Panel</div>
 
         <div id="adminLoginGroup" class="admin-login-group">
             <input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
@@ -737,7 +664,7 @@ input:checked + .slider:before { transform: translateX(21px); }
                 </div>
 
                 <div class="stock-item">
-                    <div class="stock-label">⏱️ เวลาทดสอบ (นาที:วินาที)</div>
+                    <div class="stock-label">⏱️ เวลาทดสอบรวม (นาที:วินาที)</div>
                     <div class="stock-btns" style="gap: 5px;">
                         <input type="number" id="adminTimeMin" min="0" max="60" value="1" class="admin-time-input"> :
                         <input type="number" id="adminTimeSec" min="0" max="59" value="00" class="admin-time-input">
@@ -811,7 +738,6 @@ let passCount = 0;
 let failCount = 0;
 
 let recognition;
-let totalTimeLeftSeconds = 0;
 let testTimerInterval = null;
 let isTestRunning = false; 
 let isRunning = false; 
@@ -823,6 +749,7 @@ let nextQuestionTimer = null;
 let displayInterval = null; 
 let startMicDelayTimeout = null; 
 let questionTimeout = null;     
+let speechCountdownInterval = null;
 
 let adminConfig = {
     passRequirement: 5,
@@ -836,22 +763,36 @@ let adminConfig = {
 
 let initialCountdownTimer = null;
 let initialTime = 10;
+let footerClickCount = 0;
+let footerClickTimer = null;
 
 // ==========================================
-// 💡 Dynamic Calculation & Recognition (NEW)
+// 💡 Dynamic Calculation & Recognition Algorithm
 // ==========================================
+function countSyllables(word) {
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (word.length <= 3) return 1;
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+    const syllables = word.match(/[aeiouy]{1,2}/g);
+    return syllables ? syllables.length : 1;
+}
+
 function calculateDynamicTime(sentence) {
     const words = sentence.trim().split(/\s+/);
     const wordCount = words.length;
+    let totalSyllables = 0;
+    words.forEach(w => totalSyllables += countSyllables(w));
+
+    // 1. เวลาสำหรับการแสดงข้อความแบบ Progressive Reveal (คำละ 500ms + Base 1.5s)
+    const displayTime = Math.max(2500, (wordCount * 500) + 1000);
     
-    // 1. เวลาสำหรับแสดงข้อความ (อ่านคำละ 600ms) ขั้นต่ำ 3 วินาที
-    const displayTime = Math.max(3000, wordCount * 600);
+    // 2. Dynamic Speech Timeout Algorithm
+    // ขยายเวลาตามจำนวนพยางค์และความยาวประโยค (8-15 วินาที)
+    let speechTime = Math.max(8000, (totalSyllables * 850) + (wordCount * 500));
+    if (speechTime > 15000) speechTime = 15000; // Cap ไว้สูงสุดที่ 15 วินาทีตามสเปก
     
-    // 2. เวลาสำหรับเปิดไมค์รับเสียงพูด (พูดคำละ 1200ms) ขั้นต่ำ 5 วินาที, สูงสุด 20 วินาที
-    let speechTime = Math.max(5000, wordCount * 1200);
-    if (speechTime > 20000) speechTime = 20000; // Cap ไว้ที่ 20 วิ
-    
-    return { displayTime, speechTime, wordCount };
+    return { displayTime, speechTime, wordCount, totalSyllables };
 }
 
 function renderSequentialText(sentence, totalDisplayTime) {
@@ -866,26 +807,46 @@ function renderSequentialText(sentence, totalDisplayTime) {
     words.forEach(word => {
         const span = document.createElement("span");
         span.innerText = word + " ";
-        span.style.opacity = "0"; 
-        span.style.transition = "opacity 0.2s ease-in"; 
+        span.style.opacity = "0.15"; 
+        span.style.transition = "opacity 0.25s ease-in-out, color 0.25s ease-in-out"; 
         container.appendChild(span);
     });
 
     const spans = container.querySelectorAll("span");
-    
     clearInterval(displayInterval);
     
-    // คำนวณ Interval ให้พอดีกับเวลา DisplayTime ทั้งหมด
     const intervalTime = Math.floor(totalDisplayTime / words.length);
     
     displayInterval = setInterval(() => {
         if (wordIndex < spans.length) {
             spans[wordIndex].style.opacity = "1";
+            spans[wordIndex].style.color = "#35d8ff";
             wordIndex++;
         } else {
             clearInterval(displayInterval);
         }
     }, intervalTime); 
+}
+
+function startSpeechCountdown(seconds) {
+    clearInterval(speechCountdownInterval);
+    let remaining = seconds;
+    
+    const updateDisplay = () => {
+        let m = Math.floor(remaining / 60).toString().padStart(2, '0');
+        let s = (remaining % 60).toString().padStart(2, '0');
+        document.getElementById("countdown").innerText = `${m}:${s}`;
+    };
+
+    updateDisplay();
+    speechCountdownInterval = setInterval(() => {
+        remaining--;
+        if (remaining >= 0) {
+            updateDisplay();
+        } else {
+            clearInterval(speechCountdownInterval);
+        }
+    }, 1000);
 }
 
 function startRecognition() {
@@ -899,7 +860,9 @@ function startRecognition() {
     document.getElementById("status").innerHTML = "เตรียมตัวพูด...";
     document.getElementById("status").className = "status";
     
-    document.getElementById("heardText").innerHTML = `🕒 ให้เวลาอ่าน ${Math.ceil(timing.displayTime/1000)} วิ | ให้เวลาพูด ${Math.ceil(timing.speechTime/1000)} วิ`;
+    const displaySec = Math.ceil(timing.displayTime/1000);
+    const speechSec = Math.ceil(timing.speechTime/1000);
+    document.getElementById("heardText").innerHTML = `🕒 แสดงตัวอย่าง ${displaySec} วิ | เปิดไมค์พูด ${speechSec} วิ (ยาว ${timing.totalSyllables} พยางค์)`;
 
     renderSequentialText(currentSentence, timing.displayTime);
 
@@ -909,15 +872,26 @@ function startRecognition() {
             recognition.start();
             document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟังเสียง...";
             document.getElementById("status").innerHTML = "พูดเลย!";
-            document.getElementById("heardText").innerHTML = "AI กำลังฟัง...";
+            document.getElementById("heardText").innerHTML = "AI กำลังฟังการออกเสียง...";
+
+            startSpeechCountdown(speechSec);
 
             questionTimeout = setTimeout(() => {
                 if (isRunning) {
                     isRunning = false;
                     recognition.stop();
+                    clearInterval(speechCountdownInterval);
                     document.getElementById("status").innerHTML = "หมดเวลาพูด ⏱️";
                     document.getElementById("status").className = "status fail";
-                    document.getElementById("heardText").innerHTML = "กำลังประมวลผล...";
+                    document.getElementById("heardText").innerHTML = "ประมวลผลคำตอบช้าเกินไป ข้ามไปข้อถัดไป...";
+                    
+                    failCount++;
+                    document.getElementById("failCount").innerHTML = failCount;
+                    playFailSound();
+
+                    nextQuestionTimer = setTimeout(() => {
+                        nextQuestion();
+                    }, 1500);
                 }
             }, timing.speechTime);
 
@@ -931,8 +905,24 @@ function startRecognition() {
 }
 
 // ==========================================
-// 🎯 ฟังก์ชันจัดการ Level UI
+// 🎯 ฟังก์ชันจัดการ Level UI & Mobile Admin Trigger
 // ==========================================
+function setupMobileAdminTrigger() {
+    const footer = document.getElementById("footerAdminTrigger");
+    footer.addEventListener("click", () => {
+        footerClickCount++;
+        if (footerClickCount === 1) {
+            footerClickTimer = setTimeout(() => {
+                footerClickCount = 0;
+            }, 800);
+        } else if (footerClickCount >= 3) {
+            clearTimeout(footerClickTimer);
+            footerClickCount = 0;
+            openAdminModal();
+        }
+    });
+}
+
 function applyLevelControl() {
     const userContainer = document.getElementById("userLevelContainer");
     const userSelect = document.getElementById("userLevel");
@@ -990,7 +980,7 @@ function confirmInitialLevel() {
 window.onload = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("เบราว์เซอร์ของคุณไม่รองรับระบบแยกแยะเสียง กรุณาเปิดด้วย Google Chrome หรือ Safari");
+        alert("เบราว์เซอร์ของคุณไม่รองรับระบบแยกแยะเสียง กรุณาเปิดด้วย Google Chrome");
         return;
     }
 
@@ -1003,12 +993,13 @@ window.onload = async () => {
         if(!isRunning) return;
         isRunning = false;
         clearTimeout(questionTimeout); 
+        clearInterval(speechCountdownInterval);
 
         const speechResult = event.results[0][0].transcript;
         const target = questions[currentQuestion].english;
         const score = similarity(target, speechResult);
 
-        document.getElementById("heardText").innerHTML = "AI ได้ยิน: " + speechResult;
+        document.getElementById("heardText").innerHTML = "AI ได้ยิน: \"" + speechResult + "\"";
         document.getElementById("score").innerHTML = score + "%";
         totalScore += score;
         document.getElementById("totalScore").innerHTML = totalScore;
@@ -1030,10 +1021,8 @@ window.onload = async () => {
         document.getElementById("startBtn").disabled = true;
 
         nextQuestionTimer = setTimeout(() => {
-            if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                nextQuestion();
-            }
-        }, 1200);
+            nextQuestion();
+        }, 1500);
     };
 
     recognition.onerror = function(event){
@@ -1041,6 +1030,8 @@ window.onload = async () => {
         if(!isRunning) return;
         isRunning = false; 
         clearTimeout(questionTimeout);
+        clearInterval(speechCountdownInterval);
+
         document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
         document.getElementById("status").className = "status fail";
         document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ข้ามไปข้อถัดไป...";
@@ -1050,9 +1041,7 @@ window.onload = async () => {
         playFailSound();
         
         nextQuestionTimer = setTimeout(() => {
-            if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                nextQuestion();
-            }
+            nextQuestion();
         }, 1500);
     };
 
@@ -1061,22 +1050,23 @@ window.onload = async () => {
             console.log("Recognition ended unexpectedly."); 
             isRunning = false;
             clearTimeout(questionTimeout);
+            clearInterval(speechCountdownInterval);
+
             document.getElementById("status").innerHTML = "เสียงเงียบเกินไป ⚠️";
             document.getElementById("status").className = "status fail";
-            document.getElementById("heardText").innerHTML = "ไม่พบเสียงพูดข้ามไปข้อถัดไป...";
+            document.getElementById("heardText").innerHTML = "ไม่พบเสียงพูด ข้ามไปข้อถัดไป...";
             
             failCount++;
             document.getElementById("failCount").innerHTML = failCount;
             playFailSound();
 
             nextQuestionTimer = setTimeout(() => {
-                if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                    nextQuestion();
-                }
+                nextQuestion();
             }, 1500);
         }
     };
 
+    setupMobileAdminTrigger();
     monitorMaintenance(); 
     monitorAdminSettings(); 
     showInitialPopup(); 
@@ -1173,7 +1163,6 @@ function selectUserMode(mode) {
         btnPractice.classList.remove("active");
     }
 
-    updateUIBasedOnState();
     if (questions.length > 0) prepareQuestions();
 }
 
@@ -1196,12 +1185,10 @@ async function fetchRankData() {
              rankData = data; 
         } else {
              rankData = [
-                 { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
-                 { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
-                 { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
-                 { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
-                 { rank: 5, name: "นะโม", attempts: 1, score: 0 },
-                 { rank: 6, name: "กา", attempts: 1, score: 0 }
+                 { rank: 1, name: "นักศึกษาแผนกอิเล็กทรอนิกส์", attempts: 3, score: 467 },
+                 { rank: 2, name: "สมชาย สายเชื่อม", attempts: 2, score: 380 },
+                 { rank: 3, name: "วิชัย วงจรดี", attempts: 1, score: 290 },
+                 { rank: 4, name: "อนันต์ สัญญาณชัด", attempts: 1, score: 250 }
              ];
         }
 
@@ -1233,7 +1220,7 @@ function renderRankTable(data) {
             <div class="rank-row ${rankClass}">
                 <div class="rank-badge">${actualRank}</div>
                 <div style="text-align: left; padding-left: 10px; font-weight: 500;">${user.name}</div>
-                <div>${user.attempts}</div>
+                <div>${user.attempts || 1}</div>
                 <div class="rank-score">${user.score}</div>
             </div>
         `;
@@ -1332,6 +1319,13 @@ function prepareQuestions() {
     let shuffled = finalFiltered.sort(() => 0.5 - Math.random());
     questions = shuffled.slice(0, adminConfig.questionCount);
     currentQuestion = 0;
+    totalScore = 0;
+    passCount = 0;
+    failCount = 0;
+
+    document.getElementById("totalScore").innerText = "0";
+    document.getElementById("passCount").innerText = "0";
+    document.getElementById("failCount").innerText = "0";
 
     const startBtn = document.getElementById("startBtn");
     startBtn.onclick = startRecognition;
@@ -1339,7 +1333,6 @@ function prepareQuestions() {
     if(!isTestRunning) {
         loadQuestion(0);
     }
-    updateUIBasedOnState(); 
 }
 
 function loadQuestion(index){
@@ -1350,7 +1343,7 @@ function loadQuestion(index){
     if (adminConfig.cancelRequirement) {
         document.getElementById("englishText").innerHTML = questions[index].english;
     } else {
-        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค</span>';
+        document.getElementById("englishText").innerHTML = '<span style="font-size: 22px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค</span>';
     }
     
     document.getElementById("thaiText").innerHTML = questions[index].thai;
@@ -1371,7 +1364,7 @@ function loadQuestion(index){
         skipBtn.style.display = "flex";
     }
 
-    if(!isTestRunning) { updateTimerDisplay(adminConfig.testDurationSeconds); }
+    document.getElementById("countdown").innerText = "00:00";
 
     const startBtn = document.getElementById("startBtn");
     startBtn.disabled = false;
@@ -1380,6 +1373,7 @@ function loadQuestion(index){
 
 function nextQuestion(){
     clearInterval(displayInterval); 
+    clearInterval(speechCountdownInterval);
     clearTimeout(nextQuestionTimer);
     clearTimeout(startMicDelayTimeout);
     clearTimeout(questionTimeout); 
@@ -1431,14 +1425,6 @@ function monitorAdminSettings() {
     });
 }
 
-// ==========================================
-// 🚀 ส่วนเติมเต็มฟังก์ชันที่หายไปให้สมบูรณ์พร้อมใช้งาน
-// ==========================================
-function updateUIBasedOnState() {
-    // อัปเดต UI เมื่อมีการเปลี่ยนโหมด
-    console.log("UI updated based on state.");
-}
-
 function monitorMachine() {
     db.ref('machine/status').on('value', snap => {
         currentMachineStatus = snap.val() || 'ready';
@@ -1477,8 +1463,8 @@ function updateAdminConfig(key, diff) {
 }
 
 function updateTestTime() {
-    const min = parseInt(document.getElementById("adminTimeMin").value);
-    const sec = parseInt(document.getElementById("adminTimeSec").value);
+    const min = parseInt(document.getElementById("adminTimeMin").value) || 0;
+    const sec = parseInt(document.getElementById("adminTimeSec").value) || 0;
     db.ref('machine/config/testDurationSeconds').set(min * 60 + sec);
 }
 
@@ -1498,6 +1484,7 @@ function setAdminForcedLevel() {
 
 function verifyAdmin() {
     if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
+        isAdminLoggedIn = true;
         document.getElementById("adminError").style.display = "none";
         document.getElementById("adminLoginGroup").style.display = "none";
         document.getElementById("adminControlGroup").style.display = "block";
@@ -1506,11 +1493,16 @@ function verifyAdmin() {
     }
 }
 
-function openAdminModal() { document.getElementById("adminModal").style.display = "flex"; }
-function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; }
+function openAdminModal() { 
+    document.getElementById("adminModal").style.display = "flex"; 
+}
+function closeAdminModal() { 
+    document.getElementById("adminModal").style.display = "none"; 
+}
 
 function playPassSound() { audioPass.play().catch(e=>console.log(e)); }
 function playFailSound() { audioFail.play().catch(e=>console.log(e)); }
+
 function playSentenceAudio() {
     if(questions[currentQuestion]) {
         const utter = new SpeechSynthesisUtterance(questions[currentQuestion].english);
@@ -1520,12 +1512,6 @@ function playSentenceAudio() {
 }
 function stopSentenceAudio() { window.speechSynthesis.cancel(); }
 
-function updateTimerDisplay(seconds) {
-    let m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    let s = (seconds % 60).toString().padStart(2, '0');
-    document.getElementById("countdown").innerText = `${m}:${s}`;
-}
-
 function evaluateFinalResult() { 
     isTestRunning = false;
     document.getElementById("questionNumber").innerHTML = "ทดสอบเสร็จสิ้น!";
@@ -1533,15 +1519,26 @@ function evaluateFinalResult() {
     document.getElementById("thaiText").innerHTML = "การทดสอบจบลงแล้ว";
     document.getElementById("status").innerHTML = "สรุปผลสอบ";
     document.getElementById("status").className = "status pass";
-    document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ`;
+    document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ (คะแนนรวม: ${totalScore})`;
     
     document.getElementById("startBtn").disabled = true;
     document.getElementById("startBtn").innerHTML = "จบการทำงาน";
     
+    // ส่งผลไปยัง Google Sheet สำหรับตาราง Rank
+    const sName = document.getElementById("studentName").value.trim() || "ผู้ทดสอบไม่ระบุชื่อ";
+    try {
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: sName, score: totalScore, pass: passCount })
+        });
+    } catch(e) { console.error("Error saving score:", e); }
+
+    // สั่งปลดล็อกตู้ ESP32 หากสอบผ่านเกณฑ์ในโหมดปกติ
     if (passCount >= adminConfig.passRequirement && !adminConfig.cancelRequirement) {
         applauseAudio.play().catch(e=>console.log(e));
-        document.getElementById("status").innerHTML = "คุณผ่านเกณฑ์! กรุณารอรับรางวัล";
-        // Logic สำหรับการสั่งให้ตู้จ่ายของรางวัลสามารถเชื่อมกับ Firebase ตรงนี้ได้เลย
+        document.getElementById("status").innerHTML = "คุณผ่านเกณฑ์! กรุณารอรับรางวัล 🎁";
         if (currentMachineStatus !== 'busy') {
             db.ref('machine/status').set('unlocked');
         }
