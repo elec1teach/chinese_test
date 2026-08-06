@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI Pronunciation Test Station</title>
 
-<!-- 🚀 เร่งความเร็วการเชื่อมต่อ Google Apps Script & Google User Content -->
-<link rel="preconnect" href="https://script.google.com" crossorigin>
-<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
-
 <!-- 🚀 สคริปต์บังคับเปิดใน Google Chrome / External Browser อัตโนมัติ -->
 <script>
 (function forceExternalBrowser() {
@@ -841,6 +837,66 @@ let initialCountdownTimer = null;
 let initialTime = 10;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+
+// ==========================================
+// ➕ เพิ่มฟังก์ชันเปรียบเทียบประโยค (Similarity)
+// ==========================================
+function similarity(s1, s2) {
+    if (!s1 || !s2) return 0;
+    let longer = s1.toLowerCase().replace(/[^\w\s]/gi, '');
+    let shorter = s2.toLowerCase().replace(/[^\w\s]/gi, '');
+    if (longer.length < shorter.length) {
+        let temp = longer; longer = shorter; shorter = temp;
+    }
+    let longerLength = longer.length;
+    if (longerLength == 0) return 100;
+
+    let costs = new Array();
+    for (let i = 0; i <= longer.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= shorter.length; j++) {
+            if (i == 0) costs[j] = j;
+            else {
+                if (j > 0) {
+                    let newValue = costs[j - 1];
+                    if (longer.charAt(i - 1) != shorter.charAt(j - 1))
+                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+        }
+        if (i > 0) costs[shorter.length] = lastValue;
+    }
+    let matchPercentage = (1 - (costs[shorter.length] / longerLength)) * 100;
+    return Math.round(matchPercentage);
+}
+
+
+// ==========================================
+// ➕ เพิ่มฟังก์ชันเล่นเสียงต่างๆ (Sound Effects & TTS)
+// ==========================================
+function playPassSound() {
+    new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg').play().catch(e => console.log(e));
+}
+
+function playFailSound() {
+    new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_cowbell.ogg').play().catch(e => console.log(e));
+}
+
+function playSentenceAudio() {
+    if (!questions[currentQuestion]) return;
+    const text = questions[currentQuestion].english;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+}
+
+function stopSentenceAudio() {
+    window.speechSynthesis.cancel();
+}
+
+
 // ==========================================
 // 🔔 ฟังก์ชันเล่นเสียง "ตื้ด" แจ้งเตือนเมื่อถึงเวลาเริ่มพูด
 // ==========================================
@@ -1025,7 +1081,7 @@ window.onload = async () => {
 };
 
 // ==========================================
-// 🔄 ฟังก์ชันเชื่อมต่อใหม่ (บังคับดึงข้อมูลสดจาก GAS ไม่ใช้ Cache)
+// 🔄 ฟังก์ชันเชื่อมต่อใหม่
 // ==========================================
 function retryConnection() {
     document.getElementById("reconnectBtn").style.display = "none";
@@ -1038,8 +1094,7 @@ function retryConnection() {
     document.getElementById("englishText").innerHTML = "Loading...";
     document.getElementById("thaiText").innerHTML = "กำลังเตรียมข้อมูลข้อสอบ";
     
-    // ส่งค่า true เพื่อบังคับให้ดึงข้อมูลจาก GAS โดยไม่ใช้ Cache
-    fetchQuestionsFromGAS(true);
+    fetchQuestionsFromGAS();
 }
 
 // ==========================================
@@ -1123,48 +1178,33 @@ function openRankModal() {
 }
 function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
 
-// ==========================================
-// 🏆 ฟังก์ชันดึงข้อมูล Rank แบบมีระบบ Cache เร่งความเร็ว
-// ==========================================
-async function fetchRankData(forceRefresh = false) {
+async function fetchRankData() {
     const tableBody = document.getElementById("rankTableBody");
-    const RANK_CACHE_KEY = "gas_rank_cache";
+    tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
 
-    // 1. แสดงข้อมูล Rank จาก Cache ก่อนทันทีถ้ามี
-    const cachedRank = sessionStorage.getItem(RANK_CACHE_KEY);
-    if (cachedRank && !forceRefresh) {
-        renderRankTable(JSON.parse(cachedRank));
-    } else {
-        tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
-    }
-
-    // 2. ดึงข้อมูลใหม่จาก GAS เพื่ออัปเดตตาราง
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getRank");
         const data = await response.json();
         
         let rankData = [];
-        if (Array.isArray(data) && data.length > 0 && data[0].name) {
-            rankData = data; 
-            sessionStorage.setItem(RANK_CACHE_KEY, JSON.stringify(data)); // เก็บแคชไว้ใช้รอบหน้า
+        if(Array.isArray(data) && data.length > 0 && data[0].name) {
+             rankData = data; 
         } else {
-            rankData = [
-                { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
-                { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
-                { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
-                { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
-                { rank: 5, name: "นะโม", attempts: 1, score: 0 },
-                { rank: 6, name: "กา", attempts: 1, score: 0 }
-            ];
+             rankData = [
+                 { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
+                 { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
+                 { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
+                 { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
+                 { rank: 5, name: "นะโม", attempts: 1, score: 0 },
+                 { rank: 6, name: "กา", attempts: 1, score: 0 }
+             ];
         }
 
         renderRankTable(rankData);
 
     } catch (error) {
         console.error("Error fetching rank:", error);
-        if (!cachedRank) {
-            tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
-        }
+        tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
     }
 }
 
@@ -1236,99 +1276,27 @@ function saveMaintenanceInfo() {
     alert("บันทึกข้อมูลแจ้งเตือน Maintenance สำเร็จเรียบร้อยแล้ว!");
 }
 
-// ==========================================
-// 🚀 ฟังก์ชันดึงข้อสอบแบบ "ทันทีทันใด" (Instant Load by Cache + Silent Revalidate)
-// ==========================================
-async function fetchQuestionsFromGAS(forceRefresh = false) {
-    const CACHE_KEY = "gas_questions_cache";
-    const CACHE_TIME_KEY = "gas_questions_cache_timestamp";
-    const CACHE_EXPIRE_MS = 1000 * 60 * 30; // อายุแคช 30 นาที (ปรับเปลี่ยนได้)
-
-    // 1. ตรวจสอบข้อมูลใน LocalStorage ก่อน
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    const cacheTimestamp = localStorage.getItem(CACHE_TIME_KEY);
-    const isCacheValid = cachedData && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_EXPIRE_MS);
-
-    // 2. ถ้ามีแคชและยังไม่หมดอายุ -> โหลดแสดงผลทันทีใน 0.01 วินาที!
-    if (isCacheValid && !forceRefresh) {
-        console.log("⚡ โหลดคลังข้อสอบจาก Cache ทันที (Instant Load)!");
-        try {
-            masterQuestions = JSON.parse(cachedData);
-            document.getElementById("reconnectBtn").style.display = "none";
-            document.getElementById("startBtn").style.display = "inline-block";
-            prepareQuestions();
-            
-            // แอบอัปเดตข้อมูลใหม่จาก GAS ในพื้นหลัง (ไม่รบกวนผู้ใช้)
-            fetchGASInBackground(CACHE_KEY, CACHE_TIME_KEY);
-            return;
-        } catch (e) {
-            console.warn("แคชมีปัญหา กำลังดึงข้อมูลใหม่จากเซิร์ฟเวอร์...", e);
-        }
-    }
-
-    // 3. ถ้าไม่มีแคช หรือกดปุ่มเชื่อมต่อใหม่ -> ดึงข้อมูลจาก GAS พร้อมระบบตัดเวลา (Timeout 8 วินาที)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // ตัดการทำงานถ้าเกิน 8 วินาที
-
+async function fetchQuestionsFromGAS() {
     try {
-        console.log("🌐 กำลังเชื่อมต่อ Google Apps Script...");
-        const response = await fetch(GAS_QUESTION_URL, { 
-            signal: controller.signal,
-            cache: 'no-store' // ป้องกันเบราว์เซอร์จำแคชเก่าของ HTTP
-        });
-        clearTimeout(timeoutId);
-
+        const response = await fetch(GAS_QUESTION_URL);
         const data = await response.json();
 
         if (Array.isArray(data) && data.length > 0) {
             masterQuestions = data;
-            
-            // บันทึกข้อสอบลง LocalStorage เพื่อใช้ทันทีในรอบต่อไป
-            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-            localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-
             document.getElementById("reconnectBtn").style.display = "none";
             document.getElementById("startBtn").style.display = "inline-block";
-            prepareQuestions();
-            console.log("✅ ดึงข้อสอบสำเร็จและบันทึกลง Cache แล้ว");
+            prepareQuestions(); 
         } else {
             throw new Error("Empty Data");
         }
     } catch (error) {
-        clearTimeout(timeoutId);
         console.error("Error fetching questions:", error);
-
-        // ถ้าเชื่อมต่อเน็ตไม่ได้ แต่มีแคชเก่าเหลืออยู่ ให้ดึงแคชเก่ามาใช้แก้ขัดก่อน
-        if (cachedData) {
-            console.warn("⚠️ ใช้ข้อมูลจาก Cache เก่าเนื่องจากเชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ");
-            masterQuestions = JSON.parse(cachedData);
-            document.getElementById("reconnectBtn").style.display = "none";
-            document.getElementById("startBtn").style.display = "inline-block";
-            prepareQuestions();
-            return;
-        }
-
-        // หากไม่มีทั้งเน็ตและไม่มีแคช -> แสดงหน้าจอ Error
         document.getElementById("questionNumber").innerHTML = "การเชื่อมต่อขัดข้อง";
         document.getElementById("englishText").innerHTML = "Connection<br>Error";
         document.getElementById("thaiText").innerHTML = "ไม่สามารถเชื่อมต่อคลังข้อสอบได้";
+        
         document.getElementById("startBtn").style.display = "none";
         document.getElementById("reconnectBtn").style.display = "inline-block";
-    }
-}
-
-// ฟังก์ชันแอบอัปเดตข้อมูลเงียบๆ ในพื้นหลัง
-async function fetchGASInBackground(cacheKey, timeKey) {
-    try {
-        const response = await fetch(GAS_QUESTION_URL);
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-            localStorage.setItem(cacheKey, JSON.stringify(data));
-            localStorage.setItem(timeKey, Date.now().toString());
-            console.log("🔄 อัปเดตคลังข้อสอบในพื้นหลังเรียบร้อยแล้ว");
-        }
-    } catch (err) {
-        console.log("Background sync failed (ไม่ส่งผลต่อการทำงานหลัก):", err);
     }
 }
 
@@ -1391,7 +1359,6 @@ function renderSequentialText(sentence) {
     
     clearInterval(displayInterval);
     
-    // 💡 ปรับปรุง: ทยอยแสดงข้อความจนครบภายใน 5 วินาที (5,000 มิลลิวินาที)
     const intervalTime = Math.floor(5000 / words.length);
     
     displayInterval = setInterval(() => {
@@ -1412,8 +1379,7 @@ function loadQuestion(index){
     if (adminConfig.cancelRequirement) {
         document.getElementById("englishText").innerHTML = questions[index].english;
     } else {
-        // ปรับข้อความแนะนำเป็นเวลารวม 15 วินาที
-        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลา 15 วินาที)</span>';
+        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลา 10 วินาที)</span>';
     }
     
     document.getElementById("thaiText").innerHTML = questions[index].thai;
@@ -1753,25 +1719,22 @@ function startRecognition() {
 
     isRunning = false; 
     document.getElementById("startBtn").disabled = true;
-    // 💡 ปรับปรุง: อัปเดตข้อความบนปุ่มเป็น 5 วิ + รอ 1 วิ (รวม 6 วิ)
-    document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (6 วินาที)";
+    document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (5 วินาที)";
     document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
     document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "แสดงโจทย์ 5 วินาที + ค้างรออีก 1 วินาทีก่อนเปิดไมค์...";
+    document.getElementById("heardText").innerHTML = "เตรียมอ่านประโยคเมื่อไมโครโฟนเปิดใน 5 วินาที...";
 
     renderSequentialText(questions[currentQuestion].english);
 
-    // 💡 ปรับปรุง: เปิดไมค์รับเสียงที่วินาทีที่ 6 (5s แสดง + 1s ค้างรอ = 6,000 มิลลิวินาที)
     startMicDelayTimeout = setTimeout(() => {
         if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
 
         isRunning = true;
         
-        // 🔔 เรียกใช้เสียงเตือน "ตื้ด" เมื่อถึงเวลาเริ่มพูด
+        // 🔔 เรียกใช้เสียงเตือน "ตื้ด" เมื่อข้อความแสดงครบ 5 วินาที
         playBeepSound();
         
-        // ปรับเป็นเวลาเหลือ 9 วินาทีสำหรับการพูด (เวลารวมข้อละ 15 วินาที)
-        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 9 วินาที)";
+        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 5 วินาที)";
         document.getElementById("status").innerHTML = "🎙️ กำลังฟังเสียงของคุณ...";
         document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ...";
 
@@ -1781,7 +1744,6 @@ function startRecognition() {
             console.error("Mic start error:", e);
         }
 
-        // จับเวลาพูด 9 วินาที (9,000 มิลลิวินาที)
         questionTimeout = setTimeout(() => {
             if (isRunning) {
                 isRunning = false;
@@ -1789,7 +1751,7 @@ function startRecognition() {
                 
                 document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
                 document.getElementById("status").className = "status fail";
-                document.getElementById("heardText").innerHTML = "หมดเวลา 9 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
+                document.getElementById("heardText").innerHTML = "หมดเวลา 5 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
                 
                 failCount++;
                 document.getElementById("failCount").innerHTML = failCount;
@@ -1803,11 +1765,14 @@ function startRecognition() {
                     }
                 }, 1500);
             }
-        }, 9000);
+        }, 5000);
 
-    }, 6000);
+    }, 5000);
 }
 
+// ==========================================
+// 🎯 เพิ่มฟังก์ชันจบการทดสอบ (ส่วนที่โดนตัดขาดไป)
+// ==========================================
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     clearInterval(displayInterval); 
@@ -1816,153 +1781,27 @@ function evaluateFinalResult() {
     isTestRunning = false;
     
     document.getElementById("audioControls").style.display = "none";
-    document.getElementById("userLevel").disabled = false;
     
-    const name = document.getElementById("studentName").value || "Unknown User";
-
-    document.getElementById("englishText").innerHTML = "Test Completed!";
-    document.getElementById("thaiText").innerHTML = "สิ้นสุดการทดสอบ";
-    document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
-
-    let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
-    document.getElementById("score").innerHTML = finalPercent + "%";
-
+    // สรุปผล
+    let resultMessage = "";
     if (passCount >= adminConfig.passRequirement) {
-        if (adminConfig.cancelRequirement) { 
-            document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
-            document.getElementById("status").className = "status pass";
-            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").onclick = prepareQuestions; 
-            db.ref('machine/status').set('ready'); 
-            applauseAudio.play().catch(e => console.log("Audio play error:", e));
-        } else {
-            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
-            let expireTime = Date.now() + (5 * 60 * 1000); 
-
-            db.ref('machine/otps/' + otpCode).set({
-                valid: true,
-                expire: expireTime,
-                userName: name 
-            }).then(() => {
-                document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
-                document.getElementById("status").className = "status pass";
-                document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
-                document.getElementById("startBtn").disabled = true;
-                applauseAudio.play().catch(e => console.log("Audio play error:", e));
-            });
-        }
+        resultMessage = "ผ่านเกณฑ์รับรางวัล 🎉";
+        document.getElementById("status").className = "status pass";
+        if(applauseAudio) applauseAudio.play().catch(e => console.log(e));
     } else {
-        if (adminConfig.cancelRequirement) {
-            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ (โหมดฝึกซ้อม)";
-            document.getElementById("status").className = "status fail";
-            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").onclick = prepareQuestions;
-        } else {
-            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
-            document.getElementById("status").className = "status fail";
-            document.getElementById("startBtn").innerHTML = "จบการทดสอบ";
-            document.getElementById("startBtn").disabled = true;
-            db.ref('machine/status').set('ready'); 
-        }
+        resultMessage = "ไม่ผ่านเกณฑ์ ❌";
+        document.getElementById("status").className = "status fail";
     }
-
-    saveToGoogleSheet(name, totalScore, passCount, failCount);
-}
-
-function similarity(s1, s2) {
-    let longer = s1.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-    let shorter = s2.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
     
-    if (longer.length < shorter.length) {
-        let temp = longer; longer = shorter; shorter = temp;
-    }
-    if (longer.length == 0) return 100;
+    document.getElementById("status").innerHTML = resultMessage;
+    document.getElementById("englishText").innerHTML = "สิ้นสุดการทดสอบ";
+    document.getElementById("thaiText").innerHTML = `ตอบถูกทั้งหมด ${passCount} ข้อ | คะแนนรวม ${totalScore} คะแนน`;
     
-    let longerLength = longer.length;
-    let costs = new Array();
-    for (let i = 0; i <= longer.length; i++) {
-        let lastValue = i;
-        for (let j = 0; j <= shorter.length; j++) {
-            if (i == 0) costs[j] = j;
-            else {
-                if (j > 0) {
-                    let newValue = costs[j - 1];
-                    if (longer.charAt(i - 1) != shorter.charAt(j - 1))
-                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                    costs[j - 1] = lastValue;
-                    lastValue = newValue;
-                }
-            }
-        }
-        if (i > 0) costs[shorter.length] = lastValue;
-    }
-    let score = Math.round(((longerLength - costs[shorter.length]) / parseFloat(longerLength)) * 100);
-    return score > 100 ? 100 : score;
-}
-
-function saveToGoogleSheet(name, score, pass, fail) {
-    const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&score=${score}&pass=${pass}&fail=${fail}`;
-    
-    fetch(url, { mode: 'no-cors' })
-        .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
-        .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
-}
-
-function playPassSound() {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    let osc = audioCtx.createOscillator();
-    let gainNode = audioCtx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
-    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-    
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.5);
-}
-
-function playFailSound() {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    let osc = audioCtx.createOscillator();
-    let gainNode = audioCtx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(300, audioCtx.currentTime); 
-    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
-    
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
-}
-
-let currentUtterance = null;
-function playSentenceAudio() {
-    stopSentenceAudio(); 
-    if (questions.length === 0 || currentQuestion >= questions.length) return;
-    const textToSpeak = questions[currentQuestion].english;
-    
-    currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
-    currentUtterance.lang = 'en-US'; 
-    currentUtterance.rate = 0.85; 
-    
-    window.speechSynthesis.speak(currentUtterance);
-}
-
-function stopSentenceAudio() {
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel(); 
-    }
+    // ตั้งค่าปุ่มเพื่อเริ่มรอบใหม่
+    const startBtn = document.getElementById("startBtn");
+    startBtn.innerHTML = "🔄 เริ่มการทดสอบรอบใหม่";
+    startBtn.disabled = false;
+    startBtn.onclick = prepareQuestions;
 }
 </script>
 </body>
