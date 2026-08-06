@@ -835,30 +835,9 @@ let adminConfig = {
 
 let initialCountdownTimer = null;
 let initialTime = 10;
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // ==========================================
-// 🔔 ฟังก์ชันเล่นเสียง "ตื้ด" แจ้งเตือนเมื่อถึงเวลาเริ่มพูด
-// ==========================================
-function playBeepSound() {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    let osc = audioCtx.createOscillator();
-    let gainNode = audioCtx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    osc.type = 'sine'; // เสียงเรียบๆ นุ่มๆ
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime); // ความถี่ 800Hz
-    
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2); // เฟดออกใน 0.2 วินาที
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.2);
-}
-
-// ==========================================
-// 🎯 ฟังก์ชันจัดการ Level UI
+// 🎯 ฟังก์ชันจัดการ Level UI (ใหม่)
 // ==========================================
 function applyLevelControl() {
     const userContainer = document.getElementById("userLevelContainer");
@@ -1012,7 +991,7 @@ window.onload = async () => {
     monitorMaintenance(); 
     monitorAdminSettings(); 
     
-    // เรียกใช้ Pop-up เริ่มแรก
+    // เรียกใช้ Pop-up เริ่มแรก (ถ้าโดนบังคับ มันจะถูกข้ามอัตโนมัติในฟังก์ชัน)
     showInitialPopup(); 
     
     monitorMachine(); 
@@ -1670,10 +1649,6 @@ function startRecognition() {
         if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
 
         isRunning = true;
-        
-        // 🔔 เรียกใช้เสียงเตือน "ตื้ด" เมื่อข้อความแสดงครบ 5 วินาที
-        playBeepSound();
-        
         document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 5 วินาที)";
         document.getElementById("status").innerHTML = "🎙️ กำลังฟังเสียงของคุณ...";
         document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ...";
@@ -1811,6 +1786,8 @@ function saveToGoogleSheet(name, score, pass, fail) {
         .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
         .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
 }
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playPassSound() {
     if(audioCtx.state === 'suspended') audioCtx.resume();
