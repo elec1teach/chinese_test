@@ -202,33 +202,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .start-btn { background: linear-gradient(135deg, var(--cyan), #d8f9ff, var(--violet)); color:#07101f; box-shadow: 0 10px 35px rgba(53,216,255,0.2); width: 100%; max-width: 300px;}
 .start-btn:hover:not(:disabled) { transform:translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(53,216,255,0.3); }
 
-/* 🚨 BLINKING RED RECONNECT BUTTON */
-@keyframes blinkRed {
-    0%, 100% {
-        background: var(--red);
-        box-shadow: 0 0 20px rgba(255, 77, 109, 0.85);
-        transform: scale(1);
-    }
-    50% {
-        background: #ff1a40;
-        box-shadow: 0 0 35px rgba(255, 77, 109, 1);
-        transform: scale(1.04);
-    }
-}
-.reconnect-btn {
-    display: none;
-    background: var(--red);
-    color: white;
-    box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
-    width: 100%;
-    max-width: 300px;
-    animation: blinkRed 1.1s infinite ease-in-out;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-}
-.reconnect-btn:hover {
-    filter: brightness(1.15);
-}
-
 .result-box { padding:30px; border-radius:25px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .score { font-size:75px; font-weight:900; font-family:'Orbitron',sans-serif; background: linear-gradient(135deg, var(--cyan), white, var(--violet)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 25px rgba(53,216,255,0.2); }
 .status { margin-top:5px; font-size:28px; font-weight:bold; }
@@ -238,226 +211,12 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 
 .teacher-box { margin-top:20px; padding:15px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); line-height:1.7; font-size:16px; text-align:center; }
 .teacher-title { font-weight:bold; color:#90dfff; margin-bottom:5px; font-size:18px; }
-
-/* 🔒 HIDDEN ADMIN TRIGGER */
-.footer { margin-top:20px; text-align:center; color:#92a4c9; font-size:14px; letter-spacing:2px; padding: 10px; cursor: pointer; user-select: none; transition: 0.3s; }
-.footer:hover { color: var(--cyan); }
-
-/* 🛠️ MAINTENANCE OVERLAY */
-.maintenance-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(4, 8, 22, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-    z-index: 9000; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text); padding: 20px;
-}
-.maintenance-overlay h1 { color: var(--red); font-size: 40px; margin-bottom: 20px; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 25px rgba(255, 77, 109, 0.5); }
-.maintenance-info { font-size: 22px; color: var(--cyan); margin-bottom: 20px; background: rgba(53,216,255,0.1); padding: 15px 30px; border-radius: 20px; border: 1px solid rgba(53,216,255,0.2); }
-.maintenance-msg { background: rgba(255,255,255,0.05); border: 1px solid var(--line); padding: 20px; border-radius: 20px; max-width: 600px; font-size: 18px; line-height: 1.8; color: #b6c6e8; }
-.maintenance-admin-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; z-index: 10000; }
-.maintenance-admin-btn:hover { background: rgba(255,255,255,0.3); }
-
-/* MODAL OVERLAY GENERAL */
-.modal-overlay { 
-    display: none; 
-    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; 
-    align-items: center; justify-content: center; backdrop-filter: blur(8px); 
-}
-.modal-content { width: 90%; max-width: 450px; padding: 25px; border-radius: 25px; position: relative; max-height: 85vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0; }
-.close-modal:hover { color: white; }
-
-/* REWARD MODAL SPECIFIC */
-.reward-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; text-align: center; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-.reward-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.05); }
-.reward-title { font-size: 18px; font-weight: bold; color: var(--cyan); margin-bottom: 5px; }
-.reward-stock { font-size: 14px; color: var(--muted); }
-.reward-stock span { font-weight: bold; color: var(--green); font-size: 16px; }
-.reward-container { display: flex; gap: 15px; justify-content: center; margin-top: 15px; }
-@media(max-width:400px) { .reward-container { flex-direction: column; } }
-
-/* RANK MODAL SPECIFIC */
-.rank-modal-content {
-    background: #0d1326; 
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    width: 95%;
-    max-width: 500px;
-    padding: 30px 20px;
-}
-.rank-header-text {
-    text-align: center;
-    color: #92a4c9;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-.rank-table-body {
-    background: rgba(255,255,255,0.02);
-    border-radius: 0 0 12px 12px;
-    overflow-y: auto;
-    max-height: 50vh;
-}
-.loading-rank {
-    text-align: center;
-    padding: 30px;
-    color: var(--cyan);
-}
-.rank-table-header {
-    display: grid;
-    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
-    background: rgba(255,255,255,0.05);
-    padding: 18px 10px;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-    font-weight: 700;
-    color: var(--gold); 
-    font-size: 16px;
-}
-.rank-row {
-    display: grid;
-    grid-template-columns: 0.8fr 1.5fr 1fr 1fr;
-    padding: 16px 10px;
-    align-items: center;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: white;
-    font-size: 18px; 
-}
-.rank-row:last-child { border-bottom: none; }
-.rank-badge {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    background: rgba(255,255,255,0.1);
-    font-weight: 900;
-    color: white;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 18px;
-}
-.rank-1 .rank-badge { background: var(--gold); color: #000; box-shadow: 0 0 25px rgba(255, 204, 0, 0.6); }
-.rank-2 .rank-badge { background: var(--silver); color: #000; box-shadow: 0 0 15px rgba(160, 165, 177, 0.4); }
-.rank-3 .rank-badge { background: var(--bronze); color: #000; box-shadow: 0 0 15px rgba(205, 127, 50, 0.4); }
-.rank-score {
-    color: var(--cyan);
-    font-family: 'Orbitron', sans-serif;
-    font-weight: bold;
-    font-size: 22px; 
-}
-
-/* ADMIN MODAL */
-.modal-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center; }
-.admin-login-group { display: block; text-align: center; }
-.admin-control-group { display: none; }
-.admin-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; font-size: 16px; margin-bottom: 15px; text-align: center; font-family:'Prompt',sans-serif; }
-.admin-btn-action { width: 100%; background: var(--blue); color: white; padding: 12px; border-radius: 12px; border: none; font-family:'Prompt',sans-serif; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s;}
-.admin-btn-action:hover { filter: brightness(1.1); }
-
-.switch-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-.switch-label { font-size: 15px; font-weight: 500; }
-.switch { position: relative; display: inline-block; width: 45px; height: 24px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--cyan); box-shadow: 0 0 10px rgba(53,216,255,0.5); }
-input:checked + .slider:before { transform: translateX(21px); }
-
-.stock-control-container { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
-.stock-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.stock-item:last-child { margin-bottom: 0; }
-.stock-label { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-.stock-display-badge { background: rgba(53,216,255,0.2); color: var(--cyan); padding: 4px 12px; border-radius: 8px; font-weight: bold; min-width: 40px; display: inline-block; text-align: center; font-size: 14px;}
-.stock-btns { display: flex; gap: 8px; align-items: center; }
-.stock-btn { width: 30px; height: 30px; padding: 0; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
-.stock-btn:hover { background: var(--blue); border-color: var(--blue); }
-.stock-btn.minus { color: var(--red); }
-.stock-btn.minus:hover { background: var(--red); color: white; border-color: var(--red); }
-.stock-btn.plus { color: var(--green); }
-.stock-btn.plus:hover { background: var(--green); color: white; border-color: var(--green); }
-
-.admin-time-input { width: 50px; text-align: center; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 14px; outline: none; }
-.admin-select { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; max-width: 140px;}
-.admin-select option { background: #07101f; }
-
-/* AUDIO CONTROLS */
-.audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
-.audio-btn { width: auto; padding: 8px 16px; font-size: 14px; border-radius: 12px; background: rgba(53,216,255,0.15); border: 1px solid rgba(53,216,255,0.3); color: var(--cyan); display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-.audio-btn:hover { background: rgba(53,216,255,0.3); transform: scale(1.05); }
-
-.audio-btn.skip { background: rgba(181, 108, 255, 0.15); border-color: rgba(181, 108, 255, 0.3); color: var(--violet); }
-.audio-btn.skip:hover { background: rgba(181, 108, 255, 0.3); transform: scale(1.05); }
-
-/* RESPONSIVE CLEANUP */
-@media(max-width:900px) { 
-    .main-grid { grid-template-columns:1fr; } 
-    h1 { font-size:32px; } 
-    .english-text { font-size:38px; } 
-}
-@media(max-width:600px) {
-    body { padding:10px; } 
-    .header { padding:15px; margin-bottom:15px; border-radius:20px; } 
-    .top-header { gap:10px; flex-direction: column; text-align: center; } 
-    .logo-area { gap:10px; flex-direction: column; } 
-    .logo { width:55px; height:55px; font-size:20px; border-radius:15px; } 
-    h1 { font-size:24px; line-height: 1.3; } 
-    .subtitle { font-size:14px; margin-top:5px; } 
-    .status-area { width: 100%; justify-content: center; }
-    .live { padding:8px 16px; font-size:12px; width: 100%; justify-content: center;} 
-    
-    .login-box { margin-bottom:10px; } 
-    .login-box input { padding:14px; font-size:16px; border-radius:15px; }
-    
-    .mode-selector { grid-template-columns: 1fr; gap: 8px; }
-    .mode-btn { padding: 12px; font-size: 14px; }
-
-    .action-btn-group { grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px; }
-    .btn-main-action { padding: 14px; font-size: 16px; border-radius: 15px; }
-
-    .top-bar { gap:10px; margin-bottom:15px; } 
-    .stat { padding:12px 8px; border-radius:15px; } 
-    .stat-title { font-size:10px; } 
-    .stat-value { margin-top:5px; font-size:20px; }
-    
-    .sentence-box { padding:20px 15px; border-radius:20px; } 
-    .question-number { font-size:12px; padding:6px 12px; } 
-    .english-text { font-size:32px; margin-top:15px; } 
-    .thai-text { font-size:16px; margin-top:8px; }
-    
-    .countdown-wrapper { margin:20px auto 10px; width:120px; height:120px; } 
-    .countdown-wrapper::before { width:95px; height:95px; } 
-    .countdown { font-size:24px; }
-    
-    .controls { margin-top:15px; } 
-    button { width:100%; padding:14px; font-size:16px; border-radius:14px; max-width: 100%;}
-    
-    .result-box { padding:20px 15px; border-radius:20px; margin-top:15px; } 
-    .score { font-size:55px; } 
-    .status { font-size:22px; margin-top:5px; } 
-    .heard-text { font-size:14px; padding:12px; margin-top:12px; min-height:auto; }
-    
-    .teacher-box { font-size: 14px; padding: 12px; }
-    .teacher-title { font-size: 16px; }
-
-    .rank-table-header { font-size: 12px; grid-template-columns: 0.8fr 1.2fr 1fr 1.2fr; }
-    .rank-row { font-size: 14px; grid-template-columns: 0.8fr 1.2fr 1fr 1.2fr; padding: 10px 5px; }
-    .rank-badge { width: 30px; height: 30px; }
-}
 </style>
 </head>
-
 <body>
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
-
-<!-- 🛠️ หน้าจอแจ้งเตือนปรับปรุงระบบ -->
-<div class="maintenance-overlay" id="maintenanceOverlay">
-    <div class="maintenance-admin-btn" onclick="openAdminModal()" title="Admin Panel">⚙️</div>
-    <h1>🛠️ SYSTEM MAINTENANCE</h1>
-    <div class="maintenance-info">
-        เปิดให้บริการอีกครั้ง: <span id="maintDateUI" style="color:white; font-weight:bold;">-</span> เวลา <span id="maintTimeUI" style="color:white; font-weight:bold;">-</span> น.
-    </div>
-    <div class="maintenance-msg" id="maintMsgUI">กำลังดำเนินการปรับปรุงระบบ ขออภัยในความไม่สะดวกครับ</div>
-</div>
 
 <div class="container">
     <div class="header glass">
@@ -479,7 +238,6 @@ input:checked + .slider:before { transform: translateX(21px); }
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
     </div>
 
-    <!-- 📚 LEVEL SELECTOR -->
     <div class="level-box glass" id="userLevelContainer">
         <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ</div>
         <select id="userLevel" onchange="prepareQuestions()">
@@ -490,39 +248,20 @@ input:checked + .slider:before { transform: translateX(21px); }
         </select>
     </div>
 
-    <!-- ✨ USER MODE SELECTOR -->
     <div class="mode-selector glass">
-        <button class="mode-btn active" id="modeRewardBtn" onclick="selectUserMode('reward')">
-            🎁 โหมดทดสอบรับรางวัล
-        </button>
-        <button class="mode-btn" id="modePracticeBtn" onclick="selectUserMode('practice')">
-            💡 โหมดฝึกฝน (ไม่จำกัดเกณฑ์)
-        </button>
+        <button class="mode-btn active" id="modeRewardBtn" onclick="selectUserMode('reward')">🎁 โหมดทดสอบรับรางวัล</button>
+        <button class="mode-btn" id="modePracticeBtn" onclick="selectUserMode('practice')">💡 โหมดฝึกฝน (ไม่จำกัดเกณฑ์)</button>
     </div>
 
-    <!-- 🏆 กลุ่มปุ่ม RANK และ REWARD -->
     <div class="action-btn-group">
-        <button class="btn-main-action btn-rank" onclick="openRankModal()">
-            🏆 ตารางอันดับ (Rank)
-        </button>
-        <button class="btn-main-action btn-reward" onclick="openRewardModal()">
-            🎁 ดูของรางวัล (Rewards)
-        </button>
+        <button class="btn-main-action btn-rank" onclick="openRankModal()">🏆 ตารางอันดับ (Rank)</button>
+        <button class="btn-main-action btn-reward" onclick="openRewardModal()">🎁 ดูของรางวัล (Rewards)</button>
     </div>
 
     <div class="top-bar">
-        <div class="stat glass">
-            <div class="stat-title">TOTAL SCORE</div>
-            <div class="stat-value"><span id="totalScore">0</span></div>
-        </div>
-        <div class="stat glass">
-            <div class="stat-title">PASS</div>
-            <div class="stat-value"><span id="passCount">0</span></div>
-        </div>
-        <div class="stat glass">
-            <div class="stat-title">FAIL</div>
-            <div class="stat-value"><span id="failCount">0</span></div>
-        </div>
+        <div class="stat glass"><div class="stat-title">TOTAL SCORE</div><div class="stat-value"><span id="totalScore">0</span></div></div>
+        <div class="stat glass"><div class="stat-title">PASS</div><div class="stat-value"><span id="passCount">0</span></div></div>
+        <div class="stat glass"><div class="stat-title">FAIL</div><div class="stat-value"><span id="failCount">0</span></div></div>
     </div>
 
     <div class="main-grid">
@@ -541,8 +280,6 @@ input:checked + .slider:before { transform: translateX(21px); }
             </div>
             <div class="controls">
                 <button class="start-btn" id="startBtn" onclick="startRecognition()" disabled>⏳ กรุณารอสักครู่</button>
-                <!-- 🚨 ปุ่มเชื่อมต่อใหม่สีแดงกระพริบ -->
-                <button class="reconnect-btn" id="reconnectBtn" onclick="retryConnection()">🔄 เชื่อมต่อใหม่</button>
             </div>
         </div>
 
@@ -555,239 +292,15 @@ input:checked + .slider:before { transform: translateX(21px); }
 
     <div class="teacher-box glass">
         <div class="teacher-title">ผู้พัฒนาโครงการ</div>
-        ครูวิทยากร วรรณา<br>
-        แผนกอิเล็กทรอนิกส์<br>
-        วิทยาลัยสารพัดช่างศรีสะเกษ
-    </div>
-
-    <div class="footer" ondblclick="openAdminModal()" title="Double click for Admin Panel">AI Reward Learning Machine © 2026</div>
-</div>
-
-<!-- 🎁 Reward Modal Panel -->
-<div class="modal-overlay" id="rewardModal">
-    <div class="modal-content" style="background:#0d1326; padding-top:40px;">
-        <button class="close-modal" onclick="closeRewardModal()">✕</button>
-        <h2 style="text-align:center; color:var(--cyan); margin-top:0;">🎁 รางวัลในตู้</h2>
-        <div style="text-align:center; color:var(--muted); font-size:14px; margin-bottom:10px;">สะสมคะแนนครบตามเกณฑ์ รับรางวัลฟรี!</div>
-        <div class="reward-container">
-            <div class="reward-card">
-                <div class="reward-title">Slot A (1)</div>
-                <img id="rewardImg1" src="https://via.placeholder.com/300x200?text=No+Image" alt="Slot 1 Reward">
-                <div class="reward-stock">คงเหลือ: <span id="rewardStock1UI">0</span> ชิ้น</div>
-            </div>
-            <div class="reward-card">
-                <div class="reward-title">Slot B (2)</div>
-                <img id="rewardImg2" src="https://via.placeholder.com/300x200?text=No+Image" alt="Slot 2 Reward">
-                <div class="reward-stock">คงเหลือ: <span id="rewardStock2UI">0</span> ชิ้น</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 🏆 Rank Modal Panel -->
-<div class="modal-overlay" id="rankModal">
-    <div class="modal-content rank-modal-content">
-        <button class="close-modal" onclick="closeRankModal()">✕</button>
-        <div class="rank-header-text">ยิ่งขยันทำแบบทดสอบบ่อย ยิ่งสะสม<br>คะแนนรวมได้เยอะ!</div>
-        
-        <div class="rank-table-header">
-            <div>อันดับ</div>
-            <div>ชื่อผู้ทดสอบ</div>
-            <div>รอบสอบ</div>
-            <div>คะแนนรวม<br>สะสม</div>
-        </div>
-        
-        <div class="rank-table-body" id="rankTableBody">
-            <div class="loading-rank">กำลังโหลดข้อมูลอันดับ...</div>
-        </div>
-    </div>
-</div>
-
-<!-- Admin Modal Panel -->
-<div class="modal-overlay" id="adminModal">
-    <div class="modal-content">
-        <button class="close-modal" onclick="closeAdminModal()">✕</button>
-        <div class="modal-title">Admin Panel</div>
-
-        <div id="adminLoginGroup" class="admin-login-group">
-            <input type="password" id="adminPassword" class="admin-input" placeholder="Enter Password">
-            <button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
-            <p id="adminError" style="color:var(--red); font-size:14px; display:none; margin-top:10px;">รหัสผ่านไม่ถูกต้อง!</p>
-        </div>
-
-        <div id="adminControlGroup" class="admin-control-group">
-
-            <!-- 🛠️ ระบบแจ้งเตือน Maintenance -->
-            <div class="stock-control-container" style="border-color: rgba(255, 77, 109, 0.4);">
-                <div style="color: var(--red); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">🛠️ ประกาศปิดปรับปรุง (Maintenance)</div>
-                
-                <div class="switch-container" style="background:none; border:none; padding:0; margin-bottom: 15px;">
-                    <span class="switch-label">เปิดโหมดปรับปรุงระบบ</span>
-                    <label class="switch">
-                        <input type="checkbox" id="maintSwitch" onchange="toggleMaintenance(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 12px; color: var(--muted); margin-bottom: 5px; text-align: left;">วันที่เปิดอีกครั้ง</div>
-                        <input type="date" id="adminMaintDate" class="admin-input" style="margin-bottom: 0;">
-                    </div>
-                    <div style="flex: 1;">
-                        <div style="font-size: 12px; color: var(--muted); margin-bottom: 5px; text-align: left;">เวลาที่เปิดอีกครั้ง</div>
-                        <input type="time" id="adminMaintTime" class="admin-input" style="margin-bottom: 0;">
-                    </div>
-                </div>
-                
-                <div style="font-size: 12px; color: var(--muted); margin-bottom: 5px; text-align: left;">ข้อความประกาศเพิ่มเติม</div>
-                <textarea id="adminMaintMsg" class="admin-input" style="min-height:70px; resize:vertical; text-align:left;" placeholder="เช่น จะกลับมาให้บริการอีกครั้งเร็วๆ นี้..."></textarea>
-                
-                <button class="admin-btn-action" style="background:var(--red);" onclick="saveMaintenanceInfo()">บันทึกข้อมูล</button>
-            </div>
-            
-            <!-- ปุ่มจัดการสถานะระบบ -->
-            <div class="switch-container" style="flex-direction: column; align-items: stretch; padding: 15px;">
-                <span class="switch-label" style="text-align: center; margin-bottom: 12px; display: block;">🔄 สถานะตู้ (Machine State)</span>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(29,255,149,0.2); color: var(--green); border-color: var(--green);" onclick="setSystemStatus('ready')">Ready (พร้อมใช้งาน)</button>
-                    <button class="stock-btn plus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(53,216,255,0.2); color: var(--cyan); border-color: var(--cyan);" onclick="setSystemStatus('unlocked')">Unlocked (ปลดล็อกตู้)</button>
-                    <button class="stock-btn minus" style="width: 100%; padding: 10px; font-size: 14px; background: rgba(255,77,109,0.2); color: var(--red); border-color: var(--red);" onclick="setSystemStatus('busy')">Busy (ล็อกระบบ)</button>
-                </div>
-            </div>
-
-            <!-- สต๊อกของรางวัล -->
-            <div class="stock-control-container">
-                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">📦 จำนวนของรางวัลคงเหลือ</div>
-                <div class="stock-item">
-                    <div class="stock-label">Slot 1 (A) Stock</div>
-                    <div class="stock-btns">
-                        <button class="stock-btn minus" onclick="updateStock('slot1', -1)">-</button>
-                        <span class="stock-display-badge" id="slot1StockUI">0</span>
-                        <button class="stock-btn plus" onclick="updateStock('slot1', 1)">+</button>
-                    </div>
-                </div>
-                <div class="stock-item">
-                    <div class="stock-label">Slot 2 (B) Stock</div>
-                    <div class="stock-btns">
-                        <button class="stock-btn minus" onclick="updateStock('slot2', -1)">-</button>
-                        <span class="stock-display-badge" id="slot2StockUI">0</span>
-                        <button class="stock-btn plus" onclick="updateStock('slot2', 1)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 🖼️ อัปโหลดรูปภาพของรางวัล -->
-            <div class="stock-control-container">
-                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">🖼️ จัดการภาพของรางวัลในตู้ทึบ</div>
-                <div class="stock-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-                    <div class="stock-label">อัปโหลดภาพ Slot 1 (A)</div>
-                    <div style="display:flex; gap:10px; width:100%;">
-                        <input type="file" id="adminImgSlot1" accept="image/*" class="admin-input" style="padding: 8px; margin: 0; flex:1; font-size:12px;">
-                        <button class="admin-btn-action" style="width:auto; padding:8px 15px;" onclick="uploadImage('slot1')">Upload</button>
-                    </div>
-                </div>
-                <div class="stock-item" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-top:15px;">
-                    <div class="stock-label">อัปโหลดภาพ Slot 2 (B)</div>
-                    <div style="display:flex; gap:10px; width:100%;">
-                        <input type="file" id="adminImgSlot2" accept="image/*" class="admin-input" style="padding: 8px; margin: 0; flex:1; font-size:12px;">
-                        <button class="admin-btn-action" style="width:auto; padding:8px 15px;" onclick="uploadImage('slot2')">Upload</button>
-                    </div>
-                </div>
-                <div style="font-size:12px; color:var(--muted); margin-top:10px;">* ระบบจะย่อขนาดและบันทึกภาพลงฐานข้อมูลอัตโนมัติ</div>
-            </div>
-
-            <!-- ⚙️ การตั้งค่าระบบข้อสอบ -->
-            <div class="stock-control-container">
-                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">⚙️ Game Settings</div>
-                
-                <!-- 🔒 ระบบตัดการเลือกระดับของ User โดย Admin -->
-                <div class="switch-container" style="background:none; border:none; padding:0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
-                    <span class="switch-label" style="color: var(--red);">🔒 ตัดการเลือกระดับของ User</span>
-                    <label class="switch">
-                        <input type="checkbox" id="adminForceLevelSwitch" onchange="toggleLevelControl(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="stock-item" id="adminLevelSelectContainer" style="display: none; margin-bottom: 15px; justify-content: space-between;">
-                    <div class="stock-label">เลือกระดับคลังข้อสอบบังคับ:</div>
-                    <select id="adminForcedLevelSelect" onchange="setAdminForcedLevel()" class="admin-select" style="max-width: 150px;">
-                        <option value="Primary">ประถมศึกษา</option>
-                        <option value="Secondary">มัธยมศึกษา</option>
-                        <option value="Vocational">อาชีวศึกษา</option>
-                        <option value="General">บุคคลทั่วไป</option>
-                    </select>
-                </div>
-
-                <div class="stock-item">
-                    <div class="stock-label">📝 สุ่มข้อสอบจำนวน (ข้อ)</div>
-                    <div class="stock-btns">
-                        <button class="stock-btn minus" onclick="updateAdminConfig('questionCount', -1)">-</button>
-                        <span class="stock-display-badge" id="adminQuestionCountUI">10</span>
-                        <button class="stock-btn plus" onclick="updateAdminConfig('questionCount', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="stock-item">
-                    <div class="stock-label">🏆 ตอบถูกขั้นต่ำ (ผ่าน)</div>
-                    <div class="stock-btns">
-                        <button class="stock-btn minus" onclick="updateAdminConfig('passRequirement', -1)">-</button>
-                        <span class="stock-display-badge" id="adminPassReqUI">5</span>
-                        <button class="stock-btn plus" onclick="updateAdminConfig('passRequirement', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="stock-item">
-                    <div class="stock-label">⏱️ เวลาทดสอบ (นาที:วินาที)</div>
-                    <div class="stock-btns" style="gap: 5px;">
-                        <input type="number" id="adminTimeMin" min="0" max="60" value="1" class="admin-time-input"> :
-                        <input type="number" id="adminTimeSec" min="0" max="59" value="00" class="admin-time-input">
-                        <button class="stock-btn plus" onclick="updateTestTime()" style="width: auto; padding: 0 10px; font-size:12px;">บันทึก</button>
-                    </div>
-                </div>
-
-                <div class="stock-item">
-                    <div class="stock-label">🌟 ระดับความยาก</div>
-                    <select id="adminDifficulty" onchange="updateDifficulty()" class="admin-select">
-                        <option value="ALL">สุ่มทั้งหมด (MIXED)</option>
-                        <option value="LOW">ง่าย (LOW)</option>
-                        <option value="MEDIUM">ปานกลาง (MEDIUM)</option>
-                        <option value="HIGH">ยาก (HIGH)</option>
-                    </select>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- 🎯 Initial Level Selection Modal -->
-<div class="modal-overlay" id="initialLevelModal" style="display: none; z-index: 100000;">
-    <div class="modal-content" style="text-align: center; background: #0d1326; border: 1px solid var(--cyan);">
-        <h2 style="color: var(--cyan); margin-top: 0; font-family: 'Orbitron', sans-serif;">SELECT LEVEL</h2>
-        <div style="color: var(--muted); font-size: 16px; margin-bottom: 15px;">
-            กรุณาเลือกระดับคลังข้อสอบ<br>
-            <span style="font-size: 14px;">(ระบบจะเลือกอัตโนมัติใน <span id="initialTimer" style="color: var(--red); font-weight: bold; font-size: 18px;">10</span> วินาที)</span>
-        </div>
-        
-        <select id="popupLevelSelect" class="admin-input" style="font-size: 16px; margin-bottom: 20px; text-align: center; cursor: pointer;">
-            <option value="Primary">ประถมศึกษา (Primary)</option>
-            <option value="Secondary">มัธยมศึกษา (Secondary)</option>
-            <option value="Vocational" selected>อาชีวศึกษา (Vocational)</option>
-            <option value="General">บุคคลทั่วไป (General)</option>
-        </select>
-        
-        <button class="start-btn" onclick="confirmInitialLevel()" style="width: 100%;">✅ ยืนยันการเลือก</button>
+        ครูวิทยากร วรรณา<br>แผนกอิเล็กทรอนิกส์<br>วิทยาลัยสารพัดช่างศรีสะเกษ
     </div>
 </div>
 
 <script>
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
-const ADMIN_PASSWORD = "1234"; 
 const GAS_QUESTION_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
 
-const applauseAudio = new Audio('https://actions.google.com/sounds/v1/crowds/crowd_cheer.ogg');
-
+// Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
     authDomain: "engteststation.firebaseapp.com",
@@ -810,19 +323,10 @@ let failCount = 0;
 
 let recognition;
 let totalTimeLeftSeconds = 0;
-let testTimerInterval = null;
 let isTestRunning = false; 
 let isRunning = false; 
-let isAdminLoggedIn = false;
-let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
-
-// ตวัแปรจับเวลาในระบบ
-let nextQuestionTimer = null;
-let displayInterval = null; 
-let holdDelayTimeout = null;       // ⏳ เพิ่ม: ตัวนับเวลาช่วง Hold 2 วินาที (วินาทีที่ 5 - 7)
-let startMicDelayTimeout = null;   // 🎙️ นับเวลาเปิดไมค์ในวินาทีที่ 7
-let questionTimeout = null;        // ⏱️ จับเวลาเปิดไมค์ 8 วินาที (วินาทีที่ 7 - 15)
+let questionTimeout = null;     
 
 let adminConfig = {
     passRequirement: 5,
@@ -834,64 +338,35 @@ let adminConfig = {
     forcedLevel: "Vocational"
 };
 
-let initialCountdownTimer = null;
-let initialTime = 10;
-
 // ==========================================
-// 🎯 ฟังก์ชันจัดการ Level UI
+// 💡 DYNAMIC TIMEOUT ALGORITHM
 // ==========================================
-function applyLevelControl() {
-    const userContainer = document.getElementById("userLevelContainer");
-    const userSelect = document.getElementById("userLevel");
-    const popup = document.getElementById("initialLevelModal");
-
-    if (adminConfig.forceLevelControl) {
-        userContainer.style.display = "none";
-        userSelect.value = adminConfig.forcedLevel;
-
-        if (popup.style.display === "flex") {
-            clearInterval(initialCountdownTimer);
-            popup.style.display = "none";
-            fetchQuestionsFromGAS(); 
-        }
-    } else {
-        userContainer.style.display = "flex";
-    }
+// 1. ฟังก์ชันคำนวณจำนวนพยางค์ (Syllables) ของคำศัพท์ภาษาอังกฤษ
+function countSyllables(word) {
+    word = word.toLowerCase();
+    if(word.length <= 3) return 1;
+    // ลบ e ท้ายคำ หรือ es, ed ที่มักไม่ออกเสียง
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+    const match = word.match(/[aeiouy]{1,2}/g);
+    return match !== null ? match.length : 1;
 }
 
-function showInitialPopup() {
-    if (adminConfig.forceLevelControl) {
-        document.getElementById("userLevel").value = adminConfig.forcedLevel;
-        fetchQuestionsFromGAS();
-        return;
-    }
-
-    document.getElementById("initialLevelModal").style.display = "flex";
-    initialTime = 10;
-    document.getElementById("initialTimer").innerText = initialTime;
-    document.getElementById("popupLevelSelect").value = "Vocational"; 
-
-    initialCountdownTimer = setInterval(() => {
-        initialTime--;
-        document.getElementById("initialTimer").innerText = initialTime;
-        
-        if (initialTime <= 0) {
-            clearInterval(initialCountdownTimer);
-            confirmInitialLevel(); 
-        }
-    }, 1000);
-}
-
-function confirmInitialLevel() {
-    clearInterval(initialCountdownTimer);
-    document.getElementById("initialLevelModal").style.display = "none";
+// 2. คำนวณเวลาที่เหมาะสมสำหรับความยาวประโยค
+function calculateDynamicTimeout(sentence) {
+    const words = sentence.split(" ");
+    let totalSyllables = 0;
+    words.forEach(w => {
+        totalSyllables += countSyllables(w);
+    });
     
-    if (!adminConfig.forceLevelControl) {
-        const selectedLevel = document.getElementById("popupLevelSelect").value;
-        document.getElementById("userLevel").value = selectedLevel;
-    }
+    // ตั้งค่าเวลาฐาน (Base time) ที่ 8 วินาที
+    // หากพยางค์เกิน 5 พยางค์ ให้เพิ่มเวลา 0.8 วินาที ต่อ 1 พยางค์
+    let extraTime = totalSyllables > 5 ? (totalSyllables - 5) * 800 : 0;
+    let finalTime = 8000 + extraTime;
     
-    fetchQuestionsFromGAS();
+    // จำกัดเวลาสูงสุดไว้ที่ 15 วินาที เพื่อไม่ให้ระบบค้างนานเกินไป
+    return Math.min(finalTime, 15000); 
 }
 
 window.onload = async () => {
@@ -935,399 +410,53 @@ window.onload = async () => {
         }
 
         document.getElementById("startBtn").disabled = true;
-
-        nextQuestionTimer = setTimeout(() => {
-            if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                nextQuestion();
-            }
-        }, 1200);
+        setTimeout(nextQuestion, 1500);
     };
 
-    recognition.onerror = function(event){
-        console.log("Recognition Error:", event.error);
-        if(!isRunning) return;
-        isRunning = false; 
-        clearTimeout(questionTimeout);
-        document.getElementById("status").innerHTML = "ไมโครโฟนมีปัญหา ❌";
-        document.getElementById("status").className = "status fail";
-        document.getElementById("heardText").innerHTML = "ระบบไมค์ถูกขัดจังหวะ ข้ามไปข้อถัดไป...";
-        
-        failCount++;
-        document.getElementById("failCount").innerHTML = failCount;
-        playFailSound();
-        
-        nextQuestionTimer = setTimeout(() => {
-            if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                nextQuestion();
-            }
-        }, 1500);
-    };
-
-    recognition.onend = function() {
-        if(isRunning) { 
-            console.log("Recognition ended unexpectedly."); 
-            isRunning = false;
-            clearTimeout(questionTimeout);
-            document.getElementById("status").innerHTML = "เสียงเงียบเกินไป ⚠️";
-            document.getElementById("status").className = "status fail";
-            document.getElementById("heardText").innerHTML = "ไม่พบเสียงพูดข้ามไปข้อถัดไป...";
-            
-            failCount++;
-            document.getElementById("failCount").innerHTML = failCount;
-            playFailSound();
-
-            nextQuestionTimer = setTimeout(() => {
-                if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                    nextQuestion();
-                }
-            }, 1500);
-        }
-    };
-
-    monitorMaintenance(); 
-    monitorAdminSettings(); 
-    showInitialPopup(); 
-    monitorMachine(); 
-    monitorStock(); 
-    monitorRewards(); 
-};
-
-// ==========================================
-// 🔄 ฟังก์ชันเชื่อมต่อใหม่
-// ==========================================
-function retryConnection() {
-    document.getElementById("reconnectBtn").style.display = "none";
-    const startBtn = document.getElementById("startBtn");
-    startBtn.style.display = "inline-block";
-    startBtn.disabled = true;
-    startBtn.innerHTML = "⏳ กรุณารอสักครู่";
-    
-    document.getElementById("questionNumber").innerHTML = "ระบบกำลังเชื่อมต่อ...";
-    document.getElementById("englishText").innerHTML = "Loading...";
-    document.getElementById("thaiText").innerHTML = "กำลังเตรียมข้อมูลข้อสอบ";
-    
     fetchQuestionsFromGAS();
-}
-
-// ==========================================
-// 🎁 ระบบดูของรางวัล (Reward System)
-// ==========================================
-function openRewardModal() { document.getElementById("rewardModal").style.display = "flex"; }
-function closeRewardModal() { document.getElementById("rewardModal").style.display = "none"; }
-
-function monitorRewards() {
-    db.ref('machine/rewards').on('value', (snap) => {
-        const data = snap.val();
-        if (data) {
-            if (data.slot1) document.getElementById("rewardImg1").src = data.slot1;
-            if (data.slot2) document.getElementById("rewardImg2").src = data.slot2;
-        }
-    });
-}
-
-function uploadImage(slot) {
-    const inputId = slot === 'slot1' ? 'adminImgSlot1' : 'adminImgSlot2';
-    const fileInput = document.getElementById(inputId);
-    const file = fileInput.files[0];
-
-    if (!file) {
-        alert("กรุณาเลือกไฟล์ภาพก่อนกด Upload ครับ");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 600;
-            let scaleSize = MAX_WIDTH / img.width;
-            if (scaleSize > 1) scaleSize = 1; 
-
-            canvas.width = img.width * scaleSize;
-            canvas.height = img.height * scaleSize;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-
-            db.ref(`machine/rewards/${slot}`).set(dataUrl)
-                .then(() => alert(`✅ อัปโหลดและบันทึกภาพ ${slot === 'slot1' ? 'Slot A' : 'Slot B'} เรียบร้อยแล้ว!`))
-                .catch(err => alert("❌ เกิดข้อผิดพลาดในการอัปโหลดภาพ: " + err));
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-}
-
-function selectUserMode(mode) {
-    if (isRunning || isTestRunning) {
-        alert("⚠️ กรุณารอให้จบการทดสอบหรือฝึกซ้อมรอบปัจจุบันก่อนเปลี่ยนโหมดครับ");
-        return;
-    }
-
-    const btnReward = document.getElementById("modeRewardBtn");
-    const btnPractice = document.getElementById("modePracticeBtn");
-
-    if (mode === 'practice') {
-        adminConfig.cancelRequirement = true; 
-        btnPractice.classList.add("active");
-        btnReward.classList.remove("active");
-    } else {
-        adminConfig.cancelRequirement = false; 
-        btnReward.classList.add("active");
-        btnPractice.classList.remove("active");
-    }
-
-    updateUIBasedOnState();
-    if (questions.length > 0) prepareQuestions();
-}
-
-function openRankModal() {
-    document.getElementById("rankModal").style.display = "flex";
-    fetchRankData();
-}
-function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
-
-async function fetchRankData() {
-    const tableBody = document.getElementById("rankTableBody");
-    tableBody.innerHTML = '<div class="loading-rank">กำลังโหลดข้อมูลอันดับ... ⏳</div>';
-
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getRank");
-        const data = await response.json();
-        
-        let rankData = [];
-        if(Array.isArray(data) && data.length > 0 && data[0].name) {
-             rankData = data; 
-        } else {
-             rankData = [
-                 { rank: 1, name: "ไม่ใช่คน", attempts: 3, score: 467 },
-                 { rank: 2, name: "เลื่อมเล็ก", attempts: 1, score: 300 },
-                 { rank: 3, name: "เลื่อมใหญ่", attempts: 1, score: 300 },
-                 { rank: 4, name: "เมจิ", attempts: 1, score: 266 },
-                 { rank: 5, name: "นะโม", attempts: 1, score: 0 },
-                 { rank: 6, name: "กา", attempts: 1, score: 0 }
-             ];
-        }
-
-        renderRankTable(rankData);
-
-    } catch (error) {
-        console.error("Error fetching rank:", error);
-        tableBody.innerHTML = '<div class="loading-rank" style="color:var(--red);">ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ❌</div>';
-    }
-}
-
-function renderRankTable(data) {
-    const tableBody = document.getElementById("rankTableBody");
-    tableBody.innerHTML = "";
-
-    if (data.length === 0) {
-        tableBody.innerHTML = '<div class="loading-rank">ยังไม่มีข้อมูลผู้ทดสอบ 🌟</div>';
-        return;
-    }
-
-    data.forEach((user, index) => {
-        const actualRank = index + 1; 
-        let rankClass = "";
-        if (actualRank === 1) rankClass = "rank-1";
-        else if (actualRank === 2) rankClass = "rank-2";
-        else if (actualRank === 3) rankClass = "rank-3";
-
-        const rowHTML = `
-            <div class="rank-row ${rankClass}">
-                <div class="rank-badge">${actualRank}</div>
-                <div style="text-align: left; padding-left: 10px; font-weight: 500;">${user.name}</div>
-                <div>${user.attempts}</div>
-                <div class="rank-score">${user.score}</div>
-            </div>
-        `;
-        tableBody.innerHTML += rowHTML;
-    });
-}
-
-function monitorMaintenance() {
-    db.ref('machine/maintenance').on('value', (snap) => {
-        const data = snap.val() || { isActive: false, date: '', time: '', message: '' };
-        
-        document.getElementById("maintSwitch").checked = data.isActive;
-        document.getElementById("adminMaintDate").value = data.date || "";
-        document.getElementById("adminMaintTime").value = data.time || "";
-        document.getElementById("adminMaintMsg").value = data.message || "";
-
-        const overlay = document.getElementById("maintenanceOverlay");
-        if(data.isActive) {
-            overlay.style.display = "flex";
-            let dateStr = data.date;
-            if(dateStr) {
-                const d = new Date(dateStr);
-                dateStr = d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-            }
-            document.getElementById("maintDateUI").innerText = dateStr || "เร็วๆ นี้";
-            document.getElementById("maintTimeUI").innerText = data.time || "-";
-            document.getElementById("maintMsgUI").innerText = data.message || "กำลังดำเนินการปรับปรุงระบบ ขออภัยในความไม่สะดวกครับ";
-        } else {
-            overlay.style.display = "none";
-        }
-    });
-}
-
-function toggleMaintenance(isActive) { db.ref('machine/maintenance/isActive').set(isActive); }
-
-function saveMaintenanceInfo() {
-    const date = document.getElementById("adminMaintDate").value;
-    const time = document.getElementById("adminMaintTime").value;
-    const msg = document.getElementById("adminMaintMsg").value;
-    
-    db.ref('machine/maintenance/date').set(date);
-    db.ref('machine/maintenance/time').set(time);
-    db.ref('machine/maintenance/message').set(msg);
-    
-    alert("บันทึกข้อมูลแจ้งเตือน Maintenance สำเร็จเรียบร้อยแล้ว!");
-}
+};
 
 async function fetchQuestionsFromGAS() {
     try {
         const response = await fetch(GAS_QUESTION_URL);
         const data = await response.json();
-
         if (Array.isArray(data) && data.length > 0) {
             masterQuestions = data;
-            document.getElementById("reconnectBtn").style.display = "none";
             document.getElementById("startBtn").style.display = "inline-block";
             prepareQuestions(); 
-        } else {
-            throw new Error("Empty Data");
         }
     } catch (error) {
         console.error("Error fetching questions:", error);
-        document.getElementById("questionNumber").innerHTML = "การเชื่อมต่อขัดข้อง";
-        document.getElementById("englishText").innerHTML = "Connection<br>Error";
-        document.getElementById("thaiText").innerHTML = "ไม่สามารถเชื่อมต่อคลังข้อสอบได้";
-        
-        document.getElementById("startBtn").style.display = "none";
-        document.getElementById("reconnectBtn").style.display = "inline-block";
     }
 }
 
 function prepareQuestions() {
     if (masterQuestions.length === 0) return;
-
-    const selectedLevel = adminConfig.forceLevelControl 
-                          ? adminConfig.forcedLevel 
-                          : document.getElementById("userLevel").value;
-
+    const selectedLevel = document.getElementById("userLevel").value;
     let levelFiltered = masterQuestions.filter(q => q.level === selectedLevel);
-
-    if (levelFiltered.length === 0) {
-        document.getElementById("englishText").innerHTML = "ไม่มีข้อสอบระดับนี้";
-        document.getElementById("thaiText").innerHTML = "กรุณาตรวจสอบว่ามีข้อมูลในชีต '" + selectedLevel + "' หรือไม่";
-        questions = [];
-        return;
-    }
-
-    let finalFiltered = levelFiltered;
-    if (adminConfig.difficulty !== "ALL") {
-        finalFiltered = levelFiltered.filter(q => q.difficulty && q.difficulty.toUpperCase() === adminConfig.difficulty);
-        if (finalFiltered.length === 0) {
-            finalFiltered = levelFiltered;
-        }
-    }
-
-    let shuffled = finalFiltered.sort(() => 0.5 - Math.random());
+    let shuffled = levelFiltered.sort(() => 0.5 - Math.random());
     questions = shuffled.slice(0, adminConfig.questionCount);
     currentQuestion = 0;
-
-    const startBtn = document.getElementById("startBtn");
-    startBtn.onclick = startRecognition;
-
-    if(!isTestRunning) {
-        loadQuestion(0);
-    }
-    updateUIBasedOnState(); 
-}
-
-// 🎯 ปรับให้ทยอยแสดงคำจนครบข้อความภายในเวลา 5 วินาที
-function renderSequentialText(sentence) {
-    const container = document.getElementById("englishText");
-    container.innerHTML = ""; 
-    
-    const words = sentence.split(" ");
-    if(words.length === 0) return;
-
-    let wordIndex = 0;
-    
-    words.forEach(word => {
-        const span = document.createElement("span");
-        span.innerText = word + " ";
-        span.style.opacity = "0"; 
-        span.style.transition = "opacity 0.2s ease-in"; 
-        container.appendChild(span);
-    });
-
-    const spans = container.querySelectorAll("span");
-    
-    clearInterval(displayInterval);
-    
-    // เฉลี่ยระยะเวลาให้ครบทุกคำภายใน 5000 มิลลิวินาที (5 วินาที)
-    const intervalTime = Math.floor(5000 / words.length);
-    
-    displayInterval = setInterval(() => {
-        if (wordIndex < spans.length) {
-            spans[wordIndex].style.opacity = "1";
-            wordIndex++;
-        } else {
-            clearInterval(displayInterval);
-        }
-    }, intervalTime); 
+    loadQuestion(0);
 }
 
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
-
     document.getElementById("questionNumber").innerHTML = "ข้อที่ " + (index + 1) + " / " + questions.length;
-    
-    if (adminConfig.cancelRequirement) {
-        document.getElementById("englishText").innerHTML = questions[index].english;
-    } else {
-        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลาข้อละ 15 วินาที)</span>';
-    }
-    
+    document.getElementById("englishText").innerHTML = questions[index].english;
     document.getElementById("thaiText").innerHTML = questions[index].thai;
     document.getElementById("score").innerHTML = "0%";
     document.getElementById("status").innerHTML = "รอเริ่มทดสอบ";
     document.getElementById("status").className = "status";
     document.getElementById("heardText").innerHTML = "AI พร้อมรับเสียง...";
     
-    document.getElementById("audioControls").style.display = "flex";
-    
-    const listenBtn = document.getElementById("listenBtn");
-    if (listenBtn) {
-        listenBtn.style.display = adminConfig.cancelRequirement ? "flex" : "none";
-    }
-    
-    const skipBtn = document.getElementById("skipBtn");
-    if (skipBtn) {
-        skipBtn.style.display = "flex";
-    }
-
-    if(!isTestRunning) { updateTimerDisplay(adminConfig.testDurationSeconds); }
-
     const startBtn = document.getElementById("startBtn");
     startBtn.disabled = false;
     startBtn.innerHTML = "🎤 เริ่มพูด";
 }
 
 function nextQuestion(){
-    clearInterval(displayInterval); 
-    clearTimeout(nextQuestionTimer);
-    clearTimeout(holdDelayTimeout);     // ⏳ เคลียร์เวลาระยะรอ 2 วินาที
-    clearTimeout(startMicDelayTimeout); // 🎙️ เคลียร์เวลาระยะเริ่มไมค์
-    clearTimeout(questionTimeout);      // ⏱️ เคลียร์เวลาระยะปิดไมค์
-    stopSentenceAudio();
-    
+    clearTimeout(questionTimeout); 
     if (isRunning) {
         isRunning = false;
         try { recognition.stop(); } catch(e) {}
@@ -1335,526 +464,98 @@ function nextQuestion(){
     
     currentQuestion++;
     if(currentQuestion >= questions.length){
-        evaluateFinalResult();
+        document.getElementById("englishText").innerHTML = "จบการทดสอบ!";
+        document.getElementById("thaiText").innerHTML = "ระบบกำลังประมวลผล...";
+        document.getElementById("startBtn").disabled = true;
     } else {
         loadQuestion(currentQuestion);
     }
 }
 
 // ==========================================
-// 🛠️ ส่วนจัดการ Admin Settings
+// 🚀 เริ่มบันทึกเสียงพร้อม Dynamic Timeout
 // ==========================================
-function monitorAdminSettings() {
-    db.ref('machine/config').on('value', (snap) => {
-        const conf = snap.val();
-        if (conf) {
-            adminConfig.passRequirement = conf.passRequirement !== undefined ? conf.passRequirement : 5;
-            adminConfig.questionCount = conf.questionCount !== undefined ? conf.questionCount : 10;
-            adminConfig.difficulty = conf.difficulty || "ALL";
-            adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
-            
-            adminConfig.forceLevelControl = conf.forceLevelControl || false;
-            adminConfig.forcedLevel = conf.forcedLevel || "Vocational";
-        }
-
-        document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
-        document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
-        document.getElementById("adminDifficulty").value = adminConfig.difficulty;
-
-        let m = Math.floor(adminConfig.testDurationSeconds / 60);
-        let s = adminConfig.testDurationSeconds % 60;
-        document.getElementById("adminTimeMin").value = m;
-        document.getElementById("adminTimeSec").value = s;
-
-        document.getElementById("adminForceLevelSwitch").checked = adminConfig.forceLevelControl;
-        document.getElementById("adminForcedLevelSelect").value = adminConfig.forcedLevel;
-        document.getElementById("adminLevelSelectContainer").style.display = adminConfig.forceLevelControl ? "flex" : "none";
-
-        applyLevelControl();
-
-        if (!isTestRunning) {
-            updateTimerDisplay(adminConfig.testDurationSeconds);
-            prepareQuestions();
-        }
-        updateUIBasedOnState(); 
-    });
-}
-
-function toggleLevelControl(isForced) {
-    db.ref('machine/config/forceLevelControl').set(isForced);
-    if(isForced) {
-        const currentAdminLevel = document.getElementById("adminForcedLevelSelect").value;
-        db.ref('machine/config/forcedLevel').set(currentAdminLevel);
-    }
-}
-
-function setAdminForcedLevel() {
-    const level = document.getElementById("adminForcedLevelSelect").value;
-    db.ref('machine/config/forcedLevel').set(level);
-}
-
-function updateAdminConfig(key, change) {
-    let newVal = adminConfig[key] + change;
-    if (newVal < 1) newVal = 1; 
-    db.ref(`machine/config/${key}`).set(newVal);
-}
-
-function updateDifficulty() {
-    let val = document.getElementById("adminDifficulty").value;
-    db.ref('machine/config/difficulty').set(val);
-}
-
-function updateTestTime() {
-    let m = parseInt(document.getElementById("adminTimeMin").value) || 0;
-    let s = parseInt(document.getElementById("adminTimeSec").value) || 0;
-    let totalSecs = (m * 60) + s;
-    
-    if (totalSecs >= 1) {
-        db.ref('machine/config/testDurationSeconds').set(totalSecs);
-        alert("บันทึกเวลาทดสอบเรียบร้อย: " + totalSecs + " วินาที");
-    } else {
-        alert("กรุณาใส่เวลาอย่างน้อย 1 วินาที");
-    }
-}
-
-function updateUIBasedOnState() {
-    const ui = document.getElementById("machineStatusUI");
-    const startBtn = document.getElementById("startBtn");
-    const audioControls = document.getElementById("audioControls"); 
-    const listenBtn = document.getElementById("listenBtn");
-    const skipBtn = document.getElementById("skipBtn");
-    const userLevelSelect = document.getElementById("userLevel");
-
-    if (isRunning || isTestRunning) {
-        userLevelSelect.disabled = true;
-        return;
-    } else {
-        userLevelSelect.disabled = false;
-    }
-
-    if (adminConfig.cancelRequirement) {
-        ui.innerHTML = "PRACTICE MODE";
-        ui.style.color = "#b56cff"; 
-        ui.style.background = "rgba(181, 108, 255, 0.08)";
-        ui.style.borderColor = "rgba(181, 108, 255, 0.25)";
-        
-        if (currentQuestion >= questions.length && questions.length > 0) {
-            startBtn.disabled = false;
-            startBtn.innerHTML = "🔄 เริ่มฝึกใหม่";
-            startBtn.onclick = prepareQuestions; 
-            if (audioControls) audioControls.style.display = "none"; 
-        } else if (questions.length > 0) {
-            startBtn.disabled = false;
-            startBtn.innerHTML = "🎤 เริ่มพูด";
-            startBtn.onclick = startRecognition;
-            if (audioControls) {
-                audioControls.style.display = "flex";
-                if (listenBtn) listenBtn.style.display = "flex";
-                if (skipBtn) skipBtn.style.display = "flex";
-            }
-        }
-        return; 
-    }
-
-    ui.style.background = "rgba(29,255,149,0.08)";
-    ui.style.borderColor = "rgba(29,255,149,0.25)";
-    startBtn.onclick = startRecognition; 
-
-    if(currentMachineStatus === 'ready') {
-        ui.innerHTML = "MACHINE READY";
-        ui.style.color = "#1dff95";
-        
-        if (currentQuestion >= questions.length && questions.length > 0) {
-             startBtn.disabled = true;
-             startBtn.innerHTML = "รอรอบต่อไป";
-             if (audioControls) audioControls.style.display = "none";
-        } else if (questions.length > 0) {
-            startBtn.disabled = false;
-            startBtn.innerHTML = "🎤 เริ่มพูด";
-            if (audioControls) {
-                audioControls.style.display = "flex";
-                if (listenBtn) listenBtn.style.display = "none";
-                if (skipBtn) skipBtn.style.display = "flex";
-            }
-        }
-    } else if (currentMachineStatus === 'unlocked') {
-        ui.innerHTML = "MACHINE UNLOCKED";
-        ui.style.color = "#35d8ff";
-        startBtn.disabled = true;
-        startBtn.innerHTML = "🎁 โปรดเลือกของรางวัลที่ตู้";
-        if (audioControls) audioControls.style.display = "none";
-    } else { 
-        ui.innerHTML = "MACHINE BUSY";
-        ui.style.color = "#ff4d6d";
-        startBtn.disabled = true;
-        startBtn.innerHTML = "🔒 รอคิวใช้งาน";
-        if (audioControls) audioControls.style.display = "none";
-    }
-}
-
-function monitorMachine() {
-    db.ref('machine/status').on('value', (snap) => {
-        currentMachineStatus = snap.val() || 'ready';
-        updateUIBasedOnState(); 
-    });
-}
-
-function openAdminModal() {
-    document.getElementById("adminModal").style.display = "flex";
-    if(isAdminLoggedIn) {
-        document.getElementById("adminLoginGroup").style.display = "none";
-        document.getElementById("adminControlGroup").style.display = "block";
-    } else {
-        document.getElementById("adminLoginGroup").style.display = "block";
-        document.getElementById("adminControlGroup").style.display = "none";
-        document.getElementById("adminError").style.display = "none";
-        document.getElementById("adminPassword").value = "";
-    }
-}
-
-function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; }
-
-function verifyAdmin() {
-    const pass = document.getElementById("adminPassword").value;
-    if(pass === ADMIN_PASSWORD) {
-        isAdminLoggedIn = true;
-        document.getElementById("adminLoginGroup").style.display = "none";
-        document.getElementById("adminControlGroup").style.display = "block";
-    } else {
-        document.getElementById("adminError").style.display = "block";
-    }
-}
-
-function setSystemStatus(status) {
-    db.ref('machine/status').set(status)
-        .then(() => { 
-            if (status === 'ready') {
-                alert("✅ ระบบถูกตั้งสถานะเป็น Ready (พร้อมใช้งาน) เรียบร้อยแล้ว!");
-                prepareQuestions(); 
-            } else if (status === 'unlocked') {
-                alert("🔓 ระบบถูกตั้งสถานะเป็น Unlocked (ปลดล็อกตู้) เรียบร้อยแล้ว!");
-            } else if (status === 'busy') {
-                alert("🔒 ระบบถูกตั้งสถานะเป็น Busy (ล็อกการใช้งานเพื่อปรับปรุง) เรียบร้อยแล้ว!");
-            }
-        })
-        .catch((error) => alert("❌ เกิดข้อผิดพลาดในการเปลี่ยนสถานะ: " + error));
-}
-
-function updateStock(slot, changeAmount) {
-    let newValue = currentStock[slot] + changeAmount;
-    if (newValue < 0) newValue = 0;
-    db.ref(`machine/stock/${slot}`).set(newValue);
-}
-
-function monitorStock() {
-    db.ref('machine/stock').on('value', (snap) => {
-        const data = snap.val();
-        if (data) {
-            currentStock.slot1 = data.slot1 || 0;
-            currentStock.slot2 = data.slot2 || 0;
-            
-            document.getElementById("slot1StockUI").innerText = currentStock.slot1;
-            document.getElementById("slot2StockUI").innerText = currentStock.slot2;
-            
-            document.getElementById("rewardStock1UI").innerText = currentStock.slot1;
-            document.getElementById("rewardStock2UI").innerText = currentStock.slot2;
-        }
-    });
-}
-
-function updateTimerDisplay(seconds) {
-    let m = Math.floor(seconds / 60);
-    let s = seconds % 60;
-    document.getElementById("countdown").innerHTML = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-}
-
-function startGlobalTimer() {
-    isTestRunning = true;
-    totalTimeLeftSeconds = adminConfig.testDurationSeconds;
-    updateTimerDisplay(totalTimeLeftSeconds);
-
-    testTimerInterval = setInterval(() => {
-        totalTimeLeftSeconds--;
-        updateTimerDisplay(totalTimeLeftSeconds);
-
-        if (totalTimeLeftSeconds <= 0) {
-            clearInterval(testTimerInterval);
-            forceEndTest();
-        }
-    }, 1000);
-}
-
-function forceEndTest() {
-    isRunning = false;
-    clearTimeout(holdDelayTimeout);
-    clearTimeout(startMicDelayTimeout);
-    clearTimeout(questionTimeout);
-    try { recognition.stop(); } catch(e){}
-    
-    document.getElementById("status").innerHTML = "หมดเวลาทดสอบรวม ⏰";
-    document.getElementById("status").className = "status fail";
-    document.getElementById("heardText").innerHTML = "หมดเวลาการทำแบบทดสอบ";
-    
-    document.getElementById("audioControls").style.display = "none";
-    clearInterval(displayInterval); 
-    
-    playFailSound();
-    
-    setTimeout(() => { evaluateFinalResult(); }, 2000);
-}
-
-// =========================================================
-// 🚀 ปรับปรุงระบบเวลา: 5s แสดงคำ -> 2s ค้างประโยค -> 8s รับเสียง
-// =========================================================
 function startRecognition() {
-    stopSentenceAudio(); 
-    clearInterval(displayInterval); 
-    clearTimeout(holdDelayTimeout);
-    clearTimeout(startMicDelayTimeout);
-    clearTimeout(questionTimeout); 
+    if (isRunning) return;
+    isRunning = true;
     
-    const studentName = document.getElementById("studentName").value;
-    if (studentName.trim() === "") {
-        alert("กรุณากรอกชื่อผู้เข้าทดสอบก่อนเริ่มใช้งานครับ!");
-        document.getElementById("studentName").focus();
-        return;
-    }
-
-    if (!isTestRunning) {
-        totalScore = 0; passCount = 0; failCount = 0;
-        document.getElementById("totalScore").innerHTML = 0;
-        document.getElementById("passCount").innerHTML = 0;
-        document.getElementById("failCount").innerHTML = 0;
-        
-        startGlobalTimer();
-    }
-
-    isRunning = false; 
+    const currentSentence = questions[currentQuestion].english;
+    
+    // เรียกใช้งาน Algorithm ประเมินเวลาอัตโนมัติตามพยางค์
+    const dynamicTime = calculateDynamicTimeout(currentSentence);
+    
     document.getElementById("startBtn").disabled = true;
-    
-    // -----------------------------------------------------
-    // ระยะที่ 1: (0 - 5 วินาที) ทยอยแสดงคำจนครบข้อความ
-    // -----------------------------------------------------
-    document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (5 วินาที)";
-    document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
-    document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "อ่านและทำความเข้าใจประโยค (5 วินาที)...";
+    document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง...";
+    document.getElementById("heardText").innerHTML = `AI กำลังฟังเสียงของคุณ... (เวลาให้พูด: ${(dynamicTime/1000).toFixed(1)} วินาที)`;
 
-    renderSequentialText(questions[currentQuestion].english);
+    try {
+        recognition.start();
+    } catch(e) {
+        console.error(e);
+    }
 
-    // -----------------------------------------------------
-    // ระยะที่ 2: (วินาทีที่ 5 - 7) แสดงประโยคค้างไว้ 2 วินาที (ยังไม่เปิดไมค์)
-    // -----------------------------------------------------
-    holdDelayTimeout = setTimeout(() => {
-        if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
-        
-        document.getElementById("startBtn").innerHTML = "⏳ เตรียมตัวพูด... (2 วินาที)";
-        document.getElementById("status").innerHTML = "⏳ เตรียมตัวพูด...";
-        document.getElementById("heardText").innerHTML = "พร้อมเปิดไมค์ในอีก 2 วินาที...";
-    }, 5000); // ทำงานที่วินาทีที่ 5
-
-    // -----------------------------------------------------
-    // ระยะที่ 3: (วินาทีที่ 7 - 15) เริ่มเปิดไมค์รับเสียงต่อเนื่อง 8 วินาที
-    // -----------------------------------------------------
-    startMicDelayTimeout = setTimeout(() => {
-        if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
-
-        isRunning = true;
-        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 8 วินาที)";
-        document.getElementById("status").innerHTML = "🎙️ กำลังฟังเสียงของคุณ...";
-        document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ... (ให้เวลา 8 วินาที)";
-
-        try {
-            recognition.start();
-        } catch (e) {
-            console.error("Mic start error:", e);
-        }
-
-        // ตั้งเวลาตรวจสอบหมดอายุการพูดที่ 8 วินาที (จากวินาทีที่ 7 ไปจบที่วินาที 15 พอดี)
-        questionTimeout = setTimeout(() => {
-            if (isRunning) {
-                isRunning = false;
-                try { recognition.stop(); } catch(e) {}
-                
-                document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
-                document.getElementById("status").className = "status fail";
-                document.getElementById("heardText").innerHTML = "หมดเวลา 8 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
-                
-                failCount++;
-                document.getElementById("failCount").innerHTML = failCount;
-                playFailSound();
-                
-                document.getElementById("startBtn").disabled = true;
-                
-                nextQuestionTimer = setTimeout(() => {
-                    if (totalTimeLeftSeconds > 0 || adminConfig.cancelRequirement) {
-                        nextQuestion();
-                    }
-                }, 1500);
-            }
-        }, 8000); // 8 วินาที
-
-    }, 7000); // เริ่มเปิดไมค์ที่วินาทีที่ 7
-}
-
-function evaluateFinalResult() {
-    clearInterval(testTimerInterval);
-    clearInterval(displayInterval); 
-    clearTimeout(holdDelayTimeout);
-    clearTimeout(startMicDelayTimeout);
     clearTimeout(questionTimeout);
-    isTestRunning = false;
-    
-    document.getElementById("audioControls").style.display = "none";
-    document.getElementById("userLevel").disabled = false;
-    
-    const name = document.getElementById("studentName").value || "Unknown User";
-
-    document.getElementById("englishText").innerHTML = "Test Completed!";
-    document.getElementById("thaiText").innerHTML = "สิ้นสุดการทดสอบ";
-    document.getElementById("questionNumber").innerHTML = "สรุปผลคะแนน";
-
-    let finalPercent = Math.round((passCount / adminConfig.questionCount) * 100);
-    document.getElementById("score").innerHTML = finalPercent + "%";
-
-    if (passCount >= adminConfig.passRequirement) {
-        if (adminConfig.cancelRequirement) { 
-            document.getElementById("status").innerHTML = "🎉 ผ่านเกณฑ์! (โหมดฝึกซ้อม)";
-            document.getElementById("status").className = "status pass";
-            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").onclick = prepareQuestions; 
-            db.ref('machine/status').set('ready'); 
-            applauseAudio.play().catch(e => console.log("Audio play error:", e));
-        } else {
-            let otpCode = Math.floor(1000 + Math.random() * 9000).toString(); 
-            let expireTime = Date.now() + (5 * 60 * 1000); 
-
-            db.ref('machine/otps/' + otpCode).set({
-                valid: true,
-                expire: expireTime,
-                userName: name 
-            }).then(() => {
-                document.getElementById("status").innerHTML = "🎉 รหัสรับรางวัล: " + otpCode;
-                document.getElementById("status").className = "status pass";
-                document.getElementById("startBtn").innerHTML = "กดรหัสนี้ที่ตู้ (หมดอายุใน 5 นาที)";
-                document.getElementById("startBtn").disabled = true;
-                applauseAudio.play().catch(e => console.log("Audio play error:", e));
-            });
-        }
-    } else {
-        if (adminConfig.cancelRequirement) {
-            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ (โหมดฝึกซ้อม)";
+    questionTimeout = setTimeout(() => {
+        if (isRunning) {
+            recognition.stop();
+            isRunning = false;
+            document.getElementById("status").innerHTML = "หมดเวลา ⏳";
             document.getElementById("status").className = "status fail";
-            document.getElementById("startBtn").innerHTML = "🔄 เริ่มฝึกฝนใหม่";
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").onclick = prepareQuestions;
-        } else {
-            document.getElementById("status").innerHTML = "😢 ไม่ผ่านเกณฑ์ ลองพยายามใหม่นะ";
-            document.getElementById("status").className = "status fail";
-            document.getElementById("startBtn").innerHTML = "จบการทดสอบ";
-            document.getElementById("startBtn").disabled = true;
-            db.ref('machine/status').set('ready'); 
+            document.getElementById("heardText").innerHTML = "ไม่ได้รับเสียงในเวลาที่กำหนด";
+            failCount++;
+            document.getElementById("failCount").innerHTML = failCount;
+            playFailSound();
+            
+            setTimeout(nextQuestion, 1500);
         }
-    }
-
-    saveToGoogleSheet(name, totalScore, passCount, failCount);
+    }, dynamicTime);
 }
 
+// Utility: ฟังก์ชันคำนวณความเหมือนของข้อความ
 function similarity(s1, s2) {
-    let longer = s1.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-    let shorter = s2.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-    
-    if (longer.length < shorter.length) {
-        let temp = longer; longer = shorter; shorter = temp;
-    }
-    if (longer.length == 0) return 100;
-    
+    let longer = s1;
+    let shorter = s2;
+    if (s1.length < s2.length) { longer = s2; shorter = s1; }
     let longerLength = longer.length;
+    if (longerLength == 0) return 100;
+    return Math.round(((longerLength - editDistance(longer, shorter)) / parseFloat(longerLength)) * 100);
+}
+
+function editDistance(s1, s2) {
+    s1 = s1.toLowerCase();
+    s2 = s2.toLowerCase();
     let costs = new Array();
-    for (let i = 0; i <= longer.length; i++) {
+    for (let i = 0; i <= s1.length; i++) {
         let lastValue = i;
-        for (let j = 0; j <= shorter.length; j++) {
+        for (let j = 0; j <= s2.length; j++) {
             if (i == 0) costs[j] = j;
             else {
                 if (j > 0) {
                     let newValue = costs[j - 1];
-                    if (longer.charAt(i - 1) != shorter.charAt(j - 1))
+                    if (s1.charAt(i - 1) != s2.charAt(j - 1))
                         newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
                     costs[j - 1] = lastValue;
                     lastValue = newValue;
                 }
             }
         }
-        if (i > 0) costs[shorter.length] = lastValue;
+        if (i > 0) costs[s2.length] = lastValue;
     }
-    let score = Math.round(((longerLength - costs[shorter.length]) / parseFloat(longerLength)) * 100);
-    return score > 100 ? 100 : score;
+    return costs[s2.length];
 }
 
-function saveToGoogleSheet(name, score, pass, fail) {
-    const url = `${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(name)}&score=${score}&pass=${pass}&fail=${fail}`;
-    
-    fetch(url, { mode: 'no-cors' })
-        .then(() => console.log("บันทึกสถิติลง Google Sheet สำเร็จ"))
-        .catch(err => console.error("ไม่สามารถบันทึก Google Sheet ได้:", err));
+function playPassSound() { 
+    // ตัวอย่างเสียง Pass 
+    console.log("Play Pass Sound"); 
 }
-
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-function playPassSound() {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    let osc = audioCtx.createOscillator();
-    let gainNode = audioCtx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
-    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-    
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.5);
+function playFailSound() { 
+    // ตัวอย่างเสียง Fail 
+    console.log("Play Fail Sound"); 
 }
-
-function playFailSound() {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    let osc = audioCtx.createOscillator();
-    let gainNode = audioCtx.createGain();
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(300, audioCtx.currentTime); 
-    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
-    
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
-}
-
-let currentUtterance = null;
 function playSentenceAudio() {
-    stopSentenceAudio(); 
-    if (questions.length === 0 || currentQuestion >= questions.length) return;
-    const textToSpeak = questions[currentQuestion].english;
-    
-    currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
-    currentUtterance.lang = 'en-US'; 
-    currentUtterance.rate = 0.85; 
-    
-    window.speechSynthesis.speak(currentUtterance);
-}
-
-function stopSentenceAudio() {
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel(); 
-    }
+    const utterance = new SpeechSynthesisUtterance(questions[currentQuestion].english);
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
 }
 </script>
 </body>
