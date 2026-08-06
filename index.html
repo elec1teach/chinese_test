@@ -751,6 +751,9 @@ let startMicDelayTimeout = null;
 let questionTimeout = null;     
 let speechCountdownInterval = null;
 
+// สำหรับจัดการระบบเริ่มใหม่ (Auto-Restart)
+let autoRestartTimerId = null;
+
 let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
@@ -1295,6 +1298,9 @@ async function fetchQuestionsFromGAS() {
 function prepareQuestions() {
     if (masterQuestions.length === 0) return;
 
+    // เคลียร์ Timer ของการเริ่มรอบใหม่ (ถ้ามีการกดสลับโหมดขณะรอ)
+    if (autoRestartTimerId) clearInterval(autoRestartTimerId);
+
     const selectedLevel = adminConfig.forceLevelControl 
                           ? adminConfig.forcedLevel 
                           : document.getElementById("userLevel").value;
@@ -1512,20 +1518,18 @@ function playSentenceAudio() {
 }
 function stopSentenceAudio() { window.speechSynthesis.cancel(); }
 
+// 🔄 อัปเดตฟังก์ชัน evaluateFinalResult เพื่อแก้ปัญหา OTP และระบบเริ่มรอบใหม่
 function evaluateFinalResult() { 
     isTestRunning = false;
     document.getElementById("questionNumber").innerHTML = "ทดสอบเสร็จสิ้น!";
     document.getElementById("englishText").innerHTML = "🎉 COMPLETE!";
-    document.getElementById("thaiText").innerHTML = "การทดสอบจบลงแล้ว";
+    document.getElementById("thaiText").innerHTML = "ประมวลผลคะแนน...";
     document.getElementById("status").innerHTML = "สรุปผลสอบ";
     document.getElementById("status").className = "status pass";
-    document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ (คะแนนรวม: ${totalScore})`;
     
-    document.getElementById("startBtn").disabled = true;
-    document.getElementById("startBtn").innerHTML = "จบการทำงาน";
+    const sName = document.getElementById("studentName").value.trim() || "ผู้ทดสอบไม่ระบุชื่อ";
     
     // ส่งผลไปยัง Google Sheet สำหรับตาราง Rank
-    const sName = document.getElementById("studentName").value.trim() || "ผู้ทดสอบไม่ระบุชื่อ";
     try {
         fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -1535,14 +1539,52 @@ function evaluateFinalResult() {
         });
     } catch(e) { console.error("Error saving score:", e); }
 
-    // สั่งปลดล็อกตู้ ESP32 หากสอบผ่านเกณฑ์ในโหมดปกติ
+    let waitTime = 5; // เวลาสำหรับนับถอยหลังเพื่อเริ่มรอบใหม่
+
+    // ตรวจสอบว่าผ่านเกณฑ์และอยู่ในโหมดรับรางวัลหรือไม่
     if (passCount >= adminConfig.passRequirement && !adminConfig.cancelRequirement) {
         applauseAudio.play().catch(e=>console.log(e));
-        document.getElementById("status").innerHTML = "คุณผ่านเกณฑ์! กรุณารอรับรางวัล 🎁";
-        if (currentMachineStatus !== 'busy') {
-            db.ref('machine/status').set('unlocked');
+        
+        // 🔑 1. สุ่มรหัส OTP 4 หลัก
+        const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+        // 📤 2. ส่ง OTP และชื่อผู้ใช้ไปยัง Firebase เพื่อให้ตู้ Kiosk นำไปตรวจสอบ
+        db.ref('machine/otps/' + otpCode).set({
+            valid: true,
+            userName: sName
+        });
+
+        // 🖥️ 3. แสดงรหัส OTP อย่างโดดเด่นบนหน้าจอ
+        document.getElementById("status").innerHTML = "คุณผ่านเกณฑ์! 🎁";
+        document.getElementById("englishText").innerHTML = `OTP: <span style="color: #ffcc00; font-size: 70px; text-shadow: 0 0 20px rgba(255, 204, 0, 0.5);">${otpCode}</span>`;
+        document.getElementById("thaiText").innerHTML = "นำรหัส 4 หลักนี้ไปกดรับรางวัลที่ตู้ Kiosk";
+        document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ (คะแนนรวม: ${totalScore})`;
+
+        waitTime = 15; // ให้เวลา 15 วินาทีในการจดจำ/ถ่ายรูปรหัส OTP ก่อนเริ่มรอบใหม่
+    } else {
+        // กรณีไม่ผ่านเกณฑ์ หรืออยู่ในโหมดฝึกซ้อม
+        if(!adminConfig.cancelRequirement) {
+            document.getElementById("status").innerHTML = "พยายามใหม่อีกนิด! ✌️";
+            document.getElementById("status").className = "status fail";
         }
+        document.getElementById("heardText").innerHTML = `ตอบผ่านทั้งหมด: ${passCount} / ${questions.length} ข้อ (คะแนนรวม: ${totalScore})`;
+        waitTime = 7; // ให้เวลา 7 วินาทีก่อนเริ่มรอบใหม่
     }
+
+    // 🔄 4. ระบบ Auto-Restart สุ่มข้อสอบเริ่มรอบใหม่ (ยังคงจำชื่อ User เดิมไว้)
+    document.getElementById("startBtn").disabled = true;
+    
+    if (autoRestartTimerId) clearInterval(autoRestartTimerId);
+    
+    autoRestartTimerId = setInterval(() => {
+        document.getElementById("startBtn").innerHTML = `เริ่มรอบใหม่โดยอัตโนมัติใน ${waitTime} วินาที...`;
+        waitTime--;
+        
+        if (waitTime < 0) {
+            clearInterval(autoRestartTimerId);
+            prepareQuestions(); // สุ่มข้อสอบใหม่ รีเซ็ตค่า UI เคลียร์กระดานทันที
+        }
+    }, 1000);
 }
 
 // อัลกอริทึมวัดความเหมือนของประโยค (Levenshtein Distance)
