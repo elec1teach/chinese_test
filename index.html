@@ -178,7 +178,7 @@ h1 { margin:0; font-size:42px; font-family:'Orbitron',sans-serif; letter-spacing
 
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
 .stat { padding:15px; border-radius:20px; position:relative; overflow:hidden; text-align:center; }
-.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat::after { content:"absolute"; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
 .stat-title { font-size:14px; color:var(--muted); letter-spacing: 1px;}
 .stat-value { margin-top:8px; font-size:28px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
@@ -817,11 +817,11 @@ let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
 
-// ตัวแปรจับเวลาในระบบ
+// ตวัแปรจับเวลาในระบบ
 let nextQuestionTimer = null;
 let displayInterval = null; 
-let holdDelayTimeout = null;       // ⏳ ตัวนับเวลาช่วง Hold 2 วินาที (วินาทีที่ 5 - 7)
-let startMicDelayTimeout = null;   // 🎙️ ตัวนับเวลาเริ่มเปิดไมค์ (วินาทีที่ 7)
+let holdDelayTimeout = null;       // ⏳ เพิ่ม: ตัวนับเวลาช่วง Hold 2 วินาที (วินาทีที่ 5 - 7)
+let startMicDelayTimeout = null;   // 🎙️ นับเวลาเปิดไมค์ในวินาทีที่ 7
 let questionTimeout = null;        // ⏱️ จับเวลาเปิดไมค์ 8 วินาที (วินาทีที่ 7 - 15)
 
 let adminConfig = {
@@ -1249,7 +1249,7 @@ function prepareQuestions() {
     updateUIBasedOnState(); 
 }
 
-// 🎯 ระยะที่ 1: ทยอยแสดงคำจนครบข้อความภายใน 5 วินาที
+// 🎯 ปรับให้ทยอยแสดงคำจนครบข้อความภายในเวลา 5 วินาที
 function renderSequentialText(sentence) {
     const container = document.getElementById("englishText");
     container.innerHTML = ""; 
@@ -1604,7 +1604,7 @@ function forceEndTest() {
 }
 
 // =========================================================
-// 🚀 ระบบบริหารจัดการเวลา 15 วินาที (3 ระยะ)
+// 🚀 ปรับปรุงระบบเวลา: 5s แสดงคำ -> 2s ค้างประโยค -> 8s รับเสียง
 // =========================================================
 function startRecognition() {
     stopSentenceAudio(); 
@@ -1633,7 +1633,7 @@ function startRecognition() {
     document.getElementById("startBtn").disabled = true;
     
     // -----------------------------------------------------
-    // ระยะที่ 1: (วินาทีที่ 0 - 5) ทยอยแสดงคำจนครบข้อความ
+    // ระยะที่ 1: (0 - 5 วินาที) ทยอยแสดงคำจนครบข้อความ
     // -----------------------------------------------------
     document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (5 วินาที)";
     document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
@@ -1643,18 +1643,18 @@ function startRecognition() {
     renderSequentialText(questions[currentQuestion].english);
 
     // -----------------------------------------------------
-    // ระยะที่ 2: (วินาทีที่ 5 - 7) แสดงประโยคค้างไว้ 2 วินาที (ไมโครโฟนยังไม่เปิด)
+    // ระยะที่ 2: (วินาทีที่ 5 - 7) แสดงประโยคค้างไว้ 2 วินาที (ยังไม่เปิดไมค์)
     // -----------------------------------------------------
     holdDelayTimeout = setTimeout(() => {
         if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
         
         document.getElementById("startBtn").innerHTML = "⏳ เตรียมตัวพูด... (2 วินาที)";
         document.getElementById("status").innerHTML = "⏳ เตรียมตัวพูด...";
-        document.getElementById("heardText").innerHTML = "เตรียมตัวพูดในอีก 2 วินาที...";
-    }, 5000);
+        document.getElementById("heardText").innerHTML = "พร้อมเปิดไมค์ในอีก 2 วินาที...";
+    }, 5000); // ทำงานที่วินาทีที่ 5
 
     // -----------------------------------------------------
-    // ระยะที่ 3: (วินาทีที่ 7 - 15) เปิดไมค์รับเสียงต่อเนื่อง 8 วินาที
+    // ระยะที่ 3: (วินาทีที่ 7 - 15) เริ่มเปิดไมค์รับเสียงต่อเนื่อง 8 วินาที
     // -----------------------------------------------------
     startMicDelayTimeout = setTimeout(() => {
         if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
@@ -1670,7 +1670,7 @@ function startRecognition() {
             console.error("Mic start error:", e);
         }
 
-        // ตั้งเวลาตรวจสอบหมดอายุการพูดที่ 8 วินาที (สิ้นสุดที่วินาทีที่ 15 พอดี)
+        // ตั้งเวลาตรวจสอบหมดอายุการพูดที่ 8 วินาที (จากวินาทีที่ 7 ไปจบที่วินาที 15 พอดี)
         questionTimeout = setTimeout(() => {
             if (isRunning) {
                 isRunning = false;
@@ -1692,9 +1692,9 @@ function startRecognition() {
                     }
                 }, 1500);
             }
-        }, 8000);
+        }, 8000); // 8 วินาที
 
-    }, 7000);
+    }, 7000); // เริ่มเปิดไมค์ที่วินาทีที่ 7
 }
 
 function evaluateFinalResult() {
