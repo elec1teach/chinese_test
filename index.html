@@ -1299,8 +1299,8 @@ function renderSequentialText(sentence) {
     
     clearInterval(displayInterval);
     
-    // ปรับให้ค่อย ๆ แสดงข้อความครบภายใน 6 วินาที (6,000 มิลลิวินาที)
-    const intervalTime = Math.floor(6000 / words.length);
+    // 💡 ปรับปรุง: ทยอยแสดงข้อความจนครบภายใน 5 วินาที (5,000 มิลลิวินาที)
+    const intervalTime = Math.floor(5000 / words.length);
     
     displayInterval = setInterval(() => {
         if (wordIndex < spans.length) {
@@ -1661,21 +1661,21 @@ function startRecognition() {
 
     isRunning = false; 
     document.getElementById("startBtn").disabled = true;
-    // ปรับเวลาแสดงข้อความบอกเวลาแสดงโจทย์เป็น 6 วินาที
+    // 💡 ปรับปรุง: อัปเดตข้อความบนปุ่มเป็น 5 วิ + รอ 1 วิ (รวม 6 วิ)
     document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (6 วินาที)";
     document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
     document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "เตรียมอ่านประโยคเมื่อไมโครโฟนเปิดใน 6 วินาที...";
+    document.getElementById("heardText").innerHTML = "แสดงโจทย์ 5 วินาที + ค้างรออีก 1 วินาทีก่อนเปิดไมค์...";
 
     renderSequentialText(questions[currentQuestion].english);
 
-    // เปิดไมค์รับเสียงที่วินาทีที่ 6 (6,000 มิลลิวินาที)
+    // 💡 ปรับปรุง: เปิดไมค์รับเสียงที่วินาทีที่ 6 (5s แสดง + 1s ค้างรอ = 6,000 มิลลิวินาที)
     startMicDelayTimeout = setTimeout(() => {
         if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
 
         isRunning = true;
         
-        // 🔔 เรียกใช้เสียงเตือน "ตื้ด" เมื่อข้อความแสดงครบ 6 วินาที
+        // 🔔 เรียกใช้เสียงเตือน "ตื้ด" เมื่อถึงเวลาเริ่มพูด
         playBeepSound();
         
         // ปรับเป็นเวลาเหลือ 9 วินาทีสำหรับการพูด (เวลารวมข้อละ 15 วินาที)
