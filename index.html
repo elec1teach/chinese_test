@@ -479,7 +479,7 @@ input:checked + .slider:before { transform: translateX(21px); }
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ" />
     </div>
 
-    <!-- 📚 LEVEL SELECTOR (ปรับปรุงให้รองรับการซ่อนเมื่อ Admin สั่งตัดสิทธิ์) -->
+    <!-- 📚 LEVEL SELECTOR -->
     <div class="level-box glass" id="userLevelContainer">
         <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ</div>
         <select id="userLevel" onchange="prepareQuestions()">
@@ -697,7 +697,7 @@ input:checked + .slider:before { transform: translateX(21px); }
                 <div style="font-size:12px; color:var(--muted); margin-top:10px;">* ระบบจะย่อขนาดและบันทึกภาพลงฐานข้อมูลอัตโนมัติ</div>
             </div>
 
-            <!-- ⚙️ การตั้งค่าระบบข้อสอบ (เพิ่มส่วนบังคับระดับข้อสอบ) -->
+            <!-- ⚙️ การตั้งค่าระบบข้อสอบ -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 15px; font-size: 16px; text-align: left;">⚙️ Game Settings</div>
                 
@@ -817,12 +817,13 @@ let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 let currentMachineStatus = 'ready'; 
 
+// ตวัแปรจับเวลาในระบบ
 let nextQuestionTimer = null;
 let displayInterval = null; 
-let startMicDelayTimeout = null; 
-let questionTimeout = null;     
+let holdDelayTimeout = null;       // ⏳ เพิ่ม: ตัวนับเวลาช่วง Hold 2 วินาที (วินาทีที่ 5 - 7)
+let startMicDelayTimeout = null;   // 🎙️ นับเวลาเปิดไมค์ในวินาทีที่ 7
+let questionTimeout = null;        // ⏱️ จับเวลาเปิดไมค์ 8 วินาที (วินาทีที่ 7 - 15)
 
-// เพิ่มตัวแปรสำหรับเก็บบริบทการตั้งค่าของ Admin
 let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
@@ -837,7 +838,7 @@ let initialCountdownTimer = null;
 let initialTime = 10;
 
 // ==========================================
-// 🎯 ฟังก์ชันจัดการ Level UI (ใหม่)
+// 🎯 ฟังก์ชันจัดการ Level UI
 // ==========================================
 function applyLevelControl() {
     const userContainer = document.getElementById("userLevelContainer");
@@ -845,24 +846,20 @@ function applyLevelControl() {
     const popup = document.getElementById("initialLevelModal");
 
     if (adminConfig.forceLevelControl) {
-        // Admin ควบคุม
         userContainer.style.display = "none";
         userSelect.value = adminConfig.forcedLevel;
 
-        // ถ้า Pop-up เปิดค้างอยู่ ให้ปิดทิ้งทันที
         if (popup.style.display === "flex") {
             clearInterval(initialCountdownTimer);
             popup.style.display = "none";
-            fetchQuestionsFromGAS(); // โหลดข้อสอบเลยโดยใช้ค่าจาก Admin
+            fetchQuestionsFromGAS(); 
         }
     } else {
-        // User ควบคุม
         userContainer.style.display = "flex";
     }
 }
 
 function showInitialPopup() {
-    // ถ้า Admin บังคับระดับแล้ว ให้ข้าม Pop-up ไปเลย
     if (adminConfig.forceLevelControl) {
         document.getElementById("userLevel").value = adminConfig.forcedLevel;
         fetchQuestionsFromGAS();
@@ -889,7 +886,6 @@ function confirmInitialLevel() {
     clearInterval(initialCountdownTimer);
     document.getElementById("initialLevelModal").style.display = "none";
     
-    // ถ้าตอนกด Admin ไม่ได้บังคับสิทธิ์ ให้อัปเดตค่าตามที่ User เลือก
     if (!adminConfig.forceLevelControl) {
         const selectedLevel = document.getElementById("popupLevelSelect").value;
         document.getElementById("userLevel").value = selectedLevel;
@@ -990,10 +986,7 @@ window.onload = async () => {
 
     monitorMaintenance(); 
     monitorAdminSettings(); 
-    
-    // เรียกใช้ Pop-up เริ่มแรก (ถ้าโดนบังคับ มันจะถูกข้ามอัตโนมัติในฟังก์ชัน)
     showInitialPopup(); 
-    
     monitorMachine(); 
     monitorStock(); 
     monitorRewards(); 
@@ -1222,7 +1215,6 @@ async function fetchQuestionsFromGAS() {
 function prepareQuestions() {
     if (masterQuestions.length === 0) return;
 
-    // เลือกระดับตามสถานะการบังคับของ Admin
     const selectedLevel = adminConfig.forceLevelControl 
                           ? adminConfig.forcedLevel 
                           : document.getElementById("userLevel").value;
@@ -1257,6 +1249,7 @@ function prepareQuestions() {
     updateUIBasedOnState(); 
 }
 
+// 🎯 ปรับให้ทยอยแสดงคำจนครบข้อความภายในเวลา 5 วินาที
 function renderSequentialText(sentence) {
     const container = document.getElementById("englishText");
     container.innerHTML = ""; 
@@ -1278,6 +1271,7 @@ function renderSequentialText(sentence) {
     
     clearInterval(displayInterval);
     
+    // เฉลี่ยระยะเวลาให้ครบทุกคำภายใน 5000 มิลลิวินาที (5 วินาที)
     const intervalTime = Math.floor(5000 / words.length);
     
     displayInterval = setInterval(() => {
@@ -1298,7 +1292,7 @@ function loadQuestion(index){
     if (adminConfig.cancelRequirement) {
         document.getElementById("englishText").innerHTML = questions[index].english;
     } else {
-        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลา 10 วินาที)</span>';
+        document.getElementById("englishText").innerHTML = '<span style="font-size: 24px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค (รวมเวลาข้อละ 15 วินาที)</span>';
     }
     
     document.getElementById("thaiText").innerHTML = questions[index].thai;
@@ -1329,8 +1323,9 @@ function loadQuestion(index){
 function nextQuestion(){
     clearInterval(displayInterval); 
     clearTimeout(nextQuestionTimer);
-    clearTimeout(startMicDelayTimeout);
-    clearTimeout(questionTimeout); 
+    clearTimeout(holdDelayTimeout);     // ⏳ เคลียร์เวลาระยะรอ 2 วินาที
+    clearTimeout(startMicDelayTimeout); // 🎙️ เคลียร์เวลาระยะเริ่มไมค์
+    clearTimeout(questionTimeout);      // ⏱️ เคลียร์เวลาระยะปิดไมค์
     stopSentenceAudio();
     
     if (isRunning) {
@@ -1347,7 +1342,7 @@ function nextQuestion(){
 }
 
 // ==========================================
-// 🛠️ ส่วนจัดการ Admin Settings ใหม่
+// 🛠️ ส่วนจัดการ Admin Settings
 // ==========================================
 function monitorAdminSettings() {
     db.ref('machine/config').on('value', (snap) => {
@@ -1358,12 +1353,10 @@ function monitorAdminSettings() {
             adminConfig.difficulty = conf.difficulty || "ALL";
             adminConfig.testDurationSeconds = conf.testDurationSeconds !== undefined ? conf.testDurationSeconds : 60;
             
-            // รับค่าจาก Firebase สำหรับการจัดการ Level UI
             adminConfig.forceLevelControl = conf.forceLevelControl || false;
             adminConfig.forcedLevel = conf.forcedLevel || "Vocational";
         }
 
-        // อัปเดต UI ส่วน Admin Config
         document.getElementById("adminPassReqUI").innerText = adminConfig.passRequirement;
         document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
         document.getElementById("adminDifficulty").value = adminConfig.difficulty;
@@ -1373,12 +1366,10 @@ function monitorAdminSettings() {
         document.getElementById("adminTimeMin").value = m;
         document.getElementById("adminTimeSec").value = s;
 
-        // อัปเดตสถานะสวิตช์ใน Admin Panel
         document.getElementById("adminForceLevelSwitch").checked = adminConfig.forceLevelControl;
         document.getElementById("adminForcedLevelSelect").value = adminConfig.forcedLevel;
         document.getElementById("adminLevelSelectContainer").style.display = adminConfig.forceLevelControl ? "flex" : "none";
 
-        // เรียกฟังก์ชันจัดการแสดงผล Level Dropdown ฝั่ง User
         applyLevelControl();
 
         if (!isTestRunning) {
@@ -1389,17 +1380,14 @@ function monitorAdminSettings() {
     });
 }
 
-// 📌 ฟังก์ชันสำหรับ Admin ตัดสิทธิ์เลือกระดับ
 function toggleLevelControl(isForced) {
     db.ref('machine/config/forceLevelControl').set(isForced);
     if(isForced) {
-        // ถ้ายอมให้ Admin บังคับ ให้เซฟค่าปัจจุบันใน Dropdown ฝั่ง Admin ลงไปด้วย
         const currentAdminLevel = document.getElementById("adminForcedLevelSelect").value;
         db.ref('machine/config/forcedLevel').set(currentAdminLevel);
     }
 }
 
-// 📌 ฟังก์ชันสำหรับ Admin เปลี่ยนระดับบังคับ
 function setAdminForcedLevel() {
     const level = document.getElementById("adminForcedLevelSelect").value;
     db.ref('machine/config/forcedLevel').set(level);
@@ -1598,6 +1586,7 @@ function startGlobalTimer() {
 
 function forceEndTest() {
     isRunning = false;
+    clearTimeout(holdDelayTimeout);
     clearTimeout(startMicDelayTimeout);
     clearTimeout(questionTimeout);
     try { recognition.stop(); } catch(e){}
@@ -1614,11 +1603,15 @@ function forceEndTest() {
     setTimeout(() => { evaluateFinalResult(); }, 2000);
 }
 
+// =========================================================
+// 🚀 ปรับปรุงระบบเวลา: 5s แสดงคำ -> 2s ค้างประโยค -> 8s รับเสียง
+// =========================================================
 function startRecognition() {
     stopSentenceAudio(); 
     clearInterval(displayInterval); 
-    clearTimeout(questionTimeout); 
+    clearTimeout(holdDelayTimeout);
     clearTimeout(startMicDelayTimeout);
+    clearTimeout(questionTimeout); 
     
     const studentName = document.getElementById("studentName").value;
     if (studentName.trim() === "") {
@@ -1638,20 +1631,38 @@ function startRecognition() {
 
     isRunning = false; 
     document.getElementById("startBtn").disabled = true;
+    
+    // -----------------------------------------------------
+    // ระยะที่ 1: (0 - 5 วินาที) ทยอยแสดงคำจนครบข้อความ
+    // -----------------------------------------------------
     document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงโจทย์ (5 วินาที)";
     document.getElementById("status").innerHTML = "กำลังแสดงประโยคข้อสอบ...";
     document.getElementById("status").className = "status";
-    document.getElementById("heardText").innerHTML = "เตรียมอ่านประโยคเมื่อไมโครโฟนเปิดใน 5 วินาที...";
+    document.getElementById("heardText").innerHTML = "อ่านและทำความเข้าใจประโยค (5 วินาที)...";
 
     renderSequentialText(questions[currentQuestion].english);
 
+    // -----------------------------------------------------
+    // ระยะที่ 2: (วินาทีที่ 5 - 7) แสดงประโยคค้างไว้ 2 วินาที (ยังไม่เปิดไมค์)
+    // -----------------------------------------------------
+    holdDelayTimeout = setTimeout(() => {
+        if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
+        
+        document.getElementById("startBtn").innerHTML = "⏳ เตรียมตัวพูด... (2 วินาที)";
+        document.getElementById("status").innerHTML = "⏳ เตรียมตัวพูด...";
+        document.getElementById("heardText").innerHTML = "พร้อมเปิดไมค์ในอีก 2 วินาที...";
+    }, 5000); // ทำงานที่วินาทีที่ 5
+
+    // -----------------------------------------------------
+    // ระยะที่ 3: (วินาทีที่ 7 - 15) เริ่มเปิดไมค์รับเสียงต่อเนื่อง 8 วินาที
+    // -----------------------------------------------------
     startMicDelayTimeout = setTimeout(() => {
         if (!isTestRunning && totalTimeLeftSeconds <= 0) return;
 
         isRunning = true;
-        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 5 วินาที)";
+        document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟัง... (เหลือ 8 วินาที)";
         document.getElementById("status").innerHTML = "🎙️ กำลังฟังเสียงของคุณ...";
-        document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ...";
+        document.getElementById("heardText").innerHTML = "พูดตอบได้เลยครับ... (ให้เวลา 8 วินาที)";
 
         try {
             recognition.start();
@@ -1659,6 +1670,7 @@ function startRecognition() {
             console.error("Mic start error:", e);
         }
 
+        // ตั้งเวลาตรวจสอบหมดอายุการพูดที่ 8 วินาที (จากวินาทีที่ 7 ไปจบที่วินาที 15 พอดี)
         questionTimeout = setTimeout(() => {
             if (isRunning) {
                 isRunning = false;
@@ -1666,7 +1678,7 @@ function startRecognition() {
                 
                 document.getElementById("status").innerHTML = "หมดเวลาพูด ❌";
                 document.getElementById("status").className = "status fail";
-                document.getElementById("heardText").innerHTML = "หมดเวลา 5 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
+                document.getElementById("heardText").innerHTML = "หมดเวลา 8 วินาที คุณไม่ได้พูดหรือตอบไม่ทันเวลา";
                 
                 failCount++;
                 document.getElementById("failCount").innerHTML = failCount;
@@ -1680,14 +1692,15 @@ function startRecognition() {
                     }
                 }, 1500);
             }
-        }, 5000);
+        }, 8000); // 8 วินาที
 
-    }, 5000);
+    }, 7000); // เริ่มเปิดไมค์ที่วินาทีที่ 7
 }
 
 function evaluateFinalResult() {
     clearInterval(testTimerInterval);
     clearInterval(displayInterval); 
+    clearTimeout(holdDelayTimeout);
     clearTimeout(startMicDelayTimeout);
     clearTimeout(questionTimeout);
     isTestRunning = false;
