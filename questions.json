@@ -1,0 +1,25 @@
+[
+    { "english": "Good morning teacher.", "thai": "สวัสดีตอนเช้าครับคุณครู", "level": "Primary", "difficulty": "LOW" },
+    { "english": "What is your name?", "thai": "คุณชื่ออะไร", "level": "Primary", "difficulty": "LOW" },
+    { "english": "I like to read books.", "thai": "ฉันชอบอ่านหนังสือ", "level": "Primary", "difficulty": "MEDIUM" },
+    { "english": "Can you help me please?", "thai": "คุณช่วยฉันหน่อยได้ไหม", "level": "Primary", "difficulty": "MEDIUM" },
+    { "english": "The weather is very nice today.", "thai": "วันนี้อากาศดีมาก", "level": "Primary", "difficulty": "HIGH" },
+
+    { "english": "How do I get to the train station?", "thai": "ฉันจะไปสถานีรถไฟได้อย่างไร", "level": "Secondary", "difficulty": "LOW" },
+    { "english": "I have a lot of homework to do.", "thai": "ฉันมีการบ้านต้องทำเยอะมาก", "level": "Secondary", "difficulty": "MEDIUM" },
+    { "english": "Science and math are my favorite subjects.", "thai": "วิทยาศาสตร์และคณิตศาสตร์เป็นวิชาที่ฉันชอบ", "level": "Secondary", "difficulty": "MEDIUM" },
+    { "english": "We are going to play football after school.", "thai": "พวกเราจะไปเตะฟุตบอลหลังเลิกเรียน", "level": "Secondary", "difficulty": "HIGH" },
+    { "english": "Could you please explain this lesson again?", "thai": "คุณช่วยอธิบายบทเรียนนี้อีกครั้งได้ไหม", "level": "Secondary", "difficulty": "HIGH" },
+
+    { "english": "I need a resistor for this circuit.", "thai": "ฉันต้องการตัวต้านทานสำหรับวงจรนี้", "level": "Vocational", "difficulty": "LOW" },
+    { "english": "Can you help me fix the audio amplifier?", "thai": "คุณช่วยฉันซ่อมเครื่องขยายเสียงหน่อยได้ไหม", "level": "Vocational", "difficulty": "MEDIUM" },
+    { "english": "This is a new training kit for our project.", "thai": "นี่คือชุดฝึกใหม่สำหรับโปรเจ็กต์ของเรา", "level": "Vocational", "difficulty": "MEDIUM" },
+    { "english": "We are designing a packaging for the electronics station.", "thai": "พวกเรากำลังออกแบบบรรจุภัณฑ์สำหรับสถานีอิเล็กทรอนิกส์", "level": "Vocational", "difficulty": "HIGH" },
+    { "english": "The GPS tracker sends a notification when an accident occurs.", "thai": "เครื่องติดตาม GPS จะส่งการแจ้งเตือนเมื่อเกิดอุบัติเหตุ", "level": "Vocational", "difficulty": "HIGH" },
+
+    { "english": "I would like to open a bank account.", "thai": "ฉันต้องการเปิดบัญชีธนาคาร", "level": "General", "difficulty": "LOW" },
+    { "english": "Can I pay by credit card?", "thai": "ฉันสามารถจ่ายด้วยบัตรเครดิตได้ไหม", "level": "General", "difficulty": "LOW" },
+    { "english": "I am looking for a digital trading application.", "thai": "ฉันกำลังมองหาแอปพลิเคชันเทรดดิจิทัล", "level": "General", "difficulty": "MEDIUM" },
+    { "english": "I want to buy some physical gold bars.", "thai": "ฉันต้องการซื้อทองคำแท่ง", "level": "General", "difficulty": "HIGH" },
+    { "english": "Is there a concert in the province next month?", "thai": "เดือนหน้ามีคอนเสิร์ตในจังหวัดไหม", "level": "General", "difficulty": "HIGH" }
+]
