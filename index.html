@@ -438,6 +438,19 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 
         <!-- Admin Settings -->
         <div id="adminControlGroup" style="display: none;">
+            
+            <!-- 🌟 ระบบเลือกระดับความยากโดย Admin -->
+            <div class="stock-control-container">
+                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">📊 ระดับความยากของข้อสอบ (Difficulty Level)</div>
+                <select id="adminDifficultySelect" onchange="setAdminDifficulty(this.value)" class="admin-input" style="margin-bottom:0;">
+                    <option value="All">สุ่มทุกระดับความยาก (All)</option>
+                    <option value="Low">ระดับง่าย (Low)</option>
+                    <option value="Medium">ระดับปานกลาง (Medium)</option>
+                    <option value="High">ระดับยาก (High)</option>
+                </select>
+                <div style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;">* การเปลี่ยนค่านี้จะเปลี่ยนรูปแบบข้อสอบในตู้ทันที</div>
+            </div>
+
             <!-- Language Force Switch -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🌐 การควบคุมภาษา (Language Override)</div>
@@ -540,7 +553,7 @@ let failCount = 0;
 let recognition;
 let isTestRunning = false;
 let isRunning = false;
-let isTestingPhase = false; // Flag สำหรับระบบ Anti-Cheat
+let isTestingPhase = false; 
 let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 
@@ -553,28 +566,59 @@ let nextQuestionTimer = null;
 let adminConfig = {
     passRequirement: 5,
     questionCount: 10,
-    cancelRequirement: false, // true = Practice Mode
+    cancelRequirement: false, 
     forceLangControl: false,
-    forcedLang: "ENG"
+    forcedLang: "ENG",
+    difficulty: "All" // 🌟 รับค่าความยากจาก Firebase
 };
 
 // ==========================================
-// 2. DUAL LANGUAGE SUPPORT DATABASE
+// 2. DUAL LANGUAGE SUPPORT DATABASE (With Difficulty)
 // ==========================================
 const DEFAULT_QUESTIONS = {
     ENG: [
-        { level: "Vocational", text: "Solar cell systems generate clean renewable energy.", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด" },
-        { level: "Vocational", text: "Electric vehicles reduce carbon footprint in smart cities.", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนฟุตพริ้นท์ในเมืองอัจฉริยะ" },
-        { level: "Vocational", text: "Artificial intelligence enhances vocational training efficiency.", thai: "ปัญญาประดิษฐ์ช่วยเพิ่มประสิทธิภาพในการฝึกอบรมวิชาชีพ" },
-        { level: "Vocational", text: "Microcontrollers regulate temperature in automated greenhouses.", thai: "ไมโครคอนโทรลเลอร์ควบคุมอุณหภูมิในโรงเรือนอัตโนมัติ" },
-        { level: "Vocational", text: "Safety protocols must be strictly followed in workshops.", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยอย่างเคร่งครัดในโรงฝึกงาน" }
+        // ระดับง่าย (Low)
+        { level: "Vocational", difficulty: "Low", text: "Plug in the wire.", thai: "เสียบสายไฟ" },
+        { level: "Vocational", difficulty: "Low", text: "Turn on the switch.", thai: "เปิดสวิตช์" },
+        { level: "Vocational", difficulty: "Low", text: "Check the battery.", thai: "ตรวจสอบแบตเตอรี่" },
+        { level: "Vocational", difficulty: "Low", text: "Read the meter.", thai: "อ่านค่าจากมิเตอร์" },
+        { level: "Vocational", difficulty: "Low", text: "Fix the motor.", thai: "ซ่อมมอเตอร์" },
+        
+        // ระดับปานกลาง (Medium)
+        { level: "Vocational", difficulty: "Medium", text: "Use a multimeter to measure the voltage.", thai: "ใช้มัลติมิเตอร์วัดแรงดันไฟฟ้า" },
+        { level: "Vocational", difficulty: "Medium", text: "Connect the sensor to the microcontroller.", thai: "เชื่อมต่อเซ็นเซอร์เข้ากับไมโครคอนโทรลเลอร์" },
+        { level: "Vocational", difficulty: "Medium", text: "Charge the electric vehicle at the station.", thai: "ชาร์จรถยนต์ไฟฟ้าที่สถานี" },
+        { level: "Vocational", difficulty: "Medium", text: "Solder the components on the circuit board.", thai: "บัดกรีชิ้นส่วนลงบนแผงวงจร" },
+        { level: "Vocational", difficulty: "Medium", text: "Write the code to run the simulator.", thai: "เขียนโค้ดเพื่อรันโปรแกรมจำลอง" },
+
+        // ระดับยาก (High)
+        { level: "Vocational", difficulty: "High", text: "Solar cell systems generate clean renewable energy.", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด" },
+        { level: "Vocational", difficulty: "High", text: "Electric vehicles reduce carbon footprint in smart cities.", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนฟุตพริ้นท์ในเมืองอัจฉริยะ" },
+        { level: "Vocational", difficulty: "High", text: "Artificial intelligence enhances vocational training efficiency.", thai: "ปัญญาประดิษฐ์ช่วยเพิ่มประสิทธิภาพในการฝึกอบรมวิชาชีพ" },
+        { level: "Vocational", difficulty: "High", text: "Microcontrollers regulate temperature in automated greenhouses.", thai: "ไมโครคอนโทรลเลอร์ควบคุมอุณหภูมิในโรงเรือนอัตโนมัติ" },
+        { level: "Vocational", difficulty: "High", text: "Safety protocols must be strictly followed in workshops.", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยอย่างเคร่งครัดในโรงฝึกงาน" }
     ],
     ZH: [
-        { level: "Vocational", text: "太阳能电池系统能够产生清洁的再生能源。", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด (Tàiyángnéng diànchí xìtǒng...)" },
-        { level: "Vocational", text: "电动汽车有助减少智慧城市的碳排放。", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนในเมืองอัจฉริยะ (Diàndòng qìchē...)" },
-        { level: "Vocational", text: "人工智能提高了职业技术的培训效率。", thai: "ปัญญาประดิษฐ์เพิ่มประสิทธิภาพการอบรมวิชาชีพ (Réngōng zhìnéng...)" },
-        { level: "Vocational", text: "微控制器调节自动化温室内部的温度。", thai: "ไมโครคอนโทรลเลอร์ควบคุมอุณหภูมิในโรงเรือน (Wēi kòngzhìqì...)" },
-        { level: "Vocational", text: "在车间操作时必须严格遵守安全规章。", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยในโรงฝึกงาน (Zài chējiān cāozuò shǐ...)" }
+        // ระดับง่าย (Low)
+        { level: "Vocational", difficulty: "Low", text: "插上线。", thai: "เสียบสายไฟ (Chā shàng xiàn.)" },
+        { level: "Vocational", difficulty: "Low", text: "打开开关。", thai: "เปิดสวิตช์ (Dǎkāi kāiguān.)" },
+        { level: "Vocational", difficulty: "Low", text: "检查电池。", thai: "ตรวจสอบแบตเตอรี่ (Jiǎnchá diànchí.)" },
+        { level: "Vocational", difficulty: "Low", text: "看仪表。", thai: "ดูมิเตอร์ (Kàn yíbiǎo.)" },
+        { level: "Vocational", difficulty: "Low", text: "修电机。", thai: "ซ่อมมอเตอร์ (Xiū diànjī.)" },
+
+        // ระดับปานกลาง (Medium)
+        { level: "Vocational", difficulty: "Medium", text: "用万用表测量电压。", thai: "ใช้มัลติมิเตอร์วัดแรงดันไฟฟ้า (Yòng wànyòngbiǎo cèliáng diànyā.)" },
+        { level: "Vocational", difficulty: "Medium", text: "把传感器连接到微控制器。", thai: "เชื่อมต่อเซ็นเซอร์เข้ากับไมโครคอนโทรลเลอร์ (Bǎ chuángǎnqī liánjiē dào wēi kòngzhìqì.)" },
+        { level: "Vocational", difficulty: "Medium", text: "在充电站给电动车充电。", thai: "ชาร์จรถยนต์ไฟฟ้าที่สถานี (Zài chōngdiàn zhàn gěi diàndòng chē chōngdiàn.)" },
+        { level: "Vocational", difficulty: "Medium", text: "把元件焊在电路板上。", thai: "บัดกรีชิ้นส่วนลงบนแผงวงจร (Bǎ yuánjiàn hàn zài diànlù bǎn shàng.)" },
+        { level: "Vocational", difficulty: "Medium", text: "编写代码运行模拟器。", thai: "เขียนโค้ดเพื่อรันโปรแกรมจำลอง (Biānxiě dàimǎ yùnxíng mónǐ qì.)" },
+
+        // ระดับยาก (High)
+        { level: "Vocational", difficulty: "High", text: "太阳能电池系统能够产生清洁的再生能源。", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด (Tàiyángnéng diànchí xìtǒng...)" },
+        { level: "Vocational", difficulty: "High", text: "电动汽车有助减少智慧城市的碳排放。", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนในเมืองอัจฉริยะ (Diàndòng qìchē...)" },
+        { level: "Vocational", difficulty: "High", text: "人工智能提高了职业技术的培训效率。", thai: "ปัญญาประดิษฐ์เพิ่มประสิทธิภาพการอบรมวิชาชีพ (Réngōng zhìnéng...)" },
+        { level: "Vocational", difficulty: "High", text: "微控制器调节自动化温室内部的温度。", thai: "ไมโครคอนโทรลเลอร์ควบคุมอุณหภูมิในโรงเรือน (Wēi kòngzhìqì...)" },
+        { level: "Vocational", difficulty: "High", text: "在车间操作时必须严格遵守安全规章。", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยในโรงฝึกงาน (Zài chējiān cāozuò shǐ...)" }
     ]
 };
 
@@ -760,7 +804,7 @@ function startSpeechCountdown(seconds) {
 // ==========================================
 function loadQuestion(index) {
     if (!questions || questions.length === 0) return;
-    document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${questions.length} (${currentLang})`;
+    document.getElementById("questionNumber").innerHTML = `ข้อที่ ${index + 1} / ${questions.length} (${currentLang}) [ระดับ: ${questions[index].difficulty}]`;
 
     if (adminConfig.cancelRequirement) {
         document.getElementById("targetText").innerHTML = questions[index].text;
@@ -851,13 +895,13 @@ function monitorFirebase() {
         document.getElementById("machineStatusUI").innerText = state.toUpperCase();
     });
 
-    // 2. Monitor Config & Language Lock
+    // 2. Monitor Config & Language Lock & Difficulty
     db.ref('machine/config').on('value', snap => {
         const conf = snap.val();
         if (conf) {
+            // Language Lock
             adminConfig.forceLangControl = conf.forceLangControl || false;
             adminConfig.forcedLang = conf.forcedLang || "ENG";
-            
             document.getElementById("adminForceLangSwitch").checked = adminConfig.forceLangControl;
             document.getElementById("adminForcedLangSelect").style.display = adminConfig.forceLangControl ? "block" : "none";
             document.getElementById("adminForcedLangSelect").value = adminConfig.forcedLang;
@@ -873,6 +917,12 @@ function monitorFirebase() {
             } else {
                 document.getElementById("langForceBadge").style.display = "none";
             }
+
+            // Difficulty Sync 🌟
+            adminConfig.difficulty = conf.difficulty || "All";
+            document.getElementById("adminDifficultySelect").value = adminConfig.difficulty;
+            // รีเซ็ตข้อสอบอัตโนมัติหาก Admin เปลี่ยนความยากระหว่างที่มีคนใช้งาน
+            if (!isTestRunning && !isRunning) fetchQuestions();
         }
     });
 
@@ -909,10 +959,21 @@ function fetchQuestions() {
 
 function prepareQuestions() {
     const selectedLevel = document.getElementById("userLevel").value;
-    let filtered = masterQuestions.filter(q => q.level === selectedLevel || selectedLevel === "General");
-    if (filtered.length === 0) filtered = masterQuestions;
     
+    // กรองตามระดับชั้น (Level)
+    let filtered = masterQuestions.filter(q => q.level === selectedLevel || selectedLevel === "General");
+    
+    // กรองตามระดับความยาก (Difficulty) ที่ Admin เลือกจาก Firebase 🌟
+    if (adminConfig.difficulty !== "All") {
+        filtered = filtered.filter(q => q.difficulty === adminConfig.difficulty);
+    }
+    
+    // Fallback กรณีไม่มีข้อสอบในเงื่อนไขเลย
+    if (filtered.length === 0) filtered = masterQuestions; 
+    
+    // สุ่มข้อสอบมา 5 ข้อ
     questions = filtered.sort(() => 0.5 - Math.random()).slice(0, 5);
+    
     currentQuestion = 0;
     totalScore = 0;
     passCount = 0;
@@ -944,8 +1005,8 @@ function openRankModal() {
     const body = document.getElementById("rankTableBody");
     body.innerHTML = `
         <div class="rank-row rank-1"><div class="rank-badge">1</div><div>นายสมชาย สายเชื่อม</div><div>ENG</div><div style="color:var(--cyan);font-weight:bold;">480</div></div>
-        <div class="rank-row rank-2"><div class="rank-badge">2</div><div>Mr. Wittayakon</div><div>ZH</div><div style="color:var(--cyan);font-weight:bold;">465</div></div>
-        <div class="rank-row rank-3"><div class="rank-badge">3</div><div>นักศึกษา ปวช.2</div><div>ENG</div><div style="color:var(--cyan);font-weight:bold;">390</div></div>
+        <div class="rank-row rank-2"><div class="rank-badge">2</div><div>นักศึกษา ปวช.2</div><div>ZH</div><div style="color:var(--cyan);font-weight:bold;">465</div></div>
+        <div class="rank-row rank-3"><div class="rank-badge">3</div><div>นักเรียนแผนกช่างอิเล็กทรอนิกส์</div><div>ENG</div><div style="color:var(--cyan);font-weight:bold;">390</div></div>
     `;
 }
 function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
@@ -960,6 +1021,12 @@ function verifyAdmin() {
     } else {
         document.getElementById("adminError").style.display = "block";
     }
+}
+
+// 🌟 ฟังก์ชันส่งระดับความยากไปยัง Firebase
+function setAdminDifficulty(val) {
+    db.ref('machine/config/difficulty').set(val);
+    alert("✅ เปลี่ยนระดับความยากของข้อสอบเป็น: " + val);
 }
 
 function toggleAdminForceLang(checked) { db.ref('machine/config/forceLangControl').set(checked); }
