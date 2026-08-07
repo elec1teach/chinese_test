@@ -1426,7 +1426,7 @@ function prepareQuestions() {
     loadQuestion(0);
 }
 
-// 🔄 อัปเดตฟังก์ชัน loadQuestion() เพื่อซ่อนคำแปลในโหมดจริง
+// 🔄 อัปเดตฟังก์ชัน loadQuestion() เพื่อแสดงชื่อแผนกและวิทยาลัยในโหมดรับรางวัล
 function loadQuestion(index){
     if (!questions || questions.length === 0) return;
 
@@ -1437,9 +1437,9 @@ function loadQuestion(index){
         document.getElementById("englishText").innerHTML = questions[index].english;
         document.getElementById("thaiText").innerHTML = questions[index].thai;
     } else {
-        // โหมดรับรางวัล: ซ่อนประโยคก่อนเริ่ม และ ซ่อนคำแปลตลอดการสอบ
-        document.getElementById("englishText").innerHTML = '<span style="font-size: 22px; color: var(--muted); font-weight: normal;">🔒 กด "เริ่มพูด" เพื่อดูประโยค</span>';
-        document.getElementById("thaiText").innerHTML = '<span style="font-size: 18px; color: var(--red);">🔒 ซ่อนคำแปลเพื่อป้องกันการทุจริต</span>';
+        // โหมดรับรางวัล: ลบข้อความซ่อนเดิมออกและเปลี่ยนเป็นชื่อแผนกและวิทยาลัย
+        document.getElementById("englishText").innerHTML = '<span style="font-size: 36px; color: var(--cyan); font-weight: bold;">แผนกวิชาช่างอิเล็กทรอนิกส์</span>';
+        document.getElementById("thaiText").innerHTML = '<span style="font-size: 24px; color: var(--muted);">วิทยาลัยสารพัดช่างศรีสะเกษ</span>';
     }
     
     document.getElementById("score").innerHTML = "0%";
