@@ -336,8 +336,9 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
             <div class="stat-title">TOTAL SCORE</div>
             <div class="stat-value"><span id="totalScore">0</span></div>
         </div>
+        <!-- 🎯 FIX 1: แสดงเป้าหมายเกณฑ์การผ่านชัดเจนบน UI -->
         <div class="stat glass">
-            <div class="stat-title">PASS</div>
+            <div class="stat-title">PASS <span id="uiPassReqLabel" style="font-size:11px; color:var(--gold); font-weight:bold;"></span></div>
             <div class="stat-value"><span id="passCount">0</span></div>
         </div>
         <div class="stat glass">
@@ -451,20 +452,19 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                 <div style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;">* การเปลี่ยนค่านี้จะเปลี่ยนรูปแบบข้อสอบในตู้ทันที</div>
             </div>
 
-            <!-- 🎯 การกำหนดจำนวนข้อสอบและเกณฑ์การผ่าน (ส่วนที่แก้ไขเพิ่มใหม่) -->
+            <!-- 🎯 การตั้งค่าจำนวนข้อและเกณฑ์ผ่าน (Added to prevent JS Error) -->
             <div class="stock-control-container">
-                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🎯 ตั้งค่าจำนวนข้อสอบและเกณฑ์ผ่าน</div>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 12px; color: var(--muted); margin-bottom: 5px;">จำนวนข้อสอบ/รอบ:</div>
-                        <input type="number" id="adminQuestionCount" class="admin-input" min="1" max="20" style="margin-bottom: 0;">
+                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🎯 ตั้งค่าจำนวนข้อและเกณฑ์การผ่าน</div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <span style="font-size:12px; color:var(--muted);">จำนวนข้อสอบทั้งหมด</span>
+                        <input type="number" id="adminQuestionCount" class="admin-input" style="margin-bottom:0;" placeholder="จำนวนข้อ" onchange="setAdminConfigData('questionCount', this.value)">
                     </div>
-                    <div style="flex: 1;">
-                        <div style="font-size: 12px; color: var(--muted); margin-bottom: 5px;">เกณฑ์รับรางวัล (ข้อ):</div>
-                        <input type="number" id="adminPassReq" class="admin-input" min="1" max="20" style="margin-bottom: 0;">
+                    <div style="flex:1;">
+                        <span style="font-size:12px; color:var(--muted);">เกณฑ์สอบผ่าน</span>
+                        <input type="number" id="adminPassReq" class="admin-input" style="margin-bottom:0;" placeholder="จำนวนข้อที่ผ่าน" onchange="setAdminConfigData('passRequirement', this.value)">
                     </div>
                 </div>
-                <button class="admin-btn-action" style="background:var(--cyan); color:#000;" onclick="saveExamSettings()">บันทึกการตั้งค่าข้อสอบ</button>
             </div>
 
             <!-- Language Force Switch -->
@@ -536,6 +536,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 // 1. CONFIG & SYSTEM INITIALIZATION
 // ==========================================
 const ADMIN_PASSWORD = "1234";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
 
 // Audio FX
 const audioPass = new Audio('https://actions.google.com/sounds/v1/cartoon/clown_horn.ogg');
@@ -578,31 +579,35 @@ let startMicDelayTimeout = null;
 let questionTimeout = null;
 let nextQuestionTimer = null;
 
-// ตั้งค่าเริ่มต้น (จะถูกเขียนทับโดย Firebase)
 let adminConfig = {
-    passRequirement: 3, 
-    questionCount: 5,   
+    passRequirement: 5,
+    questionCount: 10,
     cancelRequirement: false, 
     forceLangControl: false,
     forcedLang: "ENG",
-    difficulty: "All" 
+    difficulty: "All"
 };
 
 // ==========================================
-// 2. DUAL LANGUAGE SUPPORT DATABASE
+// 2. DUAL LANGUAGE SUPPORT DATABASE (With Difficulty)
 // ==========================================
 const DEFAULT_QUESTIONS = {
     ENG: [
+        // ระดับง่าย (Low)
         { level: "Vocational", difficulty: "Low", text: "Plug in the wire.", thai: "เสียบสายไฟ" },
         { level: "Vocational", difficulty: "Low", text: "Turn on the switch.", thai: "เปิดสวิตช์" },
         { level: "Vocational", difficulty: "Low", text: "Check the battery.", thai: "ตรวจสอบแบตเตอรี่" },
         { level: "Vocational", difficulty: "Low", text: "Read the meter.", thai: "อ่านค่าจากมิเตอร์" },
         { level: "Vocational", difficulty: "Low", text: "Fix the motor.", thai: "ซ่อมมอเตอร์" },
+        
+        // ระดับปานกลาง (Medium)
         { level: "Vocational", difficulty: "Medium", text: "Use a multimeter to measure the voltage.", thai: "ใช้มัลติมิเตอร์วัดแรงดันไฟฟ้า" },
         { level: "Vocational", difficulty: "Medium", text: "Connect the sensor to the microcontroller.", thai: "เชื่อมต่อเซ็นเซอร์เข้ากับไมโครคอนโทรลเลอร์" },
         { level: "Vocational", difficulty: "Medium", text: "Charge the electric vehicle at the station.", thai: "ชาร์จรถยนต์ไฟฟ้าที่สถานี" },
         { level: "Vocational", difficulty: "Medium", text: "Solder the components on the circuit board.", thai: "บัดกรีชิ้นส่วนลงบนแผงวงจร" },
         { level: "Vocational", difficulty: "Medium", text: "Write the code to run the simulator.", thai: "เขียนโค้ดเพื่อรันโปรแกรมจำลอง" },
+
+        // ระดับยาก (High)
         { level: "Vocational", difficulty: "High", text: "Solar cell systems generate clean renewable energy.", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด" },
         { level: "Vocational", difficulty: "High", text: "Electric vehicles reduce carbon footprint in smart cities.", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนฟุตพริ้นท์ในเมืองอัจฉริยะ" },
         { level: "Vocational", difficulty: "High", text: "Artificial intelligence enhances vocational training efficiency.", thai: "ปัญญาประดิษฐ์ช่วยเพิ่มประสิทธิภาพในการฝึกอบรมวิชาชีพ" },
@@ -610,16 +615,21 @@ const DEFAULT_QUESTIONS = {
         { level: "Vocational", difficulty: "High", text: "Safety protocols must be strictly followed in workshops.", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยอย่างเคร่งครัดในโรงฝึกงาน" }
     ],
     ZH: [
+        // ระดับง่าย (Low)
         { level: "Vocational", difficulty: "Low", text: "插上线。", thai: "เสียบสายไฟ (Chā shàng xiàn.)" },
         { level: "Vocational", difficulty: "Low", text: "打开开关。", thai: "เปิดสวิตช์ (Dǎkāi kāiguān.)" },
         { level: "Vocational", difficulty: "Low", text: "检查电池。", thai: "ตรวจสอบแบตเตอรี่ (Jiǎnchá diànchí.)" },
         { level: "Vocational", difficulty: "Low", text: "看仪表。", thai: "ดูมิเตอร์ (Kàn yíbiǎo.)" },
         { level: "Vocational", difficulty: "Low", text: "修电机。", thai: "ซ่อมมอเตอร์ (Xiū diànjī.)" },
+
+        // ระดับปานกลาง (Medium)
         { level: "Vocational", difficulty: "Medium", text: "用万用表测量电压。", thai: "ใช้มัลติมิเตอร์วัดแรงดันไฟฟ้า (Yòng wànyòngbiǎo cèliáng diànyā.)" },
         { level: "Vocational", difficulty: "Medium", text: "把传感器连接到微控制器。", thai: "เชื่อมต่อเซ็นเซอร์เข้ากับไมโครคอนโทรลเลอร์ (Bǎ chuángǎnqī liánjiē dào wēi kòngzhìqì.)" },
         { level: "Vocational", difficulty: "Medium", text: "在充电站给电动车充电。", thai: "ชาร์จรถยนต์ไฟฟ้าที่สถานี (Zài chōngdiàn zhàn gěi diàndòng chē chōngdiàn.)" },
         { level: "Vocational", difficulty: "Medium", text: "把元件焊在电路板上。", thai: "บัดกรีชิ้นส่วนลงบนแผงวงจร (Bǎ yuánjiàn hàn zài diànlù bǎn shàng.)" },
         { level: "Vocational", difficulty: "Medium", text: "编写代码运行模拟器。", thai: "เขียนโค้ดเพื่อรันโปรแกรมจำลอง (Biānxiě dàimǎ yùnxíng mónǐ qì.)" },
+
+        // ระดับยาก (High)
         { level: "Vocational", difficulty: "High", text: "太阳能电池系统能够产生清洁的再生能源。", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด (Tàiyángnéng diànchí xìtǒng...)" },
         { level: "Vocational", difficulty: "High", text: "电动汽车有助减少智慧城市的碳排放。", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนในเมืองอัจฉริยะ (Diàndòng qìchē...)" },
         { level: "Vocational", difficulty: "High", text: "人工智能提高了职业技术的培训效率。", thai: "ปัญญาประดิษฐ์เพิ่มประสิทธิภาพการอบรมวิชาชีพ (Réngōng zhìnéng...)" },
@@ -901,15 +911,17 @@ function monitorFirebase() {
         document.getElementById("machineStatusUI").innerText = state.toUpperCase();
     });
 
-    // 2. Monitor Config & Sync (🔥 แก้ไขเพิ่มการซิงค์จำนวนข้อและเกณฑ์ผ่าน)
+    // 2. Monitor Config & Sync 
     db.ref('machine/config').on('value', snap => {
         const conf = snap.val();
         if (conf) {
-            // ดึงค่าจำนวนข้อและเกณฑ์ผ่าน
-            adminConfig.questionCount = conf.questionCount || 5;
-            adminConfig.passRequirement = conf.passRequirement || 3;
-            document.getElementById("adminQuestionCount").value = adminConfig.questionCount;
-            document.getElementById("adminPassReq").value = adminConfig.passRequirement;
+            // 🔥 FIX 3: ป้องกัน Error โดยการแปลงค่าเป็นตัวเลข (Integer)
+            adminConfig.questionCount = parseInt(conf.questionCount) || 5;
+            adminConfig.passRequirement = parseInt(conf.passRequirement) || 3;
+            
+            // ป้องกัน JS Error ถ้า Admin Panel ซ่อน Input ไว้
+            if(document.getElementById("adminQuestionCount")) document.getElementById("adminQuestionCount").value = adminConfig.questionCount;
+            if(document.getElementById("adminPassReq")) document.getElementById("adminPassReq").value = adminConfig.passRequirement;
 
             // Language Lock
             adminConfig.forceLangControl = conf.forceLangControl || false;
@@ -934,8 +946,10 @@ function monitorFirebase() {
             adminConfig.difficulty = conf.difficulty || "All";
             document.getElementById("adminDifficultySelect").value = adminConfig.difficulty;
             
-            // รีเซ็ตข้อสอบอัตโนมัติหาก Admin เปลี่ยนค่าระหว่างที่มีคนใช้งาน
-            if (!isTestRunning && !isRunning) fetchQuestions();
+            // 🔥 รีเซ็ตข้อสอบอัตโนมัติหากยังไม่เริ่มสอบข้อแรก
+            if (currentQuestion === 0 && !isRunning) {
+                fetchQuestions();
+            }
         }
     });
 
@@ -970,6 +984,7 @@ function fetchQuestions() {
     prepareQuestions();
 }
 
+// 🎯 FIX 2: ปรับปรุงฟังก์ชันการเตรียมข้อสอบให้รองรับการวนลูปสุ่มซ้ำตามเป้าหมายของแอดมิน
 function prepareQuestions() {
     const selectedLevel = document.getElementById("userLevel").value;
     
@@ -981,11 +996,17 @@ function prepareQuestions() {
         filtered = filtered.filter(q => q.difficulty === adminConfig.difficulty);
     }
     
-    // Fallback
+    // Fallback กรณีไม่มีข้อสอบในหมวดนั้น
     if (filtered.length === 0) filtered = masterQuestions; 
     
-    // 🔥 แก้ไขจาก Hardcode 5 ข้อ เป็นดึงค่าจาก adminConfig.questionCount
-    questions = filtered.sort(() => 0.5 - Math.random()).slice(0, adminConfig.questionCount);
+    // 🔥 FIX: ระบบสุ่มข้อสอบให้ได้จำนวนเป๊ะตามที่ Admin กำหนด (วนลูปดึงข้อสอบซ้ำได้ถ้าน้อยกว่าที่ต้องการ)
+    questions = [];
+    let pool = [...filtered];
+    for (let i = 0; i < adminConfig.questionCount; i++) {
+        if (pool.length === 0) pool = [...filtered]; // เติมคลังข้อสอบใหม่ถ้าดึงจนหมดแล้ว
+        let randIdx = Math.floor(Math.random() * pool.length);
+        questions.push(pool.splice(randIdx, 1)[0]);
+    }
     
     currentQuestion = 0;
     totalScore = 0;
@@ -995,6 +1016,13 @@ function prepareQuestions() {
     document.getElementById("totalScore").innerText = "0";
     document.getElementById("passCount").innerText = "0";
     document.getElementById("failCount").innerText = "0";
+
+    // 🔥 FIX: อัปเดต UI ให้ User เห็นเกณฑ์การผ่านแบบ Real-time
+    if(adminConfig.cancelRequirement) {
+        document.getElementById("uiPassReqLabel").innerText = "(ฝึกฝน)";
+    } else {
+        document.getElementById("uiPassReqLabel").innerText = `(เป้าหมาย: ${adminConfig.passRequirement})`;
+    }
     
     const startBtn = document.getElementById("startBtn");
     startBtn.onclick = startRecognition;
@@ -1002,7 +1030,7 @@ function prepareQuestions() {
 }
 
 // ==========================================
-// 7. UI MODAL HANDLERS & ADMIN FUNCTIONS
+// 7. UI MODAL HANDLERS
 // ==========================================
 function selectUserMode(mode) {
     adminConfig.cancelRequirement = (mode === 'practice');
@@ -1036,29 +1064,17 @@ function verifyAdmin() {
     }
 }
 
-// 🔥 ฟังก์ชันใหม่สำหรับบันทึกจำนวนข้อสอบและเกณฑ์ผ่าน
-function saveExamSettings() {
-    const qc = parseInt(document.getElementById("adminQuestionCount").value);
-    const pr = parseInt(document.getElementById("adminPassReq").value);
-    
-    if (isNaN(qc) || isNaN(pr) || qc < 1 || pr < 1) {
-        alert("❌ กรุณากรอกตัวเลขให้ถูกต้อง");
-        return;
-    }
-    if (pr > qc) {
-        alert("❌ เกณฑ์สอบผ่านต้องไม่มากกว่าจำนวนข้อสอบทั้งหมด!");
-        return;
-    }
-    
-    db.ref('machine/config/questionCount').set(qc);
-    db.ref('machine/config/passRequirement').set(pr);
-    alert("✅ บันทึกการตั้งค่าจำนวนข้อสอบและเกณฑ์ผ่านเรียบร้อย การเปลี่ยนแปลงจะมีผลทันที");
-}
-
+// 🌟 ฟังก์ชันส่งระดับความยากไปยัง Firebase
 function setAdminDifficulty(val) {
     db.ref('machine/config/difficulty').set(val);
     alert("✅ เปลี่ยนระดับความยากของข้อสอบเป็น: " + val);
 }
+
+// 🎯 ฟังก์ชันจัดการตั้งค่าจำนวนข้อและเกณฑ์ผ่าน
+function setAdminConfigData(key, val) {
+    db.ref('machine/config/' + key).set(parseInt(val));
+}
+
 function toggleAdminForceLang(checked) { db.ref('machine/config/forceLangControl').set(checked); }
 function setAdminForcedLang(val) { db.ref('machine/config/forcedLang').set(val); }
 function toggleMaintenance(checked) { db.ref('machine/maintenance/isActive').set(checked); }
@@ -1135,7 +1151,7 @@ window.onload = () => {
     };
 
     monitorFirebase();
-    fetchQuestions();
+    // fetchQuestions() ถูกย้ายไปเริ่มผ่าน monitorFirebase เรียบร้อยแล้ว
 };
 </script>
 </body>
