@@ -242,7 +242,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     <div class="footer" ondblclick="openAdminModal()">AI Pronunciation Station Innovation © 2026</div>
 </div>
 
-<!-- ⚙️ ADMIN CONTROL PANEL MODAL (เพิ่มปุ่มตั้งค่าเกณฑ์สอบ) -->
+<!-- ⚙️ ADMIN CONTROL PANEL MODAL -->
 <div class="modal-overlay" id="adminModal">
     <div class="modal-content">
         <button class="close-modal" onclick="closeAdminModal()">✕</button>
@@ -255,7 +255,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         </div>
 
         <div id="adminControlGroup" style="display: none;">
-            <!-- 🌟 เพิ่มส่วนตั้งค่าข้อสอบและเกณฑ์การผ่าน -->
+            <!-- 🌟 ส่วนตั้งค่าข้อสอบและเกณฑ์การผ่าน -->
             <div class="stock-control-container" style="border-color: rgba(53, 216, 255, 0.4);">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🎯 ตั้งค่าเกณฑ์การทดสอบ (Exam Rules)</div>
                 <div class="stock-item">
@@ -315,6 +315,29 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     </div>
 </div>
 
+<!-- 🎁 REWARD MODAL (เพิ่มให้สมบูรณ์สำหรับแสดงภาพของรางวัลตามที่ตั้งโจทย์ไว้) -->
+<div class="modal-overlay" id="rewardModal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeRewardModal()">✕</button>
+        <div style="font-size: 22px; font-weight: bold; margin-bottom: 20px; color: var(--cyan); text-align: center;">🎁 ของรางวัลในตู้ปัจจุบัน</div>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <img src="image_e5a974.jpg" alt="Reward Slot A" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                <div style="color: var(--cyan); margin-top: 10px; font-weight: bold; font-size: 18px;">ตู้สล็อต A</div>
+                <div style="color: var(--muted); font-size: 14px;">(รางวัลประเภทที่ 1)</div>
+            </div>
+            <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <img src="image_e5a93c.jpg" alt="Reward Slot B" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                <div style="color: var(--cyan); margin-top: 10px; font-weight: bold; font-size: 18px;">ตู้สล็อต B</div>
+                <div style="color: var(--muted); font-size: 14px;">(รางวัลประเภทที่ 2)</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; text-align: center; font-size: 14px; color: var(--muted);">
+            * รางวัลจริงอ้างอิงจากฮาร์ดแวร์ตู้ ESP32 Kiosk ในสถานีของคุณ
+        </div>
+    </div>
+</div>
+
 <script>
 const ADMIN_PASSWORD = "1234";
 const firebaseConfig = {
@@ -341,7 +364,7 @@ let isTestRunning = false;
 let isRunning = false;
 let currentStock = { slot1: 0, slot2: 0 };
 
-// 🌟 เพิ่มตัวแปรเริ่มต้นสำหรับ Admin Settings
+// 🌟 ตัวแปรเริ่มต้นสำหรับ Admin Settings
 let adminConfig = {
     passRequirement: 3,
     questionCount: 5,
@@ -426,7 +449,6 @@ function nextQuestion() {
 
 function evaluateFinalResult() {
     document.getElementById("questionNumber").innerHTML = "การทดสอบเสร็จสิ้น!";
-    // 🌟 เช็กเกณฑ์จาก adminConfig.passRequirement แทนค่าคงที่
     if (passCount >= adminConfig.passRequirement && !adminConfig.cancelRequirement) {
         const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
         const sName = document.getElementById("studentName").value.trim() || "ผู้ทดสอบไม่ระบุชื่อ";
@@ -472,10 +494,15 @@ function monitorFirebase() {
             adminConfig.difficulty = conf.difficulty || "All";
             adminConfig.questionCount = conf.questionCount || 5;
             adminConfig.passRequirement = conf.passRequirement || 3;
-            
-            document.getElementById("adminDifficultySelect").value = adminConfig.difficulty;
-            document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
-            document.getElementById("adminPassRequirementUI").innerText = adminConfig.passRequirement;
+        }
+        
+        document.getElementById("adminDifficultySelect").value = adminConfig.difficulty;
+        document.getElementById("adminQuestionCountUI").innerText = adminConfig.questionCount;
+        document.getElementById("adminPassRequirementUI").innerText = adminConfig.passRequirement;
+
+        // 🌟 แก้บัก: บังคับให้อัปเดต UI ข้อสอบทันทีที่ได้รับการคอนฟิกจาก Backend (หากไม่ได้อยู่ระหว่างการทดสอบ)
+        if (!isRunning) {
+            fetchQuestions();
         }
     });
 }
@@ -493,7 +520,7 @@ function prepareQuestions() {
     }
     if (filtered.length === 0) filtered = masterQuestions; 
     
-    // 🌟 ดึงจำนวนข้อสอบตามค่าที่ Admin ตั้งไว้ (adminConfig.questionCount)
+    // 🌟 ดึงจำนวนข้อสอบตามค่าที่อัปเดตแบบเรียลไทม์จาก Admin
     questions = filtered.sort(() => 0.5 - Math.random()).slice(0, adminConfig.questionCount);
     
     currentQuestion = 0; totalScore = 0; passCount = 0; failCount = 0;
@@ -511,8 +538,13 @@ function selectUserMode(mode) {
     prepareQuestions();
 }
 
+// 🔧 MODAL CONTROLLERS
 function openAdminModal() { document.getElementById("adminModal").style.display = "flex"; }
 function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; }
+function openRewardModal() { document.getElementById("rewardModal").style.display = "flex"; }
+function closeRewardModal() { document.getElementById("rewardModal").style.display = "none"; }
+function openRankModal() { alert("🏆 ระบบบันทึกและแสดงตารางอันดับ (Ranking System) กำลังอยู่ในระหว่างการพัฒนาครับ"); }
+
 function verifyAdmin() {
     if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
         document.getElementById("adminError").style.display = "none";
@@ -529,7 +561,7 @@ function updateStock(slot, amt) {
     db.ref(`machine/stock/${slot}`).set(newVal);
 }
 
-// 🌟 ฟังก์ชันอัปเดตตั้งค่าเกณฑ์ข้อสอบ (Question Count & Pass Requirement)
+// 🌟 ฟังก์ชันอัปเดตตั้งค่าเกณฑ์ข้อสอบ
 function updateAdminSetting(key, amt) {
     let currentVal = adminConfig[key];
     let newVal = currentVal + amt;
@@ -575,8 +607,9 @@ window.onload = () => {
         setTimeout(() => { nextQuestion(); }, 1800);
     };
     recognition.onerror = () => { isRunning = false; setTimeout(() => { nextQuestion(); }, 1500); };
+    
+    // เริ่มทำงานมอนิเตอร์ Firebase ซึ่งจะทริกเกอร์ fetchQuestions() เมื่อดึงค่า Admin เสร็จ
     monitorFirebase();
-    fetchQuestions();
 };
 </script>
 </body>
