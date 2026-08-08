@@ -134,7 +134,7 @@ input:checked + .slider-lang:before { transform: translateX(24px); }
 /* TOP BAR STATS */
 .top-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
 .stat { padding:15px; border-radius:20px; position:relative; overflow:hidden; text-align:center; }
-.stat::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
+.stat::after { content:"absolute"; bottom:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--blue)); }
 .stat-title { font-size:14px; color:var(--muted); letter-spacing: 1px;}
 .stat-value { margin-top:8px; font-size:28px; font-weight:bold; font-family:'Orbitron',sans-serif; }
 
@@ -664,19 +664,26 @@ let adminConfig = {
 };
 
 // ==========================================
-// 2. DUAL LANGUAGE SUPPORT DATABASE (ขยายครอบคลุมทุกระดับชั้นและความยาก)
+// 2. DUAL LANGUAGE SUPPORT DATABASE 
+// (เพิ่มฐานข้อมูลจำลองให้หลากหลายขึ้นป้องกันข้อสอบซ้ำ)
 // ==========================================
 const DEFAULT_QUESTIONS = {
     ENG: [
         /* Primary (ประถมศึกษา) */
         { level: "Primary", difficulty: "Low", text: "A cat.", thai: "แมว" },
+        { level: "Primary", difficulty: "Low", text: "A bird.", thai: "นก" },
         { level: "Primary", difficulty: "Medium", text: "I like dogs.", thai: "ฉันชอบสุนัข" },
+        { level: "Primary", difficulty: "Medium", text: "I have a pen.", thai: "ฉันมีปากกา" },
         { level: "Primary", difficulty: "High", text: "The elephant is very big.", thai: "ช้างตัวใหญ่มาก" },
+        { level: "Primary", difficulty: "High", text: "She is reading a book.", thai: "เธอกำลังอ่านหนังสือ" },
         
         /* Secondary (มัธยมศึกษา) */
         { level: "Secondary", difficulty: "Low", text: "Open the door.", thai: "เปิดประตู" },
+        { level: "Secondary", difficulty: "Low", text: "Close the window.", thai: "ปิดหน้าต่าง" },
         { level: "Secondary", difficulty: "Medium", text: "I go to school by bus.", thai: "ฉันไปโรงเรียนโดยรถบัส" },
+        { level: "Secondary", difficulty: "Medium", text: "He plays football every day.", thai: "เขาเล่นฟุตบอลทุกวัน" },
         { level: "Secondary", difficulty: "High", text: "Education is important for our future.", thai: "การศึกษาเป็นสิ่งสำคัญสำหรับอนาคตของเรา" },
+        { level: "Secondary", difficulty: "High", text: "Science helps us understand the world.", thai: "วิทยาศาสตร์ช่วยให้เราเข้าใจโลก" },
 
         /* Vocational (อาชีวศึกษา) */
         { level: "Vocational", difficulty: "Low", text: "Plug in the wire.", thai: "เสียบสายไฟ" },
@@ -697,19 +704,28 @@ const DEFAULT_QUESTIONS = {
 
         /* General (บุคคลทั่วไป) */
         { level: "General", difficulty: "Low", text: "Hello.", thai: "สวัสดี" },
+        { level: "General", difficulty: "Low", text: "Thank you.", thai: "ขอบคุณ" },
         { level: "General", difficulty: "Medium", text: "How are you doing today?", thai: "วันนี้คุณเป็นอย่างไรบ้าง" },
-        { level: "General", difficulty: "High", text: "Could you please tell me the way to the station?", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม" }
+        { level: "General", difficulty: "Medium", text: "What time is it now?", thai: "ตอนนี้เวลาอะไร" },
+        { level: "General", difficulty: "High", text: "Could you please tell me the way to the station?", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม" },
+        { level: "General", difficulty: "High", text: "I would like to order a cup of coffee, please.", thai: "ฉันขอสั่งกาแฟหนึ่งแก้วครับ/ค่ะ" }
     ],
     ZH: [
         /* Primary (ประถมศึกษา) */
         { level: "Primary", difficulty: "Low", text: "猫。", thai: "แมว (Māo.)" },
+        { level: "Primary", difficulty: "Low", text: "鸟。", thai: "นก (Niǎo.)" },
         { level: "Primary", difficulty: "Medium", text: "我喜欢狗。", thai: "ฉันชอบสุนัข (Wǒ xǐhuān gǒu.)" },
+        { level: "Primary", difficulty: "Medium", text: "我有一支笔。", thai: "ฉันมีปากกา (Wǒ yǒu yī zhī bǐ.)" },
         { level: "Primary", difficulty: "High", text: "大象很大。", thai: "ช้างตัวใหญ่ (Dàxiàng hěn dà.)" },
+        { level: "Primary", difficulty: "High", text: "她在看书。", thai: "เธอกำลังอ่านหนังสือ (Tā zài kànshū.)" },
         
         /* Secondary (มัธยมศึกษา) */
         { level: "Secondary", difficulty: "Low", text: "开门。", thai: "เปิดประตู (Kāimén.)" },
+        { level: "Secondary", difficulty: "Low", text: "关窗。", thai: "ปิดหน้าต่าง (Guān chuāng.)" },
         { level: "Secondary", difficulty: "Medium", text: "我坐公交车去学校。", thai: "ฉันไปโรงเรียนโดยรถบัส (Wǒ zuò gōngjiāochē qù xuéxiào.)" },
+        { level: "Secondary", difficulty: "Medium", text: "他每天踢足球。", thai: "เขาเล่นฟุตบอลทุกวัน (Tā měitiān tī zúqiú.)" },
         { level: "Secondary", difficulty: "High", text: "教育对未来很重要。", thai: "การศึกษาเป็นสิ่งสำคัญสำหรับอนาคต (Jiàoyù duì wèilái hěn zhòngyào.)" },
+        { level: "Secondary", difficulty: "High", text: "科学帮助我们了解世界。", thai: "วิทยาศาสตร์ช่วยให้เราเข้าใจโลก (Kēxué bāngzhù wǒmen liǎojiě shìjiè.)" },
 
         /* Vocational (อาชีวศึกษา) */
         { level: "Vocational", difficulty: "Low", text: "插上线。", thai: "เสียบสายไฟ (Chā shàng xiàn.)" },
@@ -730,8 +746,11 @@ const DEFAULT_QUESTIONS = {
 
         /* General (บุคคลทั่วไป) */
         { level: "General", difficulty: "Low", text: "你好。", thai: "สวัสดี (Nǐ hǎo.)" },
+        { level: "General", difficulty: "Low", text: "谢谢。", thai: "ขอบคุณ (Xièxiè.)" },
         { level: "General", difficulty: "Medium", text: "你今天过得怎么样？", thai: "วันนี้คุณเป็นอย่างไรบ้าง (Nǐ jīntiān guò de zěnmeyàng?)" },
-        { level: "General", difficulty: "High", text: "请问去车站怎么走？", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม (Qǐngwèn qù chēzhàn zěnme zǒu?)" }
+        { level: "General", difficulty: "Medium", text: "现在几点了？", thai: "ตอนนี้เวลาอะไร (Xiànzài jǐ diǎnle?)" },
+        { level: "General", difficulty: "High", text: "请问去车站怎么走？", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม (Qǐngwèn qù chēzhàn zěnme zǒu?)" },
+        { level: "General", difficulty: "High", text: "我想点一杯咖啡。", thai: "ฉันขอสั่งกาแฟหนึ่งแก้วครับ/ค่ะ (Wǒ xiǎng diǎn yī bēi kāfēi.)" }
     ]
 };
 
@@ -1117,6 +1136,18 @@ function fetchQuestions() {
     prepareQuestions();
 }
 
+// 🚀 ฟังก์ชันเสริมเพื่อช่วยสับเปลี่ยน(Shuffle) ข้อสอบแบบสมบูรณ์
+function shuffleArray(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+// 🚀 แก้ไขฟังก์ชัน Randomizer เพื่อป้องการการออกข้อสอบซ้ำติดกัน
 function prepareQuestions() {
     const selectedLevel = document.getElementById("userLevel").value;
     
@@ -1133,8 +1164,7 @@ function prepareQuestions() {
         filtered = filtered.filter(q => q.difficulty === adminConfig.difficulty);
     }
     
-    // 3. ป้องกันบั๊ก Fallback: หากฐานข้อมูลไม่มีข้อสอบตรงเงื่อนไขเลย 
-    // จะ "ไม่กลับไปดึงข้อสอบทั้งหมด" แต่จะบังคับสร้างข้อสอบแจ้งเตือนระบบแทน
+    // 3. ป้องกันบั๊ก Fallback
     if (filtered.length === 0) {
         filtered = [{
             level: selectedLevel,
@@ -1145,11 +1175,28 @@ function prepareQuestions() {
     }
     
     questions = [];
-    let pool = [...filtered];
+    // นำ Array ที่ผ่านการกรองแล้วมา Shuffle เพื่อจัดเรียงแบบสุ่ม
+    let pool = shuffleArray([...filtered]);
+    let lastSelectedText = "";
+
+    // 4. ระบบการหยิบข้อสอบแบบป้องกันการซ้ำติดกัน (Anti-Consecutive Duplicate)
     for (let i = 0; i < adminConfig.questionCount; i++) {
-        if (pool.length === 0) pool = [...filtered]; 
-        let randIdx = Math.floor(Math.random() * pool.length);
-        questions.push(pool.splice(randIdx, 1)[0]);
+        // ถ้าระบบดึงข้อสอบจนหมด Pool แล้ว (กรณีข้อสอบในหมวดนั้นๆ มีน้อยกว่าจำนวนที่ต้องสอบ)
+        if (pool.length === 0) {
+            pool = shuffleArray([...filtered]);
+            
+            // เช็คว่าข้อสุดท้ายที่ออกไปตรงกับข้อแรกของ Pool กองใหม่หรือไม่
+            if (pool.length > 1 && pool[pool.length - 1].text === lastSelectedText) {
+                // หากตรงกัน ให้สลับข้อสุดท้ายของ Pool ไปไว้ข้อแรกแทน เพื่อกันไม่ออกซ้ำติดกัน
+                let temp = pool[pool.length - 1];
+                pool[pool.length - 1] = pool[0];
+                pool[0] = temp;
+            }
+        }
+        
+        let q = pool.pop();
+        questions.push(q);
+        lastSelectedText = q.text;
     }
     
     currentQuestion = 0;
