@@ -198,7 +198,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 
 /* REWARD MODAL */
 .reward-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; text-align: center; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-.reward-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.05); }
+.reward-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
 .reward-title { font-size: 18px; font-weight: bold; color: var(--cyan); margin-bottom: 5px; }
 .reward-stock { font-size: 14px; color: var(--muted); }
 .reward-stock span { font-weight: bold; color: var(--green); font-size: 16px; }
@@ -221,6 +221,12 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 .stock-control-container { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
 .stock-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .stock-btn { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* REWARD IMAGE UPLOADER IN ADMIN */
+.upload-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2); }
+.upload-preview { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; background: rgba(255,255,255,0.05); }
+.file-input-label { display: inline-block; padding: 8px 14px; background: rgba(53,216,255,0.2); border: 1px solid var(--cyan); color: var(--cyan); border-radius: 10px; font-size: 14px; cursor: pointer; text-align: center; transition: 0.3s; }
+.file-input-label:hover { background: var(--cyan); color: #000; }
 
 @media(max-width:900px) { .main-grid { grid-template-columns:1fr; } h1 { font-size:28px; } .target-text { font-size:32px; } }
 @media(max-width:600px) {
@@ -336,7 +342,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
             <div class="stat-title">TOTAL SCORE</div>
             <div class="stat-value"><span id="totalScore">0</span></div>
         </div>
-        <!-- 🎯 FIX 1: แสดงเป้าหมายเกณฑ์การผ่านชัดเจนบน UI -->
         <div class="stat glass">
             <div class="stat-title">PASS <span id="uiPassReqLabel" style="font-size:11px; color:var(--gold); font-weight:bold;"></span></div>
             <div class="stat-value"><span id="passCount">0</span></div>
@@ -386,7 +391,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
     <div class="footer" id="footerAdminTrigger" ondblclick="openAdminModal()">AI Pronunciation Station Innovation © 2026</div>
 </div>
 
-<!-- 🎁 REWARD MODAL -->
+<!-- 🎁 REWARD MODAL (แสดงรูปภาพและจำนวนรางวัลเรียลไทม์) -->
 <div class="modal-overlay" id="rewardModal">
     <div class="modal-content" style="background:#0d1326;">
         <button class="close-modal" onclick="closeRewardModal()">✕</button>
@@ -394,12 +399,12 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         <div style="text-align:center; color:var(--muted); font-size:14px; margin-bottom:15px;">สะสมคะแนนครบตามเกณฑ์ รับรหัส OTP สั่งจ่ายรางวัลทันที!</div>
         <div class="reward-container">
             <div class="reward-card">
-                <div class="reward-title">Slot A (1)</div>
+                <div class="reward-title" id="rewardTitle1UI">Slot A (1)</div>
                 <img id="rewardImg1" src="https://via.placeholder.com/300x200?text=No+Image" alt="Slot 1 Reward">
                 <div class="reward-stock">คงเหลือ: <span id="rewardStock1UI">0</span> ชิ้น</div>
             </div>
             <div class="reward-card">
-                <div class="reward-title">Slot B (2)</div>
+                <div class="reward-title" id="rewardTitle2UI">Slot B (2)</div>
                 <img id="rewardImg2" src="https://via.placeholder.com/300x200?text=No+Image" alt="Slot 2 Reward">
                 <div class="reward-stock">คงเหลือ: <span id="rewardStock2UI">0</span> ชิ้น</div>
             </div>
@@ -452,7 +457,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                 <div style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;">* การเปลี่ยนค่านี้จะเปลี่ยนรูปแบบข้อสอบในตู้ทันที</div>
             </div>
 
-            <!-- 🎯 การตั้งค่าจำนวนข้อและเกณฑ์ผ่าน (Added to prevent JS Error) -->
+            <!-- 🎯 การตั้งค่าจำนวนข้อและเกณฑ์ผ่าน -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🎯 ตั้งค่าจำนวนข้อและเกณฑ์การผ่าน</div>
                 <div style="display:flex; gap:10px;">
@@ -465,6 +470,35 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                         <input type="number" id="adminPassReq" class="admin-input" style="margin-bottom:0;" placeholder="จำนวนข้อที่ผ่าน" onchange="setAdminConfigData('passRequirement', this.value)">
                     </div>
                 </div>
+            </div>
+
+            <!-- 🎁 ตั้งค่ารูปภาพและชื่อของรางวัล (FEATURE UPGRADE) -->
+            <div class="stock-control-container">
+                <div style="color: var(--gold); font-weight: bold; margin-bottom: 10px;">🎁 ตั้งค่ารูปภาพและชื่อของรางวัลในตู้</div>
+                
+                <!-- Slot 1 Reward Uploader -->
+                <div class="upload-group">
+                    <span style="font-size:13px; color:var(--cyan); font-weight:bold;">🖼️ รางวัล Slot 1 (A)</span>
+                    <input type="text" id="adminSlot1Title" class="admin-input" style="margin-bottom:5px;" placeholder="ชื่อรางวัล Slot 1 (เช่น พวงกุญแจ AI)">
+                    <img id="adminPreviewImg1" class="upload-preview" src="https://via.placeholder.com/300x200?text=Slot+1+Image">
+                    <label class="file-input-label">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปภาพ Slot 1
+                        <input type="file" accept="image/*" style="display:none;" onchange="compressAndUploadImage(this, 'slot1')">
+                    </label>
+                </div>
+
+                <!-- Slot 2 Reward Uploader -->
+                <div class="upload-group" style="margin-bottom: 10px;">
+                    <span style="font-size:13px; color:var(--cyan); font-weight:bold;">🖼️ รางวัล Slot 2 (B)</span>
+                    <input type="text" id="adminSlot2Title" class="admin-input" style="margin-bottom:5px;" placeholder="ชื่อรางวัล Slot 2 (เช่น สมุดบันทึก)">
+                    <img id="adminPreviewImg2" class="upload-preview" src="https://via.placeholder.com/300x200?text=Slot+2+Image">
+                    <label class="file-input-label">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปภาพ Slot 2
+                        <input type="file" accept="image/*" style="display:none;" onchange="compressAndUploadImage(this, 'slot2')">
+                    </label>
+                </div>
+
+                <button class="admin-btn-action" style="background:var(--gold); color:#000;" onclick="saveRewardTitles()">💾 บันทึกชื่อของรางวัลทั้งสอง Slot</button>
             </div>
 
             <!-- Language Force Switch -->
@@ -589,25 +623,20 @@ let adminConfig = {
 };
 
 // ==========================================
-// 2. DUAL LANGUAGE SUPPORT DATABASE (With Difficulty)
+// 2. DUAL LANGUAGE SUPPORT DATABASE
 // ==========================================
 const DEFAULT_QUESTIONS = {
     ENG: [
-        // ระดับง่าย (Low)
         { level: "Vocational", difficulty: "Low", text: "Plug in the wire.", thai: "เสียบสายไฟ" },
         { level: "Vocational", difficulty: "Low", text: "Turn on the switch.", thai: "เปิดสวิตช์" },
         { level: "Vocational", difficulty: "Low", text: "Check the battery.", thai: "ตรวจสอบแบตเตอรี่" },
         { level: "Vocational", difficulty: "Low", text: "Read the meter.", thai: "อ่านค่าจากมิเตอร์" },
         { level: "Vocational", difficulty: "Low", text: "Fix the motor.", thai: "ซ่อมมอเตอร์" },
-        
-        // ระดับปานกลาง (Medium)
         { level: "Vocational", difficulty: "Medium", text: "Use a multimeter to measure the voltage.", thai: "ใช้มัลติมิเตอร์วัดแรงดันไฟฟ้า" },
         { level: "Vocational", difficulty: "Medium", text: "Connect the sensor to the microcontroller.", thai: "เชื่อมต่อเซ็นเซอร์เข้ากับไมโครคอนโทรลเลอร์" },
         { level: "Vocational", difficulty: "Medium", text: "Charge the electric vehicle at the station.", thai: "ชาร์จรถยนต์ไฟฟ้าที่สถานี" },
         { level: "Vocational", difficulty: "Medium", text: "Solder the components on the circuit board.", thai: "บัดกรีชิ้นส่วนลงบนแผงวงจร" },
         { level: "Vocational", difficulty: "Medium", text: "Write the code to run the simulator.", thai: "เขียนโค้ดเพื่อรันโปรแกรมจำลอง" },
-
-        // ระดับยาก (High)
         { level: "Vocational", difficulty: "High", text: "Solar cell systems generate clean renewable energy.", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด" },
         { level: "Vocational", difficulty: "High", text: "Electric vehicles reduce carbon footprint in smart cities.", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนฟุตพริ้นท์ในเมืองอัจฉริยะ" },
         { level: "Vocational", difficulty: "High", text: "Artificial intelligence enhances vocational training efficiency.", thai: "ปัญญาประดิษฐ์ช่วยเพิ่มประสิทธิภาพในการฝึกอบรมวิชาชีพ" },
@@ -615,21 +644,16 @@ const DEFAULT_QUESTIONS = {
         { level: "Vocational", difficulty: "High", text: "Safety protocols must be strictly followed in workshops.", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยอย่างเคร่งครัดในโรงฝึกงาน" }
     ],
     ZH: [
-        // ระดับง่าย (Low)
         { level: "Vocational", difficulty: "Low", text: "插上线。", thai: "เสียบสายไฟ (Chā shàng xiàn.)" },
         { level: "Vocational", difficulty: "Low", text: "打开开关。", thai: "เปิดสวิตช์ (Dǎkāi kāiguān.)" },
         { level: "Vocational", difficulty: "Low", text: "检查电池。", thai: "ตรวจสอบแบตเตอรี่ (Jiǎnchá diànchí.)" },
         { level: "Vocational", difficulty: "Low", text: "看仪表。", thai: "ดูมิเตอร์ (Kàn yíbiǎo.)" },
         { level: "Vocational", difficulty: "Low", text: "修电机。", thai: "ซ่อมมอเตอร์ (Xiū diànjī.)" },
-
-        // ระดับปานกลาง (Medium)
         { level: "Vocational", difficulty: "Medium", text: "用万用表测量电压。", thai: "ใช้มัลติมิเตอร์วัดแรงดันไฟฟ้า (Yòng wànyòngbiǎo cèliáng diànyā.)" },
         { level: "Vocational", difficulty: "Medium", text: "把传感器连接到微控制器。", thai: "เชื่อมต่อเซ็นเซอร์เข้ากับไมโครคอนโทรลเลอร์ (Bǎ chuángǎnqī liánjiē dào wēi kòngzhìqì.)" },
         { level: "Vocational", difficulty: "Medium", text: "在充电站给电动车充电。", thai: "ชาร์จรถยนต์ไฟฟ้าที่สถานี (Zài chōngdiàn zhàn gěi diàndòng chē chōngdiàn.)" },
         { level: "Vocational", difficulty: "Medium", text: "把元件焊在电路板上。", thai: "บัดกรีชิ้นส่วนลงบนแผงวงจร (Bǎ yuánjiàn hàn zài diànlù bǎn shàng.)" },
         { level: "Vocational", difficulty: "Medium", text: "编写代码运行模拟器。", thai: "เขียนโค้ดเพื่อรันโปรแกรมจำลอง (Biānxiě dàimǎ yùnxíng mónǐ qì.)" },
-
-        // ระดับยาก (High)
         { level: "Vocational", difficulty: "High", text: "太阳能电池系统能够产生清洁的再生能源。", thai: "ระบบโซลาร์เซลล์ผลิตพลังงานหมุนเวียนที่สะอาด (Tàiyángnéng diànchí xìtǒng...)" },
         { level: "Vocational", difficulty: "High", text: "电动汽车有助减少智慧城市的碳排放。", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนในเมืองอัจฉริยะ (Diàndòng qìchē...)" },
         { level: "Vocational", difficulty: "High", text: "人工智能提高了职业技术的培训效率。", thai: "ปัญญาประดิษฐ์เพิ่มประสิทธิภาพการอบรมวิชาชีพ (Réngōng zhìnéng...)" },
@@ -915,11 +939,9 @@ function monitorFirebase() {
     db.ref('machine/config').on('value', snap => {
         const conf = snap.val();
         if (conf) {
-            // 🔥 FIX 3: ป้องกัน Error โดยการแปลงค่าเป็นตัวเลข (Integer)
             adminConfig.questionCount = parseInt(conf.questionCount) || 5;
             adminConfig.passRequirement = parseInt(conf.passRequirement) || 3;
             
-            // ป้องกัน JS Error ถ้า Admin Panel ซ่อน Input ไว้
             if(document.getElementById("adminQuestionCount")) document.getElementById("adminQuestionCount").value = adminConfig.questionCount;
             if(document.getElementById("adminPassReq")) document.getElementById("adminPassReq").value = adminConfig.passRequirement;
 
@@ -946,7 +968,6 @@ function monitorFirebase() {
             adminConfig.difficulty = conf.difficulty || "All";
             document.getElementById("adminDifficultySelect").value = adminConfig.difficulty;
             
-            // 🔥 รีเซ็ตข้อสอบอัตโนมัติหากยังไม่เริ่มสอบข้อแรก
             if (currentQuestion === 0 && !isRunning) {
                 fetchQuestions();
             }
@@ -968,7 +989,7 @@ function monitorFirebase() {
         }
     });
 
-    // 4. Monitor Stock & Reward Images
+    // 4. Monitor Stock
     db.ref('machine/stock').on('value', snap => {
         const stock = snap.val() || { slot1: 0, slot2: 0 };
         currentStock = stock;
@@ -977,6 +998,29 @@ function monitorFirebase() {
         document.getElementById("rewardStock1UI").innerText = stock.slot1;
         document.getElementById("rewardStock2UI").innerText = stock.slot2;
     });
+
+    // 5. 🎁 Monitor Reward Display Settings (FEATURE UPGRADE: Dynamic Reward Images & Titles)
+    db.ref('machine/rewards').on('value', snap => {
+        const rewards = snap.val() || {};
+        const title1 = rewards.slot1Title || "Slot A (1)";
+        const title2 = rewards.slot2Title || "Slot B (2)";
+        const img1 = rewards.slot1Img || "https://via.placeholder.com/300x200?text=No+Image";
+        const img2 = rewards.slot2Img || "https://via.placeholder.com/300x200?text=No+Image";
+
+        // อัปเดตข้อมูลบนหน้า User Modal (UI)
+        document.getElementById("rewardTitle1UI").innerText = title1;
+        document.getElementById("rewardTitle2UI").innerText = title2;
+        document.getElementById("rewardImg1").src = img1;
+        document.getElementById("rewardImg2").src = img2;
+
+        // อัปเดตข้อมูลในช่อง Admin Input
+        if (document.getElementById("adminSlot1Title")) {
+            document.getElementById("adminSlot1Title").value = title1;
+            document.getElementById("adminSlot2Title").value = title2;
+            document.getElementById("adminPreviewImg1").src = img1;
+            document.getElementById("adminPreviewImg2").src = img2;
+        }
+    });
 }
 
 function fetchQuestions() {
@@ -984,26 +1028,20 @@ function fetchQuestions() {
     prepareQuestions();
 }
 
-// 🎯 FIX 2: ปรับปรุงฟังก์ชันการเตรียมข้อสอบให้รองรับการวนลูปสุ่มซ้ำตามเป้าหมายของแอดมิน
 function prepareQuestions() {
     const selectedLevel = document.getElementById("userLevel").value;
-    
-    // กรองตามระดับชั้น
     let filtered = masterQuestions.filter(q => q.level === selectedLevel || selectedLevel === "General");
     
-    // กรองตามระดับความยาก 
     if (adminConfig.difficulty !== "All") {
         filtered = filtered.filter(q => q.difficulty === adminConfig.difficulty);
     }
     
-    // Fallback กรณีไม่มีข้อสอบในหมวดนั้น
     if (filtered.length === 0) filtered = masterQuestions; 
     
-    // 🔥 FIX: ระบบสุ่มข้อสอบให้ได้จำนวนเป๊ะตามที่ Admin กำหนด (วนลูปดึงข้อสอบซ้ำได้ถ้าน้อยกว่าที่ต้องการ)
     questions = [];
     let pool = [...filtered];
     for (let i = 0; i < adminConfig.questionCount; i++) {
-        if (pool.length === 0) pool = [...filtered]; // เติมคลังข้อสอบใหม่ถ้าดึงจนหมดแล้ว
+        if (pool.length === 0) pool = [...filtered]; 
         let randIdx = Math.floor(Math.random() * pool.length);
         questions.push(pool.splice(randIdx, 1)[0]);
     }
@@ -1017,7 +1055,6 @@ function prepareQuestions() {
     document.getElementById("passCount").innerText = "0";
     document.getElementById("failCount").innerText = "0";
 
-    // 🔥 FIX: อัปเดต UI ให้ User เห็นเกณฑ์การผ่านแบบ Real-time
     if(adminConfig.cancelRequirement) {
         document.getElementById("uiPassReqLabel").innerText = "(ฝึกฝน)";
     } else {
@@ -1030,7 +1067,7 @@ function prepareQuestions() {
 }
 
 // ==========================================
-// 7. UI MODAL HANDLERS
+// 7. UI MODAL HANDLERS & IMAGE UPLOADER
 // ==========================================
 function selectUserMode(mode) {
     adminConfig.cancelRequirement = (mode === 'practice');
@@ -1064,13 +1101,11 @@ function verifyAdmin() {
     }
 }
 
-// 🌟 ฟังก์ชันส่งระดับความยากไปยัง Firebase
 function setAdminDifficulty(val) {
     db.ref('machine/config/difficulty').set(val);
     alert("✅ เปลี่ยนระดับความยากของข้อสอบเป็น: " + val);
 }
 
-// 🎯 ฟังก์ชันจัดการตั้งค่าจำนวนข้อและเกณฑ์ผ่าน
 function setAdminConfigData(key, val) {
     db.ref('machine/config/' + key).set(parseInt(val));
 }
@@ -1089,6 +1124,65 @@ function updateStock(slot, amt) {
     let newVal = (currentStock[slot] || 0) + amt;
     if(newVal < 0) newVal = 0;
     db.ref(`machine/stock/${slot}`).set(newVal);
+}
+
+// 🖼️ ระบบบันทึกชื่อของรางวัล
+function saveRewardTitles() {
+    const t1 = document.getElementById("adminSlot1Title").value || "Slot A (1)";
+    const t2 = document.getElementById("adminSlot2Title").value || "Slot B (2)";
+    db.ref('machine/rewards/slot1Title').set(t1);
+    db.ref('machine/rewards/slot2Title').set(t2);
+    alert("✅ บันทึกชื่อของรางวัลเรียบร้อยแล้ว");
+}
+
+// 🖼️ ระบบบีบอัดรูปภาพและแปลงเป็น Base64 บันทึกบน Firebase เรียลไทม์ (FEATURE UPGRADE)
+function compressAndUploadImage(input, slot) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function(event) {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = function() {
+            // สร้าง Canvas ย่อขนาดภาพไม่เกิน 400x300 พิกเซล (ประหยัดแบนด์วิดท์ Firebase)
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const maxWidth = 400;
+            const maxHeight = 300;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // บีบอัดเป็น JPEG (Quality 0.7)
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            
+            // บันทึกลง Firebase RTDB
+            const targetRef = slot === 'slot1' ? 'machine/rewards/slot1Img' : 'machine/rewards/slot2Img';
+            db.ref(targetRef).set(compressedBase64)
+                .then(() => {
+                    alert(`✅ อัปโหลดรูปภาพรางวัล ${slot.toUpperCase()} เรียบร้อยแล้ว`);
+                })
+                .catch(err => {
+                    alert("❌ เกิดข้อผิดพลาดในการอัปโหลด: " + err.message);
+                });
+        };
+    };
 }
 
 // ==========================================
@@ -1151,7 +1245,6 @@ window.onload = () => {
     };
 
     monitorFirebase();
-    // fetchQuestions() ถูกย้ายไปเริ่มผ่าน monitorFirebase เรียบร้อยแล้ว
 };
 </script>
 </body>
