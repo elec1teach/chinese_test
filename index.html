@@ -243,7 +243,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
-<!-- 🚀 WELCOME & LOGIN MODAL (POP-UP ครั้งแรกเมื่อโหลดหรือรีเฟรช) -->
+<!-- 🚀 WELCOME & LOGIN MODAL -->
 <div class="modal-overlay" id="welcomeModal" style="display: flex; z-index: 9999999;">
     <div class="modal-content" style="max-width: 460px; border: 2px solid var(--cyan); background: #07101f; text-align: center;">
         <div class="logo" style="margin: 0 auto 15px auto;">AI</div>
@@ -251,14 +251,10 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         <p style="color:var(--muted); font-size: 15px; margin-bottom: 20px;">
             กรุณาเลือกภาษาและระดับชั้นที่ต้องการทดสอบ ก่อนเข้าสู่ระบบ
         </p>
-
-        <!-- กรอกชื่อ -->
         <div style="text-align: left; margin-bottom: 12px;">
             <label style="font-size: 14px; color: var(--text); font-weight: bold;">👤 ชื่อผู้เข้าทดสอบ (Student Name)</label>
             <input type="text" id="welcomeStudentName" class="admin-input" style="margin-top: 6px; text-align: left;" placeholder="กรอกชื่อของคุณที่นี่..." />
         </div>
-
-        <!-- เลือกภาษา -->
         <div style="text-align: left; margin-bottom: 12px;">
             <label style="font-size: 14px; color: var(--cyan); font-weight: bold;">🌐 เลือกภาษาที่ทดสอบ (Select Language)</label>
             <select id="welcomeLangSelect" class="admin-input" style="margin-top: 6px; text-align: left; cursor: pointer;">
@@ -266,8 +262,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                 <option value="ZH">ภาษาจีน (ZH - 中文)</option>
             </select>
         </div>
-
-        <!-- เลือกระดับชั้น -->
         <div style="text-align: left; margin-bottom: 25px;">
             <label style="font-size: 14px; color: var(--gold); font-weight: bold;">📚 เลือกระดับคลังข้อสอบ (Select Level)</label>
             <select id="welcomeLevelSelect" class="admin-input" style="margin-top: 6px; text-align: left; cursor: pointer;">
@@ -277,7 +271,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                 <option value="General">บุคคลทั่วไป (General)</option>
             </select>
         </div>
-
         <button class="start-btn" style="width: 100%; max-width: none;" onclick="enterSystem()">
             🚀 เข้าสู่ระบบเพื่อเริ่มทดสอบ
         </button>
@@ -323,7 +316,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                 </div>
             </div>
             <div class="header-actions">
-                <!-- 2-Way Language Switcher -->
                 <div class="lang-switch-box">
                     <span style="color:var(--cyan);">ENG</span>
                     <label class="switch-lang">
@@ -333,7 +325,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                     <span style="color:var(--red);">中文</span>
                     <span id="langForceBadge" class="force-badge"><i class="fa-solid fa-lock"></i> Admin</span>
                 </div>
-                <!-- Machine Status -->
                 <div class="status-area">
                     <div class="live" id="machineStatusUI">SYSTEM STARTING</div>
                 </div>
@@ -346,9 +337,9 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ (Student Name)" />
     </div>
 
-    <!-- LEVEL SELECTOR (เปลี่ยนได้ทันทีโดยไม่ต้องรีโหลดหน้าเว็บ) -->
+    <!-- LEVEL SELECTOR -->
     <div class="level-box glass" id="userLevelContainer">
-        <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ (เปลี่ยนได้ทันทีโดยไม่ต้องรีเฟรช)</div>
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ</div>
         <select id="userLevel" onchange="prepareQuestions()">
             <option value="Primary">ประถมศึกษา (Primary)</option>
             <option value="Secondary">มัธยมศึกษา (Secondary)</option>
@@ -357,7 +348,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         </select>
     </div>
 
-    <!-- MODE SELECTOR (REWARD / PRACTICE) -->
+    <!-- MODE SELECTOR -->
     <div class="mode-selector glass">
         <button class="mode-btn active" id="modeRewardBtn" onclick="selectUserMode('reward')">
             🎁 โหมดทดสอบรับรางวัล (Reward Mode)
@@ -367,7 +358,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         </button>
     </div>
 
-    <!-- ACTION BUTTONS (RANK & REWARD) -->
+    <!-- ACTION BUTTONS -->
     <div class="action-btn-group">
         <button class="btn-main-action btn-rank" onclick="openRankModal()">
             🏆 ตารางอันดับ (Leaderboard)
@@ -427,12 +418,10 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         ครูวิทยากร วรรณา (Mr. Wittayakon Wanna)<br>
         แผนกอิเล็กทรอนิกส์ วิทยาลัยสารพัดช่างศรีสะเกษ (Sisaket Polytechnic College)
     </div>
-
-    <!-- 🔒 HIDDEN ADMIN TRIGGER (Double Click) -->
     <div class="footer" id="footerAdminTrigger" ondblclick="openAdminModal()">AI Pronunciation Station Innovation © 2026</div>
 </div>
 
-<!-- 🎁 REWARD MODAL (แสดงรูปภาพและจำนวนรางวัลเรียลไทม์) -->
+<!-- 🎁 REWARD MODAL -->
 <div class="modal-overlay" id="rewardModal">
     <div class="modal-content" style="background:#0d1326;">
         <button class="close-modal" onclick="closeRewardModal()">✕</button>
@@ -476,17 +465,13 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         <button class="close-modal" onclick="closeAdminModal()">✕</button>
         <div class="modal-title">⚙️ Station Admin Control</div>
 
-        <!-- Admin Login -->
         <div id="adminLoginGroup">
             <input type="password" id="adminPassword" class="admin-input" placeholder="Enter Admin Password">
             <button class="admin-btn-action" onclick="verifyAdmin()">Login</button>
             <p id="adminError" style="color:var(--red); font-size:14px; display:none; margin-top:10px; text-align:center;">รหัสผ่านไม่ถูกต้อง!</p>
         </div>
 
-        <!-- Admin Settings -->
         <div id="adminControlGroup" style="display: none;">
-            
-            <!-- 🌟 ระบบเลือกระดับความยากโดย Admin -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">📊 ระดับความยากของข้อสอบ (Difficulty Level)</div>
                 <select id="adminDifficultySelect" onchange="setAdminDifficulty(this.value)" class="admin-input" style="margin-bottom:0;">
@@ -495,10 +480,7 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                     <option value="Medium">ระดับปานกลาง (Medium)</option>
                     <option value="High">ระดับยาก (High)</option>
                 </select>
-                <div style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;">* การเปลี่ยนค่านี้จะเปลี่ยนรูปแบบข้อสอบในตู้ทันที</div>
             </div>
-
-            <!-- 🎯 การตั้งค่าจำนวนข้อและเกณฑ์ผ่าน -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🎯 ตั้งค่าจำนวนข้อและเกณฑ์การผ่าน</div>
                 <div style="display:flex; gap:10px;">
@@ -512,37 +494,28 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                     </div>
                 </div>
             </div>
-
-            <!-- 🎁 ตั้งค่ารูปภาพและชื่อของรางวัล (FEATURE UPGRADE) -->
             <div class="stock-control-container">
                 <div style="color: var(--gold); font-weight: bold; margin-bottom: 10px;">🎁 ตั้งค่ารูปภาพและชื่อของรางวัลในตู้</div>
-                
-                <!-- Slot 1 Reward Uploader -->
                 <div class="upload-group">
                     <span style="font-size:13px; color:var(--cyan); font-weight:bold;">🖼️ รางวัล Slot 1 (A)</span>
-                    <input type="text" id="adminSlot1Title" class="admin-input" style="margin-bottom:5px;" placeholder="ชื่อรางวัล Slot 1 (เช่น พวงกุญแจ AI)">
+                    <input type="text" id="adminSlot1Title" class="admin-input" style="margin-bottom:5px;" placeholder="ชื่อรางวัล Slot 1">
                     <img id="adminPreviewImg1" class="upload-preview" src="https://via.placeholder.com/300x200?text=Slot+1+Image">
                     <label class="file-input-label">
                         <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปภาพ Slot 1
                         <input type="file" accept="image/*" style="display:none;" onchange="compressAndUploadImage(this, 'slot1')">
                     </label>
                 </div>
-
-                <!-- Slot 2 Reward Uploader -->
                 <div class="upload-group" style="margin-bottom: 10px;">
                     <span style="font-size:13px; color:var(--cyan); font-weight:bold;">🖼️ รางวัล Slot 2 (B)</span>
-                    <input type="text" id="adminSlot2Title" class="admin-input" style="margin-bottom:5px;" placeholder="ชื่อรางวัล Slot 2 (เช่น สมุดบันทึก)">
+                    <input type="text" id="adminSlot2Title" class="admin-input" style="margin-bottom:5px;" placeholder="ชื่อรางวัล Slot 2">
                     <img id="adminPreviewImg2" class="upload-preview" src="https://via.placeholder.com/300x200?text=Slot+2+Image">
                     <label class="file-input-label">
                         <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปภาพ Slot 2
                         <input type="file" accept="image/*" style="display:none;" onchange="compressAndUploadImage(this, 'slot2')">
                     </label>
                 </div>
-
                 <button class="admin-btn-action" style="background:var(--gold); color:#000;" onclick="saveRewardTitles()">💾 บันทึกชื่อของรางวัลทั้งสอง Slot</button>
             </div>
-
-            <!-- Language Force Switch -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🌐 การควบคุมภาษา (Language Override)</div>
                 <div class="switch-container">
@@ -557,8 +530,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                     <option value="ZH">ภาษาจีน (ZH - zh-CN)</option>
                 </select>
             </div>
-
-            <!-- Maintenance Control -->
             <div class="stock-control-container" style="border-color: rgba(255, 77, 109, 0.4);">
                 <div style="color: var(--red); font-weight: bold; margin-bottom: 10px;">🛠️ ระบบประกาศปิดปรับปรุง (Maintenance Mode)</div>
                 <div class="switch-container">
@@ -573,8 +544,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                 <textarea id="adminMaintMsg" class="admin-input" style="min-height:60px;" placeholder="ข้อความแจ้งเตือนถึงผู้ใช้..."></textarea>
                 <button class="admin-btn-action" style="background:var(--red);" onclick="saveMaintenanceInfo()">บันทึกประกาศ Maintenance</button>
             </div>
-
-            <!-- Machine Hardware Status -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">🔌 สั่งงานบอร์ด ESP32 (Hardware Control)</div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
@@ -583,8 +552,6 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
                     <button class="admin-btn-action" style="background:var(--red);" onclick="setSystemStatus('busy')">BUSY / LOCK</button>
                 </div>
             </div>
-
-            <!-- Stock Control -->
             <div class="stock-control-container">
                 <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">📦 สต๊อกของรางวัล (Kiosk Reward Stock)</div>
                 <div class="stock-item">
@@ -611,15 +578,12 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 // 1. CONFIG & SYSTEM INITIALIZATION
 // ==========================================
 const ADMIN_PASSWORD = "1234";
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoo5FbqReEwFxYecwWZANl65I2u45wUZ0oq5MRl162mscLZRK7CZ1p22nt3CQP86_W/exec";
 
-// Audio FX
 const audioPass = new Audio('https://actions.google.com/sounds/v1/cartoon/clown_horn.ogg');
 const audioFail = new Audio('https://actions.google.com/sounds/v1/cartoon/slip_and_crash.ogg');
 const audioCheer = new Audio('https://actions.google.com/sounds/v1/crowds/crowd_cheer.ogg');
 const audioCheat = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
 
-// Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyBK9hqf4TBb_ISgEtE5Qu4AjmGHZ5zhShk",
     authDomain: "engteststation.firebaseapp.com",
@@ -632,8 +596,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// State Variables
-let currentLang = "ENG"; // 'ENG' หรือ 'ZH'
+let currentLang = "ENG"; 
 let masterQuestions = [];
 let questions = [];
 let currentQuestion = 0;
@@ -645,7 +608,6 @@ let recognition;
 let isTestRunning = false;
 let isRunning = false;
 let isTestingPhase = false; 
-let isAdminLoggedIn = false;
 let currentStock = { slot1: 0, slot2: 0 };
 
 let displayInterval = null;
@@ -653,6 +615,7 @@ let speechCountdownInterval = null;
 let startMicDelayTimeout = null;
 let questionTimeout = null;
 let nextQuestionTimer = null;
+let prepStatusTimeout = null;
 
 let adminConfig = {
     passRequirement: 5,
@@ -664,26 +627,44 @@ let adminConfig = {
 };
 
 // ==========================================
-// 2. DUAL LANGUAGE SUPPORT DATABASE 
-// (เพิ่มฐานข้อมูลจำลองให้หลากหลายขึ้นป้องกันข้อสอบซ้ำ)
+// 2. ขยายฐานข้อมูล (Mock Database Expanded) 
+// เพื่อแก้ปัญหาการสุ่มข้อสอบซ้ำไปมา 2 ข้อ ในระดับอื่นๆ
 // ==========================================
 const DEFAULT_QUESTIONS = {
     ENG: [
         /* Primary (ประถมศึกษา) */
         { level: "Primary", difficulty: "Low", text: "A cat.", thai: "แมว" },
         { level: "Primary", difficulty: "Low", text: "A bird.", thai: "นก" },
+        { level: "Primary", difficulty: "Low", text: "A red apple.", thai: "แอปเปิ้ลสีแดง" },
+        { level: "Primary", difficulty: "Low", text: "The sun is hot.", thai: "ดวงอาทิตย์ร้อน" },
+        { level: "Primary", difficulty: "Low", text: "I am happy.", thai: "ฉันมีความสุข" },
         { level: "Primary", difficulty: "Medium", text: "I like dogs.", thai: "ฉันชอบสุนัข" },
         { level: "Primary", difficulty: "Medium", text: "I have a pen.", thai: "ฉันมีปากกา" },
+        { level: "Primary", difficulty: "Medium", text: "She goes to school.", thai: "เธอไปโรงเรียน" },
+        { level: "Primary", difficulty: "Medium", text: "He plays with a ball.", thai: "เขาเล่นกับลูกบอล" },
+        { level: "Primary", difficulty: "Medium", text: "We eat rice.", thai: "พวกเรากินข้าว" },
         { level: "Primary", difficulty: "High", text: "The elephant is very big.", thai: "ช้างตัวใหญ่มาก" },
         { level: "Primary", difficulty: "High", text: "She is reading a book.", thai: "เธอกำลังอ่านหนังสือ" },
+        { level: "Primary", difficulty: "High", text: "My father drives a car.", thai: "พ่อของฉันขับรถยนต์" },
+        { level: "Primary", difficulty: "High", text: "The monkey climbs the tree.", thai: "ลิงปีนต้นไม้" },
+        { level: "Primary", difficulty: "High", text: "I want to be a doctor.", thai: "ฉันอยากเป็นหมอ" },
         
         /* Secondary (มัธยมศึกษา) */
         { level: "Secondary", difficulty: "Low", text: "Open the door.", thai: "เปิดประตู" },
         { level: "Secondary", difficulty: "Low", text: "Close the window.", thai: "ปิดหน้าต่าง" },
+        { level: "Secondary", difficulty: "Low", text: "Read the instructions.", thai: "อ่านคำแนะนำ" },
+        { level: "Secondary", difficulty: "Low", text: "Write your name.", thai: "เขียนชื่อของคุณ" },
+        { level: "Secondary", difficulty: "Low", text: "Listen carefully.", thai: "ตั้งใจฟัง" },
         { level: "Secondary", difficulty: "Medium", text: "I go to school by bus.", thai: "ฉันไปโรงเรียนโดยรถบัส" },
         { level: "Secondary", difficulty: "Medium", text: "He plays football every day.", thai: "เขาเล่นฟุตบอลทุกวัน" },
+        { level: "Secondary", difficulty: "Medium", text: "She likes to listen to music.", thai: "เธอชอบฟังเพลง" },
+        { level: "Secondary", difficulty: "Medium", text: "They are studying for exams.", thai: "พวกเขากำลังอ่านหนังสือเตรียมสอบ" },
+        { level: "Secondary", difficulty: "Medium", text: "We have homework today.", thai: "พวกเรามีการบ้านวันนี้" },
         { level: "Secondary", difficulty: "High", text: "Education is important for our future.", thai: "การศึกษาเป็นสิ่งสำคัญสำหรับอนาคตของเรา" },
         { level: "Secondary", difficulty: "High", text: "Science helps us understand the world.", thai: "วิทยาศาสตร์ช่วยให้เราเข้าใจโลก" },
+        { level: "Secondary", difficulty: "High", text: "Technology changes how we communicate.", thai: "เทคโนโลยีเปลี่ยนวิธีการสื่อสารของเรา" },
+        { level: "Secondary", difficulty: "High", text: "Global warming is a serious problem.", thai: "ภาวะโลกร้อนเป็นปัญหาร้ายแรง" },
+        { level: "Secondary", difficulty: "High", text: "History teaches us about the past.", thai: "ประวัติศาสตร์สอนเราเกี่ยวกับอดีต" },
 
         /* Vocational (อาชีวศึกษา) */
         { level: "Vocational", difficulty: "Low", text: "Plug in the wire.", thai: "เสียบสายไฟ" },
@@ -705,27 +686,54 @@ const DEFAULT_QUESTIONS = {
         /* General (บุคคลทั่วไป) */
         { level: "General", difficulty: "Low", text: "Hello.", thai: "สวัสดี" },
         { level: "General", difficulty: "Low", text: "Thank you.", thai: "ขอบคุณ" },
+        { level: "General", difficulty: "Low", text: "Good morning.", thai: "อรุณสวัสดิ์" },
+        { level: "General", difficulty: "Low", text: "Excuse me.", thai: "ขอโทษนะคะ/ครับ" },
+        { level: "General", difficulty: "Low", text: "Goodbye.", thai: "ลาก่อน" },
         { level: "General", difficulty: "Medium", text: "How are you doing today?", thai: "วันนี้คุณเป็นอย่างไรบ้าง" },
         { level: "General", difficulty: "Medium", text: "What time is it now?", thai: "ตอนนี้เวลาอะไร" },
+        { level: "General", difficulty: "Medium", text: "Where is the restroom?", thai: "ห้องน้ำอยู่ที่ไหน" },
+        { level: "General", difficulty: "Medium", text: "How much does this cost?", thai: "สิ่งนี้ราคาเท่าไหร่" },
+        { level: "General", difficulty: "Medium", text: "Can you help me, please?", thai: "คุณช่วยฉันหน่อยได้ไหม" },
         { level: "General", difficulty: "High", text: "Could you please tell me the way to the station?", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม" },
-        { level: "General", difficulty: "High", text: "I would like to order a cup of coffee, please.", thai: "ฉันขอสั่งกาแฟหนึ่งแก้วครับ/ค่ะ" }
+        { level: "General", difficulty: "High", text: "I would like to order a cup of coffee, please.", thai: "ฉันขอสั่งกาแฟหนึ่งแก้วครับ/ค่ะ" },
+        { level: "General", difficulty: "High", text: "Do you have any recommendations for dinner?", thai: "คุณมีคำแนะนำสำหรับอาหารเย็นไหม" },
+        { level: "General", difficulty: "High", text: "I am looking forward to our meeting tomorrow.", thai: "ฉันตั้งตารอการประชุมของเราพรุ่งนี้" },
+        { level: "General", difficulty: "High", text: "Please let me know if you need further assistance.", thai: "โปรดแจ้งให้ฉันทราบหากคุณต้องการความช่วยเหลือเพิ่มเติม" }
     ],
     ZH: [
         /* Primary (ประถมศึกษา) */
         { level: "Primary", difficulty: "Low", text: "猫。", thai: "แมว (Māo.)" },
         { level: "Primary", difficulty: "Low", text: "鸟。", thai: "นก (Niǎo.)" },
+        { level: "Primary", difficulty: "Low", text: "红苹果。", thai: "แอปเปิ้ลสีแดง (Hóng píngguǒ.)" },
+        { level: "Primary", difficulty: "Low", text: "太阳很热。", thai: "ดวงอาทิตย์ร้อน (Tàiyáng hěn rè.)" },
+        { level: "Primary", difficulty: "Low", text: "我很高兴。", thai: "ฉันมีความสุข (Wǒ hěn gāoxìng.)" },
         { level: "Primary", difficulty: "Medium", text: "我喜欢狗。", thai: "ฉันชอบสุนัข (Wǒ xǐhuān gǒu.)" },
         { level: "Primary", difficulty: "Medium", text: "我有一支笔。", thai: "ฉันมีปากกา (Wǒ yǒu yī zhī bǐ.)" },
+        { level: "Primary", difficulty: "Medium", text: "她去学校。", thai: "เธอไปโรงเรียน (Tā qù xuéxiào.)" },
+        { level: "Primary", difficulty: "Medium", text: "他玩球。", thai: "เขาเล่นลูกบอล (Tā wán qiú.)" },
+        { level: "Primary", difficulty: "Medium", text: "我们吃饭。", thai: "พวกเรากินข้าว (Wǒmen chīfàn.)" },
         { level: "Primary", difficulty: "High", text: "大象很大。", thai: "ช้างตัวใหญ่ (Dàxiàng hěn dà.)" },
         { level: "Primary", difficulty: "High", text: "她在看书。", thai: "เธอกำลังอ่านหนังสือ (Tā zài kànshū.)" },
+        { level: "Primary", difficulty: "High", text: "我爸爸开车。", thai: "พ่อของฉันขับรถ (Wǒ bàba kāichē.)" },
+        { level: "Primary", difficulty: "High", text: "猴子爬树。", thai: "ลิงปีนต้นไม้ (Hóuzi pá shù.)" },
+        { level: "Primary", difficulty: "High", text: "我想当医生。", thai: "ฉันอยากเป็นหมอ (Wǒ xiǎng dāng yīshēng.)" },
         
-        /* Secondary (มัธยมศึกษา) */
+        /* Secondary, Vocational, General... เพิ่มเติมโครงสร้างให้ครบถ้วนเพื่อกันซ้ำ */
         { level: "Secondary", difficulty: "Low", text: "开门。", thai: "เปิดประตู (Kāimén.)" },
         { level: "Secondary", difficulty: "Low", text: "关窗。", thai: "ปิดหน้าต่าง (Guān chuāng.)" },
+        { level: "Secondary", difficulty: "Low", text: "读说明书。", thai: "อ่านคำแนะนำ (Dú shuōmíngshū.)" },
+        { level: "Secondary", difficulty: "Low", text: "写下你的名字。", thai: "เขียนชื่อของคุณ (Xiě xià nǐ de míngzì.)" },
+        { level: "Secondary", difficulty: "Low", text: "仔细听。", thai: "ตั้งใจฟัง (Zǐxì tīng.)" },
         { level: "Secondary", difficulty: "Medium", text: "我坐公交车去学校。", thai: "ฉันไปโรงเรียนโดยรถบัส (Wǒ zuò gōngjiāochē qù xuéxiào.)" },
         { level: "Secondary", difficulty: "Medium", text: "他每天踢足球。", thai: "เขาเล่นฟุตบอลทุกวัน (Tā měitiān tī zúqiú.)" },
+        { level: "Secondary", difficulty: "Medium", text: "她喜欢听音乐。", thai: "เธอชอบฟังเพลง (Tā xǐhuān tīng yīnyuè.)" },
+        { level: "Secondary", difficulty: "Medium", text: "他们在为考试复习。", thai: "พวกเขากำลังอ่านหนังสือเตรียมสอบ (Tāmen zài wèi kǎoshì fùxí.)" },
+        { level: "Secondary", difficulty: "Medium", text: "我们今天有作业。", thai: "พวกเรามีการบ้านวันนี้ (Wǒmen jīntiān yǒu zuòyè.)" },
         { level: "Secondary", difficulty: "High", text: "教育对未来很重要。", thai: "การศึกษาเป็นสิ่งสำคัญสำหรับอนาคต (Jiàoyù duì wèilái hěn zhòngyào.)" },
         { level: "Secondary", difficulty: "High", text: "科学帮助我们了解世界。", thai: "วิทยาศาสตร์ช่วยให้เราเข้าใจโลก (Kēxué bāngzhù wǒmen liǎojiě shìjiè.)" },
+        { level: "Secondary", difficulty: "High", text: "技术改变了我们交流的方式。", thai: "เทคโนโลยีเปลี่ยนวิธีการสื่อสาร (Jìshù gǎibiànle wǒmen jiāoliú de fāngshì.)" },
+        { level: "Secondary", difficulty: "High", text: "全球变暖是一个严重的问题。", thai: "ภาวะโลกร้อนเป็นปัญหาร้ายแรง (Quánqiú biànnuǎn shì yígè yánzhòng de wèntí.)" },
+        { level: "Secondary", difficulty: "High", text: "历史教给我们关于过去的知识。", thai: "ประวัติศาสตร์สอนเราเกี่ยวกับอดีต (Lìshǐ jiào gěi wǒmen guānyú guòqù de zhīshì.)" },
 
         /* Vocational (อาชีวศึกษา) */
         { level: "Vocational", difficulty: "Low", text: "插上线。", thai: "เสียบสายไฟ (Chā shàng xiàn.)" },
@@ -747,38 +755,40 @@ const DEFAULT_QUESTIONS = {
         /* General (บุคคลทั่วไป) */
         { level: "General", difficulty: "Low", text: "你好。", thai: "สวัสดี (Nǐ hǎo.)" },
         { level: "General", difficulty: "Low", text: "谢谢。", thai: "ขอบคุณ (Xièxiè.)" },
+        { level: "General", difficulty: "Low", text: "早上好。", thai: "อรุณสวัสดิ์ (Zǎoshang hǎo.)" },
+        { level: "General", difficulty: "Low", text: "打扰一下。", thai: "ขอโทษนะคะ/ครับ (Dǎrǎo yīxià.)" },
+        { level: "General", difficulty: "Low", text: "再见。", thai: "ลาก่อน (Zàijiàn.)" },
         { level: "General", difficulty: "Medium", text: "你今天过得怎么样？", thai: "วันนี้คุณเป็นอย่างไรบ้าง (Nǐ jīntiān guò de zěnmeyàng?)" },
         { level: "General", difficulty: "Medium", text: "现在几点了？", thai: "ตอนนี้เวลาอะไร (Xiànzài jǐ diǎnle?)" },
+        { level: "General", difficulty: "Medium", text: "洗手间在哪里？", thai: "ห้องน้ำอยู่ที่ไหน (Xǐshǒujiān zài nǎlǐ?)" },
+        { level: "General", difficulty: "Medium", text: "这个多少钱？", thai: "สิ่งนี้ราคาเท่าไหร่ (Zhège duōshǎo qián?)" },
+        { level: "General", difficulty: "Medium", text: "你能帮我吗？", thai: "คุณช่วยฉันหน่อยได้ไหม (Nǐ néng bāng wǒ ma?)" },
         { level: "General", difficulty: "High", text: "请问去车站怎么走？", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม (Qǐngwèn qù chēzhàn zěnme zǒu?)" },
-        { level: "General", difficulty: "High", text: "我想点一杯咖啡。", thai: "ฉันขอสั่งกาแฟหนึ่งแก้วครับ/ค่ะ (Wǒ xiǎng diǎn yī bēi kāfēi.)" }
+        { level: "General", difficulty: "High", text: "我想点一杯咖啡。", thai: "ฉันขอสั่งกาแฟหนึ่งแก้วครับ/ค่ะ (Wǒ xiǎng diǎn yī bēi kāfēi.)" },
+        { level: "General", difficulty: "High", text: "你对晚餐有什么建议吗？", thai: "คุณมีคำแนะนำสำหรับอาหารเย็นไหม (Nǐ duì wǎncān yǒu shé me jiànyì ma?)" },
+        { level: "General", difficulty: "High", text: "我期待明天的会议。", thai: "ฉันตั้งตารอการประชุมของเราพรุ่งนี้ (Wǒ qídài míngtiān de huìyì.)" },
+        { level: "General", difficulty: "High", text: "如果您需要进一步的帮助，请告诉我。", thai: "โปรดแจ้งให้ฉันทราบหากคุณต้องการความช่วยเหลือเพิ่มเติม (Rúguǒ nín xūyào jìnyībù de bāngzhù, qǐng gàosù wǒ.)" }
     ]
 };
 
-// 🚀 ฟังก์ชันเข้าสู่ระบบจาก Pop-Up หน้าแรก
 function enterSystem() {
     const sName = document.getElementById("welcomeStudentName").value.trim() || "ผู้เข้าทดสอบ";
     const chosenLang = document.getElementById("welcomeLangSelect").value;
     const chosenLevel = document.getElementById("welcomeLevelSelect").value;
 
-    // อัปเดตข้อมูลบนหน้าจอหลัก
     document.getElementById("studentName").value = sName;
     document.getElementById("userLevel").value = chosenLevel;
     
-    // ตั้งค่าระบบภาษาให้ตรงกับ Pop-Up
     currentLang = chosenLang;
     document.getElementById("langToggle").checked = (currentLang === "ZH");
     if(recognition) {
         recognition.lang = currentLang === "ZH" ? "zh-CN" : "en-US";
     }
 
-    // ซ่อน Pop-Up
     document.getElementById("welcomeModal").style.display = "none";
-
-    // เริ่มเตรียมข้อมูลข้อสอบทันที
     fetchQuestions();
 }
 
-// 🚀 เปลี่ยนภาษาแบบ Dynamic (ไม่ต้องรีเฟรชหน้าแอป)
 function toggleLanguage(isZh) {
     if (adminConfig.forceLangControl) {
         alert("🔒 Admin ได้ทำการล็อกภาษาทดสอบไว้ ไม่สามารถเปลี่ยนเองได้ครับ");
@@ -823,7 +833,7 @@ document.addEventListener('keydown', (e) => {
 function closeCheatModal() { document.getElementById("cheatModal").style.display = "none"; }
 
 // ==========================================
-// 4. SPEECH RECOGNITION & ALGORITHM
+// 4. SPEECH RECOGNITION & ⏱️ TIMING ALGORITHM
 // ==========================================
 function similarity(s1, s2) {
     s1 = s1.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g, "").trim();
@@ -851,13 +861,23 @@ function similarity(s1, s2) {
     return Math.round(((maxLength - costs[s2.length]) / maxLength) * 100);
 }
 
+// ⏱️ ระบบประมวลเวลาจากการคำนวณแบบ Dynamic + Hold 2s + Open Mic
 function calculateDynamicTime(text) {
     const isChinese = currentLang === "ZH";
     const wordCount = isChinese ? text.length : text.trim().split(/\s+/).length;
-    const displayTime = Math.max(2500, (wordCount * 600) + 1000);
+    
+    // เวลาแอนิเมชันแสดงข้อสอบ (วิเคราะห์จากความยาวประโยค)
+    const animateTime = Math.max(2500, (wordCount * 600) + 500); 
+    // เวลาค้างประโยคไว้ให้จำก่อนเปิดไมค์ (Fix ที่ 2 วินาที ตาม Requirement)
+    const holdTime = 2000;
+    // เวลารวมทั้งหมดที่รอตั้งแต่กดปุ่มจนถึงตอนไมค์เปิด
+    const delayBeforeMic = animateTime + holdTime;
+
+    // เวลาเปิดไมค์ให้ผู้ทดสอบพูด (วิเคราะห์จากความยาวประโยค)
     let speechTime = Math.max(8000, (wordCount * 800) + 2000);
     if (speechTime > 15000) speechTime = 15000;
-    return { displayTime, speechTime };
+    
+    return { animateTime, holdTime, delayBeforeMic, speechTime };
 }
 
 function renderSequentialText(text, totalDisplayTime) {
@@ -896,22 +916,34 @@ function startRecognition() {
     const timing = calculateDynamicTime(currentText);
 
     isTestingPhase = true;
-    document.getElementById("startBtn").disabled = true;
-    document.getElementById("startBtn").innerHTML = "⏳ กำลังแสดงประโยค...";
-    document.getElementById("status").innerHTML = "เตรียมตัวพูด...";
+    const startBtn = document.getElementById("startBtn");
+    startBtn.disabled = true;
+    startBtn.innerHTML = "⏳ กำลังแสดงประโยค...";
+    document.getElementById("status").innerHTML = "อ่านประโยค...";
     document.getElementById("status").className = "status";
 
-    const displaySec = Math.ceil(timing.displayTime/1000);
+    const preDelaySec = Math.ceil(timing.delayBeforeMic/1000);
     const speechSec = Math.ceil(timing.speechTime/1000);
-    document.getElementById("heardText").innerHTML = `🕒 แสดงตัวอย่าง ${displaySec} วิ | เปิดไมค์พูด ${speechSec} วิ (${currentLang})`;
+    document.getElementById("heardText").innerHTML = `🕒 รอหน่วงเวลา ${preDelaySec} วิ | เปิดไมค์พูด ${speechSec} วิ (${currentLang})`;
 
-    renderSequentialText(currentText, timing.displayTime);
+    // เริ่มแอนิเมชันทีละคำ (Animate Time)
+    renderSequentialText(currentText, timing.animateTime);
 
+    // 🕒 แจ้งเตือนสถานะเมื่อแสดงคำครบและเข้าสู่โหมด "ค้างประโยคไว้ 2 วินาที"
+    prepStatusTimeout = setTimeout(() => {
+        if(isTestingPhase) {
+            document.getElementById("status").innerHTML = "เตรียมตัวพูด...";
+            startBtn.innerHTML = "⏳ เตรียมตัว...";
+        }
+    }, timing.animateTime);
+
+    // 🎤 เปิดไมค์เมื่อผ่านไป animateTime + holdTime (2s)
     startMicDelayTimeout = setTimeout(() => {
+        if (!isTestingPhase) return;
         isRunning = true;
         try {
             recognition.start();
-            document.getElementById("startBtn").innerHTML = "🎙️ กำลังฟังเสียง...";
+            startBtn.innerHTML = "🎙️ กำลังฟังเสียง...";
             document.getElementById("status").innerHTML = "พูดเลย!";
             document.getElementById("heardText").innerHTML = "AI กำลังฟังการออกเสียงของคุณ...";
             
@@ -934,10 +966,11 @@ function startRecognition() {
             console.error("Mic error:", e);
             isRunning = false;
             isTestingPhase = false;
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").innerHTML = "🎤 เริ่มพูดอีกครั้ง";
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🎤 เริ่มพูดอีกครั้ง";
+            document.getElementById("status").innerHTML = "เกิดข้อผิดพลาดกับไมค์";
         }
-    }, timing.displayTime);
+    }, timing.delayBeforeMic);
 }
 
 function startSpeechCountdown(seconds) {
@@ -990,15 +1023,18 @@ function nextQuestion() {
     clearInterval(speechCountdownInterval);
     clearTimeout(nextQuestionTimer);
     clearTimeout(startMicDelayTimeout);
+    clearTimeout(prepStatusTimeout);
     clearTimeout(questionTimeout);
     window.speechSynthesis.cancel();
     
-    if (isRunning) {
+    // Clear and abort mic strictly to prevent InvalidStateError
+    if (isRunning || recognition) {
+        try { recognition.abort(); } catch(e) {}
         isRunning = false;
-        try { recognition.stop(); } catch(e) {}
     }
     isTestingPhase = false;
     currentQuestion++;
+    
     if(currentQuestion >= questions.length) evaluateFinalResult();
     else loadQuestion(currentQuestion);
 }
@@ -1136,7 +1172,6 @@ function fetchQuestions() {
     prepareQuestions();
 }
 
-// 🚀 ฟังก์ชันเสริมเพื่อช่วยสับเปลี่ยน(Shuffle) ข้อสอบแบบสมบูรณ์
 function shuffleArray(array) {
     let currentIndex = array.length, randomIndex;
     while (currentIndex !== 0) {
@@ -1147,24 +1182,19 @@ function shuffleArray(array) {
     return array;
 }
 
-// 🚀 แก้ไขฟังก์ชัน Randomizer เพื่อป้องการการออกข้อสอบซ้ำติดกัน
+// 🎯 ปรับปรุงฟังก์ชันสุ่มชุดข้อสอบ (Anti-Pool Depletion Logic)
 function prepareQuestions() {
     const selectedLevel = document.getElementById("userLevel").value;
     
-    // 1. กรองตามระดับชั้น (Level) อย่างเคร่งครัด
     let filtered = masterQuestions.filter(q => q.level === selectedLevel);
-    
-    // กรองระดับทั่วไปให้โชว์ทุกอย่าง หรือเฉพาะ General
     if (selectedLevel === "General") {
         filtered = masterQuestions.filter(q => q.level === "General");
     }
 
-    // 2. กรองตามระดับความยาก (Difficulty) ที่ Admin กำหนด อย่างเคร่งครัด
     if (adminConfig.difficulty !== "All") {
         filtered = filtered.filter(q => q.difficulty === adminConfig.difficulty);
     }
     
-    // 3. ป้องกันบั๊ก Fallback
     if (filtered.length === 0) {
         filtered = [{
             level: selectedLevel,
@@ -1175,25 +1205,18 @@ function prepareQuestions() {
     }
     
     questions = [];
-    // นำ Array ที่ผ่านการกรองแล้วมา Shuffle เพื่อจัดเรียงแบบสุ่ม
     let pool = shuffleArray([...filtered]);
     let lastSelectedText = "";
 
-    // 4. ระบบการหยิบข้อสอบแบบป้องกันการซ้ำติดกัน (Anti-Consecutive Duplicate)
     for (let i = 0; i < adminConfig.questionCount; i++) {
-        // ถ้าระบบดึงข้อสอบจนหมด Pool แล้ว (กรณีข้อสอบในหมวดนั้นๆ มีน้อยกว่าจำนวนที่ต้องสอบ)
         if (pool.length === 0) {
             pool = shuffleArray([...filtered]);
-            
-            // เช็คว่าข้อสุดท้ายที่ออกไปตรงกับข้อแรกของ Pool กองใหม่หรือไม่
             if (pool.length > 1 && pool[pool.length - 1].text === lastSelectedText) {
-                // หากตรงกัน ให้สลับข้อสุดท้ายของ Pool ไปไว้ข้อแรกแทน เพื่อกันไม่ออกซ้ำติดกัน
                 let temp = pool[pool.length - 1];
                 pool[pool.length - 1] = pool[0];
                 pool[0] = temp;
             }
         }
-        
         let q = pool.pop();
         questions.push(q);
         lastSelectedText = q.text;
@@ -1259,10 +1282,7 @@ function setAdminDifficulty(val) {
     alert("✅ เปลี่ยนระดับความยากของข้อสอบเป็น: " + val);
 }
 
-function setAdminConfigData(key, val) {
-    db.ref('machine/config/' + key).set(parseInt(val));
-}
-
+function setAdminConfigData(key, val) { db.ref('machine/config/' + key).set(parseInt(val)); }
 function toggleAdminForceLang(checked) { db.ref('machine/config/forceLangControl').set(checked); }
 function setAdminForcedLang(val) { db.ref('machine/config/forcedLang').set(val); }
 function toggleMaintenance(checked) { db.ref('machine/maintenance/isActive').set(checked); }
@@ -1323,12 +1343,8 @@ function compressAndUploadImage(input, slot) {
             
             const targetRef = slot === 'slot1' ? 'machine/rewards/slot1Img' : 'machine/rewards/slot2Img';
             db.ref(targetRef).set(compressedBase64)
-                .then(() => {
-                    alert(`✅ อัปโหลดรูปภาพรางวัล ${slot.toUpperCase()} เรียบร้อยแล้ว`);
-                })
-                .catch(err => {
-                    alert("❌ เกิดข้อผิดพลาดในการอัปโหลด: " + err.message);
-                });
+                .then(() => { alert(`✅ อัปโหลดรูปภาพรางวัล ${slot.toUpperCase()} เรียบร้อยแล้ว`); })
+                .catch(err => { alert("❌ เกิดข้อผิดพลาดในการอัปโหลด: " + err.message); });
         };
     };
 }
