@@ -664,10 +664,21 @@ let adminConfig = {
 };
 
 // ==========================================
-// 2. DUAL LANGUAGE SUPPORT DATABASE
+// 2. DUAL LANGUAGE SUPPORT DATABASE (ขยายครอบคลุมทุกระดับชั้นและความยาก)
 // ==========================================
 const DEFAULT_QUESTIONS = {
     ENG: [
+        /* Primary (ประถมศึกษา) */
+        { level: "Primary", difficulty: "Low", text: "A cat.", thai: "แมว" },
+        { level: "Primary", difficulty: "Medium", text: "I like dogs.", thai: "ฉันชอบสุนัข" },
+        { level: "Primary", difficulty: "High", text: "The elephant is very big.", thai: "ช้างตัวใหญ่มาก" },
+        
+        /* Secondary (มัธยมศึกษา) */
+        { level: "Secondary", difficulty: "Low", text: "Open the door.", thai: "เปิดประตู" },
+        { level: "Secondary", difficulty: "Medium", text: "I go to school by bus.", thai: "ฉันไปโรงเรียนโดยรถบัส" },
+        { level: "Secondary", difficulty: "High", text: "Education is important for our future.", thai: "การศึกษาเป็นสิ่งสำคัญสำหรับอนาคตของเรา" },
+
+        /* Vocational (อาชีวศึกษา) */
         { level: "Vocational", difficulty: "Low", text: "Plug in the wire.", thai: "เสียบสายไฟ" },
         { level: "Vocational", difficulty: "Low", text: "Turn on the switch.", thai: "เปิดสวิตช์" },
         { level: "Vocational", difficulty: "Low", text: "Check the battery.", thai: "ตรวจสอบแบตเตอรี่" },
@@ -682,9 +693,25 @@ const DEFAULT_QUESTIONS = {
         { level: "Vocational", difficulty: "High", text: "Electric vehicles reduce carbon footprint in smart cities.", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนฟุตพริ้นท์ในเมืองอัจฉริยะ" },
         { level: "Vocational", difficulty: "High", text: "Artificial intelligence enhances vocational training efficiency.", thai: "ปัญญาประดิษฐ์ช่วยเพิ่มประสิทธิภาพในการฝึกอบรมวิชาชีพ" },
         { level: "Vocational", difficulty: "High", text: "Microcontrollers regulate temperature in automated greenhouses.", thai: "ไมโครคอนโทรลเลอร์ควบคุมอุณหภูมิในโรงเรือนอัตโนมัติ" },
-        { level: "Vocational", difficulty: "High", text: "Safety protocols must be strictly followed in workshops.", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยอย่างเคร่งครัดในโรงฝึกงาน" }
+        { level: "Vocational", difficulty: "High", text: "Safety protocols must be strictly followed in workshops.", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยอย่างเคร่งครัดในโรงฝึกงาน" },
+
+        /* General (บุคคลทั่วไป) */
+        { level: "General", difficulty: "Low", text: "Hello.", thai: "สวัสดี" },
+        { level: "General", difficulty: "Medium", text: "How are you doing today?", thai: "วันนี้คุณเป็นอย่างไรบ้าง" },
+        { level: "General", difficulty: "High", text: "Could you please tell me the way to the station?", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม" }
     ],
     ZH: [
+        /* Primary (ประถมศึกษา) */
+        { level: "Primary", difficulty: "Low", text: "猫。", thai: "แมว (Māo.)" },
+        { level: "Primary", difficulty: "Medium", text: "我喜欢狗。", thai: "ฉันชอบสุนัข (Wǒ xǐhuān gǒu.)" },
+        { level: "Primary", difficulty: "High", text: "大象很大。", thai: "ช้างตัวใหญ่ (Dàxiàng hěn dà.)" },
+        
+        /* Secondary (มัธยมศึกษา) */
+        { level: "Secondary", difficulty: "Low", text: "开门。", thai: "เปิดประตู (Kāimén.)" },
+        { level: "Secondary", difficulty: "Medium", text: "我坐公交车去学校。", thai: "ฉันไปโรงเรียนโดยรถบัส (Wǒ zuò gōngjiāochē qù xuéxiào.)" },
+        { level: "Secondary", difficulty: "High", text: "教育对未来很重要。", thai: "การศึกษาเป็นสิ่งสำคัญสำหรับอนาคต (Jiàoyù duì wèilái hěn zhòngyào.)" },
+
+        /* Vocational (อาชีวศึกษา) */
         { level: "Vocational", difficulty: "Low", text: "插上线。", thai: "เสียบสายไฟ (Chā shàng xiàn.)" },
         { level: "Vocational", difficulty: "Low", text: "打开开关。", thai: "เปิดสวิตช์ (Dǎkāi kāiguān.)" },
         { level: "Vocational", difficulty: "Low", text: "检查电池。", thai: "ตรวจสอบแบตเตอรี่ (Jiǎnchá diànchí.)" },
@@ -699,7 +726,12 @@ const DEFAULT_QUESTIONS = {
         { level: "Vocational", difficulty: "High", text: "电动汽车有助减少智慧城市的碳排放。", thai: "ยานยนต์ไฟฟ้าช่วยลดคาร์บอนในเมืองอัจฉริยะ (Diàndòng qìchē...)" },
         { level: "Vocational", difficulty: "High", text: "人工智能提高了职业技术的培训效率。", thai: "ปัญญาประดิษฐ์เพิ่มประสิทธิภาพการอบรมวิชาชีพ (Réngōng zhìnéng...)" },
         { level: "Vocational", difficulty: "High", text: "微控制器调节自动化温室内部的温度。", thai: "ไมโครคอนโทรลเลอร์ควบคุมอุณหภูมิในโรงเรือน (Wēi kòngzhìqì...)" },
-        { level: "Vocational", difficulty: "High", text: "在车间操作时必须严格遵守安全规章。", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยในโรงฝึกงาน (Zài chējiān cāozuò shǐ...)" }
+        { level: "Vocational", difficulty: "High", text: "在车间操作时必须严格遵守安全规章。", thai: "ต้องปฏิบัติตามมาตรการความปลอดภัยในโรงฝึกงาน (Zài chējiān cāozuò shǐ...)" },
+
+        /* General (บุคคลทั่วไป) */
+        { level: "General", difficulty: "Low", text: "你好。", thai: "สวัสดี (Nǐ hǎo.)" },
+        { level: "General", difficulty: "Medium", text: "你今天过得怎么样？", thai: "วันนี้คุณเป็นอย่างไรบ้าง (Nǐ jīntiān guò de zěnmeyàng?)" },
+        { level: "General", difficulty: "High", text: "请问去车站怎么走？", thai: "กรุณาบอกทางไปสถานีหน่อยได้ไหม (Qǐngwèn qù chēzhàn zěnme zǒu?)" }
     ]
 };
 
@@ -1087,13 +1119,30 @@ function fetchQuestions() {
 
 function prepareQuestions() {
     const selectedLevel = document.getElementById("userLevel").value;
-    let filtered = masterQuestions.filter(q => q.level === selectedLevel || selectedLevel === "General");
     
+    // 1. กรองตามระดับชั้น (Level) อย่างเคร่งครัด
+    let filtered = masterQuestions.filter(q => q.level === selectedLevel);
+    
+    // กรองระดับทั่วไปให้โชว์ทุกอย่าง หรือเฉพาะ General
+    if (selectedLevel === "General") {
+        filtered = masterQuestions.filter(q => q.level === "General");
+    }
+
+    // 2. กรองตามระดับความยาก (Difficulty) ที่ Admin กำหนด อย่างเคร่งครัด
     if (adminConfig.difficulty !== "All") {
         filtered = filtered.filter(q => q.difficulty === adminConfig.difficulty);
     }
     
-    if (filtered.length === 0) filtered = masterQuestions; 
+    // 3. ป้องกันบั๊ก Fallback: หากฐานข้อมูลไม่มีข้อสอบตรงเงื่อนไขเลย 
+    // จะ "ไม่กลับไปดึงข้อสอบทั้งหมด" แต่จะบังคับสร้างข้อสอบแจ้งเตือนระบบแทน
+    if (filtered.length === 0) {
+        filtered = [{
+            level: selectedLevel,
+            difficulty: adminConfig.difficulty !== "All" ? adminConfig.difficulty : "Low",
+            text: "No questions available in the database for this setting.",
+            thai: "ยังไม่มีข้อสอบในระบบสำหรับระดับและความยากนี้"
+        }];
+    }
     
     questions = [];
     let pool = [...filtered];
