@@ -243,6 +243,47 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
+<!-- 🚀 WELCOME & LOGIN MODAL (POP-UP ครั้งแรกเมื่อโหลดหรือรีเฟรช) -->
+<div class="modal-overlay" id="welcomeModal" style="display: flex; z-index: 9999999;">
+    <div class="modal-content" style="max-width: 460px; border: 2px solid var(--cyan); background: #07101f; text-align: center;">
+        <div class="logo" style="margin: 0 auto 15px auto;">AI</div>
+        <h2 style="color:var(--cyan); font-family:'Orbitron',sans-serif; margin-top: 0;">AI Pronunciation Station</h2>
+        <p style="color:var(--muted); font-size: 15px; margin-bottom: 20px;">
+            กรุณาเลือกภาษาและระดับชั้นที่ต้องการทดสอบ ก่อนเข้าสู่ระบบ
+        </p>
+
+        <!-- กรอกชื่อ -->
+        <div style="text-align: left; margin-bottom: 12px;">
+            <label style="font-size: 14px; color: var(--text); font-weight: bold;">👤 ชื่อผู้เข้าทดสอบ (Student Name)</label>
+            <input type="text" id="welcomeStudentName" class="admin-input" style="margin-top: 6px; text-align: left;" placeholder="กรอกชื่อของคุณที่นี่..." />
+        </div>
+
+        <!-- เลือกภาษา -->
+        <div style="text-align: left; margin-bottom: 12px;">
+            <label style="font-size: 14px; color: var(--cyan); font-weight: bold;">🌐 เลือกภาษาที่ทดสอบ (Select Language)</label>
+            <select id="welcomeLangSelect" class="admin-input" style="margin-top: 6px; text-align: left; cursor: pointer;">
+                <option value="ENG">ภาษาอังกฤษ (ENG - English)</option>
+                <option value="ZH">ภาษาจีน (ZH - 中文)</option>
+            </select>
+        </div>
+
+        <!-- เลือกระดับชั้น -->
+        <div style="text-align: left; margin-bottom: 25px;">
+            <label style="font-size: 14px; color: var(--gold); font-weight: bold;">📚 เลือกระดับคลังข้อสอบ (Select Level)</label>
+            <select id="welcomeLevelSelect" class="admin-input" style="margin-top: 6px; text-align: left; cursor: pointer;">
+                <option value="Primary">ประถมศึกษา (Primary)</option>
+                <option value="Secondary">มัธยมศึกษา (Secondary)</option>
+                <option value="Vocational" selected>อาชีวศึกษา (Vocational - 职业教育)</option>
+                <option value="General">บุคคลทั่วไป (General)</option>
+            </select>
+        </div>
+
+        <button class="start-btn" style="width: 100%; max-width: none;" onclick="enterSystem()">
+            🚀 เข้าสู่ระบบเพื่อเริ่มทดสอบ
+        </button>
+    </div>
+</div>
+
 <!-- 🚨 ANTI-CHEAT MODAL OVERLAY -->
 <div class="modal-overlay" id="cheatModal" style="z-index: 999999;">
     <div class="modal-content" style="background:#1a0505; border: 2px solid var(--red); text-align:center;">
@@ -305,9 +346,9 @@ button:disabled { filter: grayscale(100%); cursor: not-allowed; opacity: 0.5; }
         <input type="text" id="studentName" placeholder="กรอกชื่อผู้เข้าทดสอบ (Student Name)" />
     </div>
 
-    <!-- LEVEL SELECTOR -->
+    <!-- LEVEL SELECTOR (เปลี่ยนได้ทันทีโดยไม่ต้องรีโหลดหน้าเว็บ) -->
     <div class="level-box glass" id="userLevelContainer">
-        <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ</div>
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 4px; font-weight: bold;">📚 เลือกระดับคลังข้อสอบที่ต้องการทดสอบ (เปลี่ยนได้ทันทีโดยไม่ต้องรีเฟรช)</div>
         <select id="userLevel" onchange="prepareQuestions()">
             <option value="Primary">ประถมศึกษา (Primary)</option>
             <option value="Secondary">มัธยมศึกษา (Secondary)</option>
@@ -662,6 +703,31 @@ const DEFAULT_QUESTIONS = {
     ]
 };
 
+// 🚀 ฟังก์ชันเข้าสู่ระบบจาก Pop-Up หน้าแรก
+function enterSystem() {
+    const sName = document.getElementById("welcomeStudentName").value.trim() || "ผู้เข้าทดสอบ";
+    const chosenLang = document.getElementById("welcomeLangSelect").value;
+    const chosenLevel = document.getElementById("welcomeLevelSelect").value;
+
+    // อัปเดตข้อมูลบนหน้าจอหลัก
+    document.getElementById("studentName").value = sName;
+    document.getElementById("userLevel").value = chosenLevel;
+    
+    // ตั้งค่าระบบภาษาให้ตรงกับ Pop-Up
+    currentLang = chosenLang;
+    document.getElementById("langToggle").checked = (currentLang === "ZH");
+    if(recognition) {
+        recognition.lang = currentLang === "ZH" ? "zh-CN" : "en-US";
+    }
+
+    // ซ่อน Pop-Up
+    document.getElementById("welcomeModal").style.display = "none";
+
+    // เริ่มเตรียมข้อมูลข้อสอบทันที
+    fetchQuestions();
+}
+
+// 🚀 เปลี่ยนภาษาแบบ Dynamic (ไม่ต้องรีเฟรชหน้าแอป)
 function toggleLanguage(isZh) {
     if (adminConfig.forceLangControl) {
         alert("🔒 Admin ได้ทำการล็อกภาษาทดสอบไว้ ไม่สามารถเปลี่ยนเองได้ครับ");
@@ -929,13 +995,11 @@ function playSentenceAudio() {
 // 6. FIREBASE REAL-TIME & ADMIN MONITORING
 // ==========================================
 function monitorFirebase() {
-    // 1. Monitor Machine Hardware Status (ESP32)
     db.ref('machine/status').on('value', snap => {
         const state = snap.val() || 'ready';
         document.getElementById("machineStatusUI").innerText = state.toUpperCase();
     });
 
-    // 2. Monitor Config & Sync 
     db.ref('machine/config').on('value', snap => {
         const conf = snap.val();
         if (conf) {
@@ -945,7 +1009,6 @@ function monitorFirebase() {
             if(document.getElementById("adminQuestionCount")) document.getElementById("adminQuestionCount").value = adminConfig.questionCount;
             if(document.getElementById("adminPassReq")) document.getElementById("adminPassReq").value = adminConfig.passRequirement;
 
-            // Language Lock
             adminConfig.forceLangControl = conf.forceLangControl || false;
             adminConfig.forcedLang = conf.forcedLang || "ENG";
             document.getElementById("adminForceLangSwitch").checked = adminConfig.forceLangControl;
@@ -964,7 +1027,6 @@ function monitorFirebase() {
                 document.getElementById("langForceBadge").style.display = "none";
             }
 
-            // Difficulty Sync 
             adminConfig.difficulty = conf.difficulty || "All";
             document.getElementById("adminDifficultySelect").value = adminConfig.difficulty;
             
@@ -974,7 +1036,6 @@ function monitorFirebase() {
         }
     });
 
-    // 3. Monitor Maintenance
     db.ref('machine/maintenance').on('value', snap => {
         const data = snap.val() || { isActive: false };
         document.getElementById("maintSwitch").checked = data.isActive;
@@ -989,7 +1050,6 @@ function monitorFirebase() {
         }
     });
 
-    // 4. Monitor Stock
     db.ref('machine/stock').on('value', snap => {
         const stock = snap.val() || { slot1: 0, slot2: 0 };
         currentStock = stock;
@@ -999,7 +1059,6 @@ function monitorFirebase() {
         document.getElementById("rewardStock2UI").innerText = stock.slot2;
     });
 
-    // 5. 🎁 Monitor Reward Display Settings (FEATURE UPGRADE: Dynamic Reward Images & Titles)
     db.ref('machine/rewards').on('value', snap => {
         const rewards = snap.val() || {};
         const title1 = rewards.slot1Title || "Slot A (1)";
@@ -1007,13 +1066,11 @@ function monitorFirebase() {
         const img1 = rewards.slot1Img || "https://via.placeholder.com/300x200?text=No+Image";
         const img2 = rewards.slot2Img || "https://via.placeholder.com/300x200?text=No+Image";
 
-        // อัปเดตข้อมูลบนหน้า User Modal (UI)
         document.getElementById("rewardTitle1UI").innerText = title1;
         document.getElementById("rewardTitle2UI").innerText = title2;
         document.getElementById("rewardImg1").src = img1;
         document.getElementById("rewardImg2").src = img2;
 
-        // อัปเดตข้อมูลในช่อง Admin Input
         if (document.getElementById("adminSlot1Title")) {
             document.getElementById("adminSlot1Title").value = title1;
             document.getElementById("adminSlot2Title").value = title2;
@@ -1126,7 +1183,6 @@ function updateStock(slot, amt) {
     db.ref(`machine/stock/${slot}`).set(newVal);
 }
 
-// 🖼️ ระบบบันทึกชื่อของรางวัล
 function saveRewardTitles() {
     const t1 = document.getElementById("adminSlot1Title").value || "Slot A (1)";
     const t2 = document.getElementById("adminSlot2Title").value || "Slot B (2)";
@@ -1135,7 +1191,6 @@ function saveRewardTitles() {
     alert("✅ บันทึกชื่อของรางวัลเรียบร้อยแล้ว");
 }
 
-// 🖼️ ระบบบีบอัดรูปภาพและแปลงเป็น Base64 บันทึกบน Firebase เรียลไทม์ (FEATURE UPGRADE)
 function compressAndUploadImage(input, slot) {
     const file = input.files[0];
     if (!file) return;
@@ -1146,7 +1201,6 @@ function compressAndUploadImage(input, slot) {
         const img = new Image();
         img.src = event.target.result;
         img.onload = function() {
-            // สร้าง Canvas ย่อขนาดภาพไม่เกิน 400x300 พิกเซล (ประหยัดแบนด์วิดท์ Firebase)
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             const maxWidth = 400;
@@ -1169,10 +1223,8 @@ function compressAndUploadImage(input, slot) {
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
 
-            // บีบอัดเป็น JPEG (Quality 0.7)
             const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
             
-            // บันทึกลง Firebase RTDB
             const targetRef = slot === 'slot1' ? 'machine/rewards/slot1Img' : 'machine/rewards/slot2Img';
             db.ref(targetRef).set(compressedBase64)
                 .then(() => {
